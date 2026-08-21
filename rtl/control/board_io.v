@@ -16,7 +16,7 @@
 //  조작
 //    sw[0]  en        0 = 펄스 없음 (서보 무부하). 전원 인가 시 반드시 0 에서 시작
 //    sw[1]  sweep     1 = 자동 왕복. 0 = 버튼 수동
-//    sw[2]  range     0 = 좁은 범위 약 30 도, 1 = 넓은 범위 약 180 도
+//    sw[2]  range     0 = 좁은 범위, 1 = 실측 안전 범위 약 90 도
 //    sw[3]  axis      0 = PAN(JD1), 1 = TILT(JD2). 선택 안 된 축은 현재 위치 유지
 //    btn[0] pos 감소     btn[1] pos 증가     btn[2] 중립(128)     btn[3] reset
 //
@@ -50,7 +50,7 @@ module board_io #(
     parameter integer PULSE_MAX_US = 2500,
 
     // Layer 2 : 최후 방어선. 기구 실측 전에는 이 밖으로 나가지 않는다
-    //   pos  32 ->  750 us      pos 224 -> 2250 us    (약 180 도)
+    //   pos  32 ->  750 us      pos 224 -> 2250 us    (실측 약 90 도)
     //   양 끝을 완전히 개방하지 않고 여유를 남긴다. 0/255 는 서보의
     //   내부 기계적 스톱을 넘겨 스톨시킬 수 있다.
     parameter integer POS_LIMIT_LO = 32,

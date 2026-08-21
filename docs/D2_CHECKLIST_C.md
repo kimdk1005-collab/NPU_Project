@@ -6,6 +6,11 @@
 >
 > **D2 목표** (TEAM_ROLE_PLAN_v1.3 §9) — **Event Adapter 초안 + Servo PWM**
 > **날짜** 2026-08-21
+>
+> **종료 기록** — 이 문서는 D2 당시의 작업 일지라 아래 D/E 절의 대기 항목과
+> 다음 날 목표를 역사 그대로 보존한다. Direct Handshake 확정, Accumulator 구현,
+> 서보 실물 검증 이후의 최신 상태는 `docs/D3_CHECKLIST_C.md`와
+> `docs/PROJECT_STATUS.md`를 따른다.
 
 ---
 
