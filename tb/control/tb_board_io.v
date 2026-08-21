@@ -18,6 +18,9 @@
 //    8. led[0] 심장박동 반주기 = 25 frame = 500 ms   (CLK_HZ 검증 수단)
 //    9. sweep -> 상한에서 방향이 뒤집힌다
 //   10. 선택 안 된 축(TILT)은 중립을 유지한다
+//   11. TILT 선택 후 양방향 조그하면 TILT만 움직이고 PAN은 중립을 유지한다
+//   12. PAN으로 다시 전환해도 TILT 위치는 유지된다
+//   13. TILT 중립 복귀 후 PAN/TILT가 각각 중립을 유지한다
 // ---------------------------------------------------------------------------
 `timescale 1ns / 1ps
 `default_nettype none
@@ -159,6 +162,40 @@ module tb_board_io;
         btn[2] = 1'b0;
         measure; measure;
         check("btn[2] -> neutral 128     ", m_high, expect_us(128), 2);
+
+        // 11) TILT 단독 조그 -- PAN 은 중립에 고정되어야 한다
+        sw[3] = 1'b1;
+        run_frames(2);
+        btn[1] = 1'b1;
+        run_frames(14);
+        btn[1] = 1'b0;
+        measure; measure;
+        check("TILT jog -> narrow hi 144 ", m_hilt, expect_us(144), 2);
+        check("PAN holds while TILT jog  ", m_high, expect_us(128), 2);
+
+        btn[0] = 1'b1;
+        run_frames(24);
+        btn[0] = 1'b0;
+        measure; measure;
+        check("TILT jog -> narrow lo 112 ", m_hilt, expect_us(112), 2);
+
+        // 12) PAN 으로 전환해도 선택되지 않은 TILT 의 위치는 유지된다
+        sw[3] = 1'b0;
+        run_frames(2);
+        measure; measure;
+        check("TILT holds after axis swap", m_hilt, expect_us(112), 2);
+
+        // 13) TILT 만 중립 복귀시킨 뒤 PAN/TILT 의 독립 상태를 다시 확인한다
+        sw[3] = 1'b1;
+        run_frames(2);
+        btn[2] = 1'b1;
+        run_frames(3);
+        btn[2] = 1'b0;
+        measure; measure;
+        check("TILT btn[2] -> neutral 128", m_hilt, expect_us(128), 2);
+        check("PAN remains neutral       ", m_high, expect_us(128), 2);
+        sw[3] = 1'b0;
+        run_frames(2);
 
         // 8) 심장박동 반주기 = 25 frame = 500 ms
         @(posedge led[0]);  t0 = $time;

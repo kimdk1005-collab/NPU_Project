@@ -9,10 +9,10 @@
 > | | |
 > |---|---|
 > | 담당 | C (김도근) |
-> | 버전 | `c_control_v02` |
-> | 최종 갱신 | 2026-08-21 (D2) |
+> | 버전 | `c_control_v03` |
+> | 최종 갱신 | 2026-08-21 (D3) |
 > | 기준 SPEC | **v1.2** |
-> | 상태 | D2 — Servo PWM + Event Adapter 구현 완료. Accumulator는 D3 |
+> | 상태 | D3 — Event Accumulator + Pan/Tilt 단독 테스트 완료 |
 >
 > **SPEC v1.1 반영분** — `target_score` = signed INT8 (§7, §10),
 > Event Count 포화 상한 = 127 (§2). 두 항목은 더 이상 TBD가 아니다.
@@ -35,7 +35,7 @@
 | 파일 | 소유 | 상태 | 검증 |
 |---|---|---|---|
 | `rtl/control/servo_pwm.v` | C | **구현 완료** | `tb_servo_pwm` 6/6 PASS (xsim) |
-| `rtl/control/board_io.v` | C | **구현 완료** (브링업 전용) | `tb_board_io` (실물 검증 대기) |
+| `rtl/control/board_io.v` | C | **구현 완료** (브링업 전용) | `tb_board_io` 19/19 PASS + PAN/TILT 실물 검증 |
 | `rtl/event/event_adapter.v` | C | **구현 완료** (D2) | `tb_event_adapter` 23/23 PASS (xsim) |
 | `rtl/event/event_accumulator.v` | C | **구현 완료** (D3) | `tb_event_accumulator` 15/15 PASS |
 | `rtl/control/tracking_controller.v` | C | 미착수 | D4 |
@@ -209,7 +209,7 @@ Python으로 64 / 128 / 240 / 260 / 346 / 480 / 640 / 720 / 1024 / 1280 / 1920 /
 | `SENSOR_W` / `SENSOR_H` | 640 / 480 | SPEC v1.2 §14.1이 전제한 값. 카메라 변경 시 이것만 교체 |
 | `SRC_COORD_W` | 11 | C 내부 |
 | `OOR_POLICY` | 0 (폐기) | C 내부 결정 |
-| `CLK_HZ` | 125,000,000 | **[TBD]** A 대기 (§8-1) |
+| `CLK_HZ` | 100,000,000 | **C 측 확정·반영** (CR C-003). A Block Design 공급 확인만 남음 |
 | `WINDOW_US` | 10,000 | **[TBD]** CR C-002 승인 대기. 확정 시 33,333 |
 | `WINDOW_SRC` | 0 (내부 타이머) | **[TBD]** CR C-002 승인 시 1 (프레임 경계) |
 | `BIN_SHIFT` | 22 | C 내부. 센서 폭 2048까지 유효 |
@@ -330,14 +330,13 @@ Channel 1 = Negative Event Count
 | ~~Tensor Memory Order~~ | **확정 — CHW** `(pol<<12)｜(y<<6)｜x` | A (D3 Freeze A-001 1번) | 완료 |
 | ~~Physical Transfer 방식~~ | **확정 — Direct Handshake** | A+C (D3 Freeze A-001 5번) | 완료 |
 | ~~NPU Input Buffer Interface~~ | **확정 — `ext_we`/`ext_addr[12:0]`/`ext_data`/`start`/`busy`/`done`** | A (동상) | 완료 |
-| C 모듈 구동 클럭 | **CR C-003 회신 대기** — A 문서는 100 MHz 전제, C 기본값은 125 MHz | A | D3 |
+| ~~C 모듈 구동 클럭~~ | **C 측 100 MHz 확정·코드 반영** — A Block Design 공급 확인만 남음 | A/C | 통합 시 확인 |
 | `event_polarity` 인코딩 | **CR C-004 회신 대기** — 0=Positive 로 C 측 반영 완료 | A+B | D3 |
 | Event Window 값 | **CR C-002 승인 대기** | 팀 확정 | D3 |
 | ~~원본 해상도 → 64×64 Binning 규칙~~ | **확정 — SPEC v1.2 §14.1** | ~~C~~ → A/B/C 공통 | ~~D2~~ 완료 |
 
-> **A에게 필요한 답 (최우선)** — SPEC §7.3의 물리 전달 방식.
-> BRAM 공유 / Ping-Pong / AXI-Stream / Memory-Mapped / Direct Handshake 중 무엇인지에 따라
-> `event_accumulator.v`의 출력단 설계가 전부 달라진다. D2 착수 전에 필요하다.
+> **물리 전달 방식은 해결됐다.** A의 D3 Freeze A-001과 C 회신 #001에 따라
+> Direct Handshake를 채택했고 `event_accumulator.v`의 `tensor_*` 출력으로 구현했다.
 
 ### Window 길이 — **5 ms / 10 ms 후보는 둘 다 물리적으로 불가능하다** (D2 실측)
 
@@ -440,10 +439,11 @@ target_y = heatmap_y * 8 + 4
 | `PULSE_MIN_US` | **500** | **D2 실물 확정** — 아래 참조 |
 | `PULSE_MAX_US` | **2500** | **D2 실물 확정** |
 
-> **1000~2000 → 500~2500으로 확장 확정 (D2, 2026-08-21).**
-> D1에는 기구 가동 범위를 몰라 좁게 제안했으나, D2에 실물 2축을 구동해
-> 500~2500 us 전 구간에서 기구 간섭이 없음을 확인했다.
-> `board_io.v`가 이 값으로 동작 중이며 `servo_pwm.v` 기본값도 여기에 맞췄다.
+> **PWM 스케일 1000~2000 → 500~2500으로 확장 (D2, 2026-08-21).**
+> D1에는 기구 가동 범위를 몰라 좁게 제안했으나, D2에 실물 2축을 구동했다.
+> 실제 브링업은 `board_io.v`의 안전 clamp `pos=32~224`, 즉 750~2250 us에서
+> 기구 간섭 없이 약 90°를 확인했다. `servo_pwm.v`의 전체 변환 스케일은
+> 500~2500 us이며 출력 clamp가 실제 허용 범위를 제한한다.
 > `docs/CHANGE_REQUEST_C_001_servo_command_format.md`에 정정 이력으로 기록했다.
 
 ```text
@@ -451,8 +451,8 @@ SPAN_CYC     = PULSE_MAX_CYC - PULSE_MIN_CYC
 pulse_cycles = PULSE_MIN_CYC + ((pos * SPAN_CYC) >> 8)
 ```
 
-> **범위를 1.0~2.0 ms로 좁게 제안한 이유** — 기구가 물리적으로 걸리는 각도를 아직 모른다.
-> 넓히는 방향은 나중에 안전하지만 반대는 기구를 파손시킨다.
+> 브링업에서는 항상 `POS_MIN/POS_MAX` clamp를 먼저 적용하고, 실측 없이
+> 500~2500 us 끝점까지 개방하지 않는다.
 
 > **`CLK_HZ` 근거** — Digilent 공식 마스터 XDC
 > [`constraints/digilent-xdc-master/Zybo-Z7-Master.xdc:9`](../constraints/digilent-xdc-master/Zybo-Z7-Master.xdc#L9)가
@@ -706,14 +706,12 @@ Interlock이 잘못 열린다. SPEC §9.1이 Conv4 Heatmap을 ReLU 없는 signed
    `board_io.v`는 **125 MHz를 유지한다.** 브링업 전용 top이고 PL sysclk K17을
    직결하며 `top_system`에 들어가지 않는다. 오늘 확인한 `led[0]` 1초 심장박동이
    그 근거다. 여기를 100 MHz로 "고치면" 오히려 깨진다.
-2. **`servo_pwm.v`는 실제 서보로 검증하지 않았다.** xsim 시뮬레이션만 통과했다.
-3. **`event_accumulator.v`가 아직 없다.** 다만 **블로커는 해소됐다** —
-   A의 `docs/D3_FREEZE_REQUEST_A_001.md`가 SPEC §7.3을 Direct Handshake로 확정했다.
-   D3에 착수한다. 남은 선행 조건은 **CR C-003 클럭 확정**뿐이다.
-
-   `busy==1`이면 write 금지라는 제약 때문에 **Ping-Pong 버퍼가 필요하다.**
-   8192 byte를 읽어 내보내는 82 us 동안에도 다음 Window 이벤트가 들어오므로,
-   단일 버퍼면 그만큼 유실되어 Golden과 어긋난다. 8 KB × 2 = BRAM 4개.
+2. **Servo PWM과 PAN/TILT 2축 실물 구동은 검증 완료했다.** 다만 NPU 좌표를
+   받아 움직이는 Closed-loop 경로는 D4 `tracking_controller.v` 구현 후 검증한다.
+3. **`event_accumulator.v`는 구현·단위 검증 완료했다.** Ping-Pong 버퍼와
+   Direct Handshake 전송을 포함하며 `tb_event_accumulator` 15/15 PASS,
+   Window별 8192 byte 전수 비교를 통과했다. A `npu_core` 및 B Golden과의
+   통합 비교는 A/B 산출물 합류 후 수행한다.
 4. **`event_adapter.v`는 실제 카메라 스트림으로 검증하지 않았다.** xsim 자극만 통과했다.
    `win_evt_count`로 실제 Event Rate를 재는 것은 입력 경로가 붙은 뒤(D6~D8)다.
 5. **Event Rate 수치는 합성 데이터다.** 실제 카메라 측정값이 아니다.

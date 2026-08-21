@@ -1,6 +1,6 @@
 # 프로젝트 진행상황
 
-> 기준점: 2026-08-21 Day 02 종료
+> 기준점: 2026-08-21 Day 03 C 범위 종료
 >
 > 최종 검증: 2026-08-21, 현재 폴더의 RTL과 xsim 재실행 결과
 >
@@ -8,10 +8,11 @@
 
 ## 한눈에 보기
 
-Day 02 목표인 Servo PWM과 Event Adapter는 RTL·시뮬레이션·보드 브링업까지 완료했다.
-계획상 D3 산출물인 Event Accumulator도 선행 구현해 8192-byte Tensor 전수 비교를
-통과했다. 전체 시스템 기준으로는 CNN/INT8 Golden, Dense NPU, Target Decoder,
-Closed-loop Tracking이 아직 합쳐지지 않아 C 경로만 앞서 있는 상태다.
+Day 03 C 목표인 Event Accumulator와 Pan/Tilt 단독 테스트를 완료했다.
+Accumulator는 Ping-Pong 버퍼, 127 포화, Direct Handshake 전송을 구현했고
+8192-byte Tensor 전수 비교를 통과했다. Pan/Tilt는 축별 독립 조그와 위치 유지까지
+19/19 시뮬레이션을 통과했으며 2축 실물 구동도 확인했다. 전체 시스템 기준으로는
+CNN/INT8 Golden, Dense NPU, Target Decoder, Closed-loop Tracking이 아직 합쳐지지 않았다.
 
 | 전체 성공 기준 | 현재 저장소 상태 | 다음 Gate |
 |---|---|---|
@@ -27,12 +28,12 @@ Closed-loop Tracking이 아직 합쳐지지 않아 C 경로만 앞서 있는 상
 | 항목 | 상태 | 2026-08-21 재검증 |
 |---|---|---|
 | `rtl/event/event_adapter.v` | D2 구현 완료 | `tb_event_adapter` **23/23 PASS** |
-| `rtl/event/event_accumulator.v` | D3 선행 구현 완료 | `tb_event_accumulator` **15/15 PASS**, 8192 B 전수 비교 |
+| `rtl/event/event_accumulator.v` | D3 구현 완료 | `tb_event_accumulator` **15/15 PASS**, 8192 B 전수 비교 |
 | `rtl/control/servo_pwm.v` | D1 구현 완료 | `tb_servo_pwm` **6/6 PASS** |
-| `rtl/control/board_io.v` | 브링업 Top 구현 완료 | `tb_board_io` **13/13 PASS**, PAN/TILT 실물 구동 완료 |
+| `rtl/control/board_io.v` | D3 축별 단독 검증 완료 | `tb_board_io` **19/19 PASS**, PAN/TILT 실물 구동 완료 |
 | Zybo Z7-20 제약/Tcl 빌드 경로 | 준비 완료 | WNS +0.357 ns, WHS +0.047 ns |
 | 웹캠 Fallback 능력 측정 도구 | 구현 완료 | APC850 기준 640×480 YUYV 30 fps 확인 |
-| SPEC v1.2 및 C Handoff | 동기화 완료 | D3 Freeze A-001 반영, CR C-001/C-002/C-004 회신 대기 |
+| SPEC v1.2 및 C Handoff | 동기화 완료 | D3 결과 반영, CR C-001/C-002/C-004 회신 대기 |
 
 재현 명령:
 
@@ -60,7 +61,7 @@ Closed-loop Tracking이 아직 합쳐지지 않아 C 경로만 앞서 있는 상
 
 - A: PAN/TILT 레지스터 필드와 Frame Difference 실행 위치를 확정한다.
 - B: CR C-004 채널 순서와 CR C-002의 33.3 ms Window 영향을 검토한다.
-- C: D4 `tracking_controller.v`를 구현하고 실측된 0.469°/step을 기준으로 튜닝한다.
+- C: D4 `tracking_controller.v`와 단위 TB를 구현하고 실측된 0.469°/step을 기준으로 튜닝한다.
 - A/C: `event_accumulator` Direct Handshake를 NPU 입력에 연결해 Golden과 비교한다.
 - 팀: A/B 브랜치를 `integration`에 합쳐 이 문서를 전체 프로젝트 기준으로 갱신한다.
 
