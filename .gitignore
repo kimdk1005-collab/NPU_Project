@@ -1,0 +1,53 @@
+# Vivado / Vitis
+*.jou
+*.log
+*.str
+*.wdb
+*.pb
+.Xil/
+xsim.dir/
+vivado*.backup.jou
+vivado*.backup.log
+webtalk*.jou
+webtalk*.log
+*.cache/
+*.hw/
+*.ip_user_files/
+*.sim/
+*.runs/
+*.gen/
+*.srcs/sources_1/bd/*/ip/
+.Vitis/
+_ide/
+
+# GUI 로 만든 Vivado 프로젝트
+#   NPU_Project.srcs/ 아래에 rtl/ 과 tb/ 파일의 "사본"이 들어간다.
+#   커밋하면 소스 master 가 둘이 되고, GUI 에서 저장할 때 rtl/ 이 아니라
+#   사본이 바뀌어 조용히 갈라진다.
+#   sim/create_vivado_project.tcl 이 만드는 vivado_proj/ 는 rtl/ 을
+#   참조만 하므로 그쪽을 쓴다.
+/NPU_Project/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Digilent XDC 마스터 팩 (28개 보드)
+#   constraints/ 는 SPEC §5.4 공유 디렉토리다. C 가 보드 파일 28개를
+#   단독으로 올리지 않는다. 이 프로젝트가 쓰는 Zybo Z7 파일과 MIT
+#   라이선스 고지만 커밋한다.
+constraints/digilent-xdc-master/*
+!constraints/digilent-xdc-master/Zybo-Z7-Master.xdc
+!constraints/digilent-xdc-master/License.txt
+
+# 생성물 (스크립트로 재생성 가능)
+# 주의: test_vectors/ 와 golden_outputs/ 는 B 소유이므로 규칙을 넣지 않는다 (SPEC §5.2)
+sim/event_vectors/
+sim/work/
+vivado_proj/
+vivado_bringup/
+
+# OS
+.DS_Store
