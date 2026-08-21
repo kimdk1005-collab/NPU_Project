@@ -22,6 +22,7 @@ Event Input → 64×64×2 Event Tensor → Tiny CNN → INT8 → Integer Golden 
 | [docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md](docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md) | **최상위 공통 명세** (A 작성) |
 | [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | 팀 공유용 최신 진행상황, 블로커, 다음 액션 |
 | [docs/D3_CHECKLIST_C.md](docs/D3_CHECKLIST_C.md) | C Day 3 완료 기준과 검증 결과 |
+| [docs/D4_CHECKLIST_C.md](docs/D4_CHECKLIST_C.md) | C Day 4 완료 기준과 검증 결과 |
 | [handoff/C_EVENT_CONTROL_HANDOFF.md](handoff/C_EVENT_CONTROL_HANDOFF.md) | C Handoff — Event / Tracking / Servo / Laser |
 | [docs/CHANGE_REQUEST_C_001_servo_command_format.md](docs/CHANGE_REQUEST_C_001_servo_command_format.md) | CR C-001 Servo Command Format (승인 대기) |
 | [docs/CHANGE_REQUEST_C_002_event_window_and_input_source.md](docs/CHANGE_REQUEST_C_002_event_window_and_input_source.md) | CR C-002 Event Window + 입력원 Fallback (승인 대기) |
@@ -90,8 +91,10 @@ python3 tools/probe_webcam.py            # 기본 /dev/video0
 ```bash
 ./sim/run_xsim.sh tb_event_adapter     # 판정 TB — 23/23 PASS 확인용
 ./sim/run_xsim.sh tb_event_accumulator # 판정 TB — 15/15 PASS 확인용
+./sim/run_xsim.sh tb_event_pipeline    # 판정 TB — 15/15 PASS 확인용
 ./sim/run_xsim.sh tb_servo_pwm         # 판정 TB — 6/6 PASS 확인용
 ./sim/run_xsim.sh tb_board_io           # 판정 TB — 19/19 PASS 확인용
+./sim/run_xsim.sh tb_tracking_controller # 판정 TB — 30/30 PASS 확인용
 ./sim/run_xsim.sh tb_servo_pwm_sweep   # pos 0~255 스윕, 파형 관찰용
 ```
 
@@ -125,5 +128,6 @@ Commit 형식: `[C][CTRL] Add servo dead-zone logic`
 | `rtl/control/board_io.v` | 구현 완료 (D1, 브링업 전용) | 19/19 PASS + 2축 실물 검증 완료 |
 | `rtl/event/event_adapter.v` | 구현 완료 (D2) | `tb_event_adapter` 23/23 PASS |
 | `rtl/event/event_accumulator.v` | 구현 완료 (D3) | `tb_event_accumulator` 15/15 PASS, 8192 B 전수 비교 |
-| `rtl/control/tracking_controller.v` | D4 | |
+| Adapter→Accumulator 통합 경로 | 검증 완료 (D4) | `tb_event_pipeline` 15/15 PASS, 2 Window × 8192 B 전수 비교 |
+| `rtl/control/tracking_controller.v` | 구현 완료 (D4) | `tb_tracking_controller` 30/30 PASS |
 | `rtl/control/laser_interlock.v` | D6 | |

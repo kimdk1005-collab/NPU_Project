@@ -9,10 +9,10 @@
 > | | |
 > |---|---|
 > | 담당 | C (김도근) |
-> | 버전 | `c_control_v03` |
-> | 최종 갱신 | 2026-08-21 (D3) |
+> | 버전 | `c_control_v04` |
+> | 최종 갱신 | 2026-08-21 (D4) |
 > | 기준 SPEC | **v1.2** |
-> | 상태 | D3 — Event Accumulator + Pan/Tilt 단독 테스트 완료 |
+> | 상태 | D4 — Event Pipeline 단위 TB + Tracking Controller 완료 |
 >
 > **SPEC v1.1 반영분** — `target_score` = signed INT8 (§7, §10),
 > Event Count 포화 상한 = 127 (§2). 두 항목은 더 이상 TBD가 아니다.
@@ -38,7 +38,8 @@
 | `rtl/control/board_io.v` | C | **구현 완료** (브링업 전용) | `tb_board_io` 19/19 PASS + PAN/TILT 실물 검증 |
 | `rtl/event/event_adapter.v` | C | **구현 완료** (D2) | `tb_event_adapter` 23/23 PASS (xsim) |
 | `rtl/event/event_accumulator.v` | C | **구현 완료** (D3) | `tb_event_accumulator` 15/15 PASS |
-| `rtl/control/tracking_controller.v` | C | 미착수 | D4 |
+| `rtl/control/tracking_controller.v` | C | **구현 완료** (D4) | `tb_tracking_controller` 30/30 PASS |
+| Adapter→Accumulator 연결 | C | **검증 완료** (D4) | `tb_event_pipeline` 15/15 PASS |
 | `rtl/control/laser_interlock.v` | C | 미착수 | D6 |
 
 ---
@@ -494,18 +495,20 @@ Parameter: `CLK_HZ` / `PWM_HZ` / `PULSE_MIN_US` / `PULSE_MAX_US` / `POS_MIN` / `
 
 ---
 
-## 4. Dead Zone / 제어 파라미터 — 전부 TBD
+## 4. Tracking Controller / Dead Zone / 제어 파라미터
 
 SPEC §15에 따라 **P Control + Dead Zone**으로 시작한다.
 Full PID / Kalman / Velocity Predictor / Trajectory Planner는 기본 시스템 완성 전 추가하지 않는다.
 
 ```text
 DEAD_ZONE      = 4      // 하한 확정 (SPEC v1.2 §15). |error| <= DEAD_ZONE -> Servo Hold
-P_GAIN         = TBD
-SLEW_LIMIT     = TBD    // Servo Frame당 pos 최대 변화량 (상한은 아래에서 계산됨)
+P_GAIN         = 1      // D4 시작값. 실제 Closed-loop에서 튜닝
+P_GAIN_SHIFT   = 2      // prop_step = (|error| * P_GAIN) >> P_GAIN_SHIFT
+SLEW_LIMIT     = 1      // D4 부드러운 구동 시작값. Servo Frame당 최대 pos 변화량
 ```
 
-`P_GAIN` / `SLEW_LIMIT`은 실제 서보와 실제 Tracking을 봐야 정해진다. 담당 C / 기한 D5~D10.
+위 값은 C 내부의 안전한 시작값이며 공유 Interface를 바꾸지 않는다.
+최종 `P_GAIN` / `SLEW_LIMIT`은 실제 Closed-loop를 보고 D5~D10에 튜닝한다.
 
 ### `DEAD_ZONE`은 더 이상 자유값이 아니다 — SPEC v1.2 §15
 
@@ -583,24 +586,56 @@ Servo Frame 20 ms 동안 물리적으로 갈 수 있는 거리는:
 > **`SLEW_LIMIT`을 18보다 크게 잡는 것은 의미가 없다.** 서보가 따라오지 못하므로
 > 명령만 앞서 나가고 실제 위치는 뒤처진다. 그 상태로 P Control이 계속 오차를 보면
 > 적분 없는 P 제어인데도 오버슈트처럼 보이는 거동이 나온다.
-> 무부하 기준이므로 카메라+레이저를 달면 더 낮아진다. 시작값은 **4~8** 권장.
+> 무부하 기준이므로 카메라+레이저를 달면 더 낮아진다. D4에서는 사용자가 관찰한
+> 단계적 움직임을 줄이기 위해 **1 step/Frame**으로 더 보수적으로 시작한다.
+> 실측 `0.469°/step` 기준 약 23.45°/s이며, 부족하면 2~4로 올린다.
 >
 > 가동범위 120°는 MG996R 공표값이며 **실측으로 확정해야 한다**.
 
 ### Window와 Servo Frame의 주기가 다르다
 
 ```text
-Event Window  = 5 ~ 10 ms   (TBD)
+Event Window  = 10 ms 기본값 / 33.3 ms C 제안 (CR C-002 승인 대기)
 Servo Frame   = 20 ms       (50 Hz 고정)
 ```
 
-Event Window가 더 짧으므로 Tracking Controller가 Servo보다 **2~4배 빠르게**
-새 `pos`를 만들 수 있다. 그대로 흘려보내면 서보는 중간 명령을 무시하고
-마지막 것만 받으므로 `SLEW_LIMIT` 계산이 무의미해진다.
+어느 Window 값이 확정되더라도 NPU의 `target_valid/x/y`는 done 이후 다음 start까지
+유지되는 Level이다. Tracking이 이를 매 clock 누적하면 즉시 Limit에 닿으므로
+Servo Frame에서만 현재 Target을 한 번 적용해야 한다.
 
 **대응** — Tracking Controller의 출력 갱신을 `servo_pwm`의 `frame_tick`에 맞춘다.
 `frame_tick`을 출력으로 뺀 이유가 이것이다. 그러면 `SLEW_LIMIT`의 단위가
 Servo Frame으로 고정되어 위 표가 그대로 적용된다.
+
+### D4 `tracking_controller.v` 구현 결과
+
+```text
+target_valid/x/y
+    -> error = target - 32
+    -> abs(error) <= 4 이면 Hold
+    -> P Gain
+    -> Frame당 Slew Limit
+    -> PAN/TILT Soft Limit 32~224
+    -> pan_pos / tilt_pos
+```
+
+- `target_valid=0`: 진행 중이던 이동을 계속하지 않고 현재 출력 위치 Hold
+- `target_valid=1`: `frame_tick`마다 한 번만 P 제어량 적용
+- 기본 방향: 화면 X/Y 증가 → Servo pos 증가
+- 기구 방향이 반대면 `PAN_INVERT` / `TILT_INVERT` parameter 사용
+- `target_score`는 Tracking이 재판정하지 않는다. A의 `target_valid`가 권위이며
+  Score는 D6 Laser Interlock이 signed INT8로 사용한다
+- Tracking의 32~224 Soft Limit과 `servo_pwm` 출력 Clamp를 겹쳐 2중 보호한다
+
+`tb_tracking_controller`는 Reset/No-Tick/Target Lost/±4 Dead Zone/PAN·TILT 방향/
+동시 이동/P Gain/Slew Clamp/축 반전/Soft Limit을 검증해 **30/30 PASS**했다.
+
+### D4 Adapter→Accumulator 통합 TB
+
+`tb_event_pipeline`은 Raw 640×480 Event를 실제 두 RTL에 연결하고 두 Window의
+Tensor를 각각 8192 byte 전수 비교했다. OOR 7개 폐기, 같은 좌표 127 포화,
+Window 경계 Event 포함, `npu_busy` 게이팅, 전송 중 다음 Window 320개 보존을
+포함해 **15/15 PASS**했다.
 
 ---
 
@@ -706,8 +741,8 @@ Interlock이 잘못 열린다. SPEC §9.1이 Conv4 Heatmap을 ReLU 없는 signed
    `board_io.v`는 **125 MHz를 유지한다.** 브링업 전용 top이고 PL sysclk K17을
    직결하며 `top_system`에 들어가지 않는다. 오늘 확인한 `led[0]` 1초 심장박동이
    그 근거다. 여기를 100 MHz로 "고치면" 오히려 깨진다.
-2. **Servo PWM과 PAN/TILT 2축 실물 구동은 검증 완료했다.** 다만 NPU 좌표를
-   받아 움직이는 Closed-loop 경로는 D4 `tracking_controller.v` 구현 후 검증한다.
+2. **Servo PWM, PAN/TILT 2축 실물 구동, Tracking Controller 단위 검증은 완료했다.**
+   A의 실제 Target 출력과 연결한 실물 Closed-loop는 아직 검증하지 않았다.
 3. **`event_accumulator.v`는 구현·단위 검증 완료했다.** Ping-Pong 버퍼와
    Direct Handshake 전송을 포함하며 `tb_event_accumulator` 15/15 PASS,
    Window별 8192 byte 전수 비교를 통과했다. A `npu_core` 및 B Golden과의
@@ -716,7 +751,8 @@ Interlock이 잘못 열린다. SPEC §9.1이 Conv4 Heatmap을 ReLU 없는 signed
    `win_evt_count`로 실제 Event Rate를 재는 것은 입력 경로가 붙은 뒤(D6~D8)다.
 5. **Event Rate 수치는 합성 데이터다.** 실제 카메라 측정값이 아니다.
    다만 **웹캠의 최대 fps는 실측이다** (§2, `tools/probe_webcam.py`).
-6. **Slew Rate Limit 미구현.** `frame_tick` 훅만 준비되어 있고 로직은 D4 `tracking_controller.v`에 들어간다.
+6. **Slew Rate Limit은 구현 완료했지만 실제 하중 튜닝 전이다.** 기본값은
+   `1 step/20 ms`이며 D5~D10 Closed-loop에서 1~4 범위를 확인한다.
 7. **`WINDOW_US` / `WINDOW_SRC`는 확정이 아니다.** CR C-002 승인 대기 중이며
    승인 시 `33333` / `1`로 바뀐다. parameter 교체만으로 끝나고 로직 변경은 없다.
 8. `tools/gen_event_vector.py`의 출력은 **C의 로컬 개발용 자극**이다.
