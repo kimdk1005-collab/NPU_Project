@@ -1,6 +1,6 @@
 # 이벤트 카메라 기반 FPGA NPU 팬틸트 추적 시스템
 
-Event Input → 64×64×2 Event Tensor → Tiny CNN → INT8 → Integer Golden → Dense INT8 FPGA NPU → 8×8 Heatmap → Argmax → Tracking Controller → Pan/Tilt Servo
+Event Input → 64×64×2 Event Tensor → Tiny CNN → INT8 → Integer Golden → Dense INT8 FPGA NPU → 8×8 Heatmap → Argmax → Camera PT#1 Tracking → Laser PT#2 Follower → LED/Laser Interlock
 
 - 플랫폼: Digilent Zybo Z7-20 (`xc7z020clg400-1`)
 - 툴체인: Vivado 2024.2 / Vitis / xsim
@@ -22,6 +22,10 @@ Event Input → 64×64×2 Event Tensor → Tiny CNN → INT8 → Integer Golden 
 | [docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md](docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md) | **최상위 공통 명세** (A 작성) |
 | [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | 팀 공유용 최신 진행상황, 블로커, 다음 액션 |
 | [docs/D3_CHECKLIST_C.md](docs/D3_CHECKLIST_C.md) | C Day 3 완료 기준과 검증 결과 |
+| [docs/D4_CHECKLIST_C.md](docs/D4_CHECKLIST_C.md) | C Day 4 완료 기준과 검증 결과 |
+| [docs/D5_CHECKLIST_C.md](docs/D5_CHECKLIST_C.md) | C Day 5 — 2-Head 4축 제어와 LED Interlock 검증 |
+| [docs/D5_FINAL_DRIVE_TEST.md](docs/D5_FINAL_DRIVE_TEST.md) | Camera/Laser 4축 + JD7 RED 실물 구동 절차 |
+| [docs/C_TO_A_REPLY_002.md](docs/C_TO_A_REPLY_002.md) | PT#2 좌표식 승인, 통합 포트와 JD 핀 제안 |
 | [handoff/C_EVENT_CONTROL_HANDOFF.md](handoff/C_EVENT_CONTROL_HANDOFF.md) | C Handoff — Event / Tracking / Servo / Laser |
 | [docs/CHANGE_REQUEST_C_001_servo_command_format.md](docs/CHANGE_REQUEST_C_001_servo_command_format.md) | CR C-001 Servo Command Format (승인 대기) |
 | [docs/CHANGE_REQUEST_C_002_event_window_and_input_source.md](docs/CHANGE_REQUEST_C_002_event_window_and_input_source.md) | CR C-002 Event Window + 입력원 Fallback (승인 대기) |
@@ -48,7 +52,7 @@ rtl/integration/   A 소유 — npu_axi.v, top_system.v
 tb/npu/            A 소유
 
 rtl/event/         C 소유 — event_adapter.v, event_accumulator.v
-rtl/control/       C 소유 — tracking_controller.v, servo_pwm.v, laser_interlock.v
+rtl/control/       C 소유 — tracking/laser-head/interlock/dual-head/servo RTL
 tb/event/          C 소유
 tb/control/        C 소유
 
@@ -90,8 +94,14 @@ python3 tools/probe_webcam.py            # 기본 /dev/video0
 ```bash
 ./sim/run_xsim.sh tb_event_adapter     # 판정 TB — 23/23 PASS 확인용
 ./sim/run_xsim.sh tb_event_accumulator # 판정 TB — 15/15 PASS 확인용
+./sim/run_xsim.sh tb_event_pipeline    # 판정 TB — 15/15 PASS 확인용
 ./sim/run_xsim.sh tb_servo_pwm         # 판정 TB — 6/6 PASS 확인용
 ./sim/run_xsim.sh tb_board_io           # 판정 TB — 19/19 PASS 확인용
+./sim/run_xsim.sh tb_tracking_controller # 판정 TB — 30/30 PASS 확인용
+./sim/run_xsim.sh tb_laser_head_controller # 판정 TB — 23/23 PASS 확인용
+./sim/run_xsim.sh tb_laser_interlock    # 판정 TB — 28/28 PASS 확인용
+./sim/run_xsim.sh tb_dual_head_control  # 판정 TB — 30/30 PASS 확인용
+./sim/run_xsim.sh tb_dual_head_board_io # 판정 TB — 최종 4축+RED 32/32 PASS
 ./sim/run_xsim.sh tb_servo_pwm_sweep   # pos 0~255 스윕, 파형 관찰용
 ```
 
@@ -106,6 +116,48 @@ vivado vivado_proj/npu_c_sim.xpr
 
 `vivado_proj/`는 스크립트로 재생성되므로 `.gitignore` 대상이다.
 `rtl/`을 **참조**만 하므로 GUI에서 편집해도 원본이 그대로 바뀐다.
+
+### 레이저 PT#2 Servo 단독 브링업
+
+카메라 PT#1의 JD1/JD2 연결을 바꾸지 않고 레이저 PAN/TILT Servo를 JD3/JD4에서
+먼저 검증하는 순수 PL Bitstream이다.
+
+```bash
+./sim/run_xsim.sh tb_board_io
+vivado -mode batch -source sim/create_laser_bringup_project.tcl
+```
+
+생성 Bitstream은
+`vivado_laser_bringup/c_laser_servo_bringup.runs/impl_1/laser_board_io.bit`이다.
+
+```text
+Laser PAN  signal = JD3 / P14
+Laser TILT signal = JD4 / R14
+sw[0] enable  sw[1] sweep  sw[2] range  sw[3] 0=PAN/1=TILT
+btn[0] pos-   btn[1] pos+  btn[2] neutral  btn[3] reset
+```
+
+처음에는 `sw=0000`으로 Program하고 `led[0]` heartbeat를 확인한 뒤 Servo를
+활성화한다. Servo 전원은 외부 5~6 V를 사용하고 Zybo와 GND만 공통 연결한다.
+실제 레이저 광원은 이 브링업 Top에 연결하지 않는다.
+
+### 최종 4축 Servo + RED 구동 테스트
+
+```bash
+./sim/run_xsim.sh tb_dual_head_board_io
+vivado -mode batch -source sim/create_dual_head_drive_test_project.tcl
+vivado vivado_dual_head_bringup/c_dual_head_drive_test.xpr
+```
+
+Bitstream:
+`vivado_dual_head_bringup/c_dual_head_drive_test.runs/impl_1/dual_head_board_io.bit`
+
+Camera Servo는 JD1/JD2, Laser Servo는 JD3/JD4, 저항 내장 RGB LED 모듈의
+`R`은 JD7, `-`는 JD11 GND에 연결한다. 세부 조작과 판정은
+[docs/D5_FINAL_DRIVE_TEST.md](docs/D5_FINAL_DRIVE_TEST.md)를 따른다.
+
+이 보드 테스트 Top은 카메라/NPU 대신 Switch와 Button으로 가상 Target 좌표를
+만든다. 실제 영상 기반 중앙 판정은 A의 NPU `target_*` 신호를 연결한 뒤 검증한다.
 
 ## Git (SPEC §24, §25)
 
@@ -123,7 +175,12 @@ Commit 형식: `[C][CTRL] Add servo dead-zone logic`
 |---|---|---|
 | `rtl/control/servo_pwm.v` | 구현 완료 (D1) | `tb_servo_pwm` 6/6 PASS |
 | `rtl/control/board_io.v` | 구현 완료 (D1, 브링업 전용) | 19/19 PASS + 2축 실물 검증 완료 |
+| `rtl/control/laser_board_io.v` | PT#2 단독 실물 브링업 완료 | JD3/JD4 Servo 방향·범위 정상, WNS +0.396 ns / WHS +0.165 ns |
+| `rtl/control/dual_head_board_io.v` | 최종 4축+RED 실물 검증 완료 | 32/32 PASS + 실물 전 항목 PASS, WNS +1.068 ns / WHS +0.179 ns |
 | `rtl/event/event_adapter.v` | 구현 완료 (D2) | `tb_event_adapter` 23/23 PASS |
 | `rtl/event/event_accumulator.v` | 구현 완료 (D3) | `tb_event_accumulator` 15/15 PASS, 8192 B 전수 비교 |
-| `rtl/control/tracking_controller.v` | D4 | |
-| `rtl/control/laser_interlock.v` | D6 | |
+| Adapter→Accumulator 통합 경로 | 검증 완료 (D4) | `tb_event_pipeline` 15/15 PASS, 2 Window × 8192 B 전수 비교 |
+| `rtl/control/tracking_controller.v` | 구현 완료 (D4) | `tb_tracking_controller` 30/30 PASS |
+| `rtl/control/laser_head_controller.v` | 구현 완료 (D5) | `tb_laser_head_controller` 23/23 PASS |
+| `rtl/control/laser_interlock.v` | LED 우선 구현 완료 (D5) | `tb_laser_interlock` 28/28 PASS |
+| `rtl/control/dual_head_control.v` | 4 Servo + LED 경로 구현 완료 (D5) | `tb_dual_head_control` 30/30 PASS |

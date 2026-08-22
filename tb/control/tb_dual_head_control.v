@@ -1,0 +1,212 @@
+// ---------------------------------------------------------------------------
+// tb_dual_head_control.v -- PT#1/PT#2 4 Servo PWM + LED Interlock 통합 검증
+// ---------------------------------------------------------------------------
+`timescale 1ns / 1ps
+`default_nettype none
+
+module tb_dual_head_control;
+
+    localparam integer CLK_HZ = 1_000_000;
+    localparam integer PWM_HZ = 50;
+    localparam integer PERIOD_CYC = CLK_HZ / PWM_HZ;
+
+    reg               clk = 1'b0;
+    reg               rst_n = 1'b0;
+    reg               servo_enable = 1'b0;
+    reg               target_update = 1'b0;
+    reg               target_valid = 1'b0;
+    reg  [5:0]        target_x = 6'd32;
+    reg  [5:0]        target_y = 6'd32;
+    reg signed [7:0]  target_score = 8'sd10;
+    reg               laser_arm = 1'b0;
+    reg               emergency_stop = 1'b0;
+
+    wire camera_pan_pwm, camera_tilt_pwm;
+    wire laser_pan_pwm, laser_tilt_pwm;
+    wire laser_led, laser_enable_safe, frame_tick;
+    wire [7:0] camera_pan_pos, camera_tilt_pos;
+    wire [7:0] laser_pan_pos, laser_tilt_pos;
+    wire [7:0] laser_pan_target, laser_tilt_target;
+    wire laser_aim_ready, laser_lock_qualified;
+    wire laser_target_fresh, laser_timeout_fault;
+
+    integer errors = 0;
+    integer m_cam_pan, m_cam_tilt, m_laser_pan, m_laser_tilt, m_total;
+
+    always #500 clk = ~clk;
+
+    dual_head_control #(
+        .CLK_HZ(CLK_HZ),
+        .PWM_HZ(PWM_HZ),
+        .TARGET_TIMEOUT_FRAMES(20),
+        .MAX_ON_FRAMES(0)
+    ) dut (
+        .clk(clk), .rst_n(rst_n), .servo_enable(servo_enable),
+        .target_update(target_update), .target_valid(target_valid),
+        .target_x(target_x), .target_y(target_y), .target_score(target_score),
+        .laser_arm(laser_arm), .emergency_stop(emergency_stop),
+        .camera_pan_pwm(camera_pan_pwm), .camera_tilt_pwm(camera_tilt_pwm),
+        .laser_pan_pwm(laser_pan_pwm), .laser_tilt_pwm(laser_tilt_pwm),
+        .laser_led(laser_led), .laser_enable_safe(laser_enable_safe),
+        .frame_tick(frame_tick),
+        .camera_pan_pos(camera_pan_pos), .camera_tilt_pos(camera_tilt_pos),
+        .laser_pan_pos(laser_pan_pos), .laser_tilt_pos(laser_tilt_pos),
+        .laser_pan_target(laser_pan_target), .laser_tilt_target(laser_tilt_target),
+        .laser_aim_ready(laser_aim_ready),
+        .laser_lock_qualified(laser_lock_qualified),
+        .laser_target_fresh(laser_target_fresh),
+        .laser_timeout_fault(laser_timeout_fault)
+    );
+
+    function integer expect_us(input integer p);
+        begin
+            expect_us = 500 + ((p * 2000) / 256);
+        end
+    endfunction
+
+    task check_int(input [8*48-1:0] nm, input integer got, input integer exp_v);
+        begin
+            if (got === exp_v)
+                $display("  [PASS] %0s : %0d", nm, got);
+            else begin
+                $display("  [FAIL] %0s : %0d (expected %0d)", nm, got, exp_v);
+                errors = errors + 1;
+            end
+        end
+    endtask
+
+    task check_tol(input [8*48-1:0] nm, input integer got,
+                   input integer exp_v, input integer tol);
+        begin
+            if (got >= exp_v - tol && got <= exp_v + tol)
+                $display("  [PASS] %0s : %0d (expected %0d +/- %0d)",
+                         nm, got, exp_v, tol);
+            else begin
+                $display("  [FAIL] %0s : %0d (expected %0d +/- %0d)",
+                         nm, got, exp_v, tol);
+                errors = errors + 1;
+            end
+        end
+    endtask
+
+    task wait_frames(input integer n);
+        integer i;
+        begin
+            for (i = 0; i < n; i = i + 1) @(posedge frame_tick);
+            repeat (2) @(negedge clk);
+        end
+    endtask
+
+    task pulse_update;
+        begin
+            @(negedge clk); target_update = 1'b1;
+            @(negedge clk); target_update = 1'b0;
+            @(negedge clk);
+        end
+    endtask
+
+    task measure_four;
+        begin
+            @(posedge frame_tick);
+            @(negedge clk);
+            m_cam_pan = 0;
+            m_cam_tilt = 0;
+            m_laser_pan = 0;
+            m_laser_tilt = 0;
+            m_total = 0;
+            forever begin
+                @(negedge clk);
+                m_total = m_total + 1;
+                if (camera_pan_pwm)  m_cam_pan = m_cam_pan + 1;
+                if (camera_tilt_pwm) m_cam_tilt = m_cam_tilt + 1;
+                if (laser_pan_pwm)   m_laser_pan = m_laser_pan + 1;
+                if (laser_tilt_pwm)  m_laser_tilt = m_laser_tilt + 1;
+                if (frame_tick) disable measure_four;
+            end
+        end
+    endtask
+
+    initial begin
+        $display("=== tb_dual_head_control : 4 Servo + LED integration ===");
+
+        repeat (3) @(negedge clk);
+        rst_n = 1'b1;
+        servo_enable = 1'b1;
+        laser_arm = 1'b1;
+        target_valid = 1'b1;
+
+        // Lock 밖 표적으로 PT#1이 한 step 움직이고, PT#2 목표가 그 자세를 포함하는지 확인.
+        target_x = 6'd60;
+        target_y = 6'd4;
+        wait_frames(1);
+        check_int("T1 camera PAN tracks +1", camera_pan_pos, 129);
+        check_int("T1 camera TILT tracks -1", camera_tilt_pos, 127);
+        check_int("T1 PT2 PAN target includes camera pose", laser_pan_target, 157);
+        check_int("T1 PT2 TILT target includes camera pose", laser_tilt_target, 99);
+        check_int("T1 outside Lock Zone -> LED OFF", laser_led, 0);
+
+        // 중앙 양자화 범위로 들어오면 PT#1은 Hold, PT#2는 잔차까지 조준한다.
+        target_x = 6'd36;
+        target_y = 6'd28;
+        wait_frames(3);
+        check_int("T2 camera PAN dead-zone hold", camera_pan_pos, 129);
+        check_int("T2 camera TILT dead-zone hold", camera_tilt_pos, 127);
+        check_int("T2 laser PAN = camera +4", laser_pan_pos, 133);
+        check_int("T2 laser TILT = camera -4", laser_tilt_pos, 123);
+        check_int("T2 PT2 aim ready", laser_aim_ready, 1);
+
+        pulse_update; pulse_update;
+        check_int("T3 before 3 confirmations -> LED OFF", laser_led, 0);
+        pulse_update;
+        check_int("T3 confirmed Lock -> LED ON", laser_led, 1);
+        check_int("T3 LED equals safe enable", laser_led, laser_enable_safe);
+
+        // 네 물리 PWM 출력이 각 명령 위치의 펄스폭으로 동시에 나오는지 확인.
+        measure_four;
+        check_int("T4 common PWM frame period", m_total, PERIOD_CYC);
+        check_tol("T4 camera PAN PWM", m_cam_pan, expect_us(129), 2);
+        check_tol("T4 camera TILT PWM", m_cam_tilt, expect_us(127), 2);
+        check_tol("T4 laser PAN PWM", m_laser_pan, expect_us(133), 2);
+        check_tol("T4 laser TILT PWM", m_laser_tilt, expect_us(123), 2);
+
+        emergency_stop = 1'b1;
+        repeat (2) @(negedge clk);
+        check_int("T5 emergency stop -> LED OFF", laser_led, 0);
+        emergency_stop = 1'b0;
+
+        // Servo 출력 자체를 끄면 Laser Arm도 유효하지 않도록 통합한다.
+        pulse_update; pulse_update; pulse_update;
+        check_int("T6 re-confirm -> LED ON", laser_led, 1);
+        servo_enable = 1'b0;
+        repeat (2) @(negedge clk);
+        check_int("T6 servo disable -> LED OFF", laser_led, 0);
+        measure_four;
+        check_int("T6 camera PAN PWM disabled", m_cam_pan, 0);
+        check_int("T6 camera TILT PWM disabled", m_cam_tilt, 0);
+        check_int("T6 laser PAN PWM disabled", m_laser_pan, 0);
+        check_int("T6 laser TILT PWM disabled", m_laser_tilt, 0);
+
+        // Target Lost: 두 헤드 위치 Hold, LED OFF.
+        servo_enable = 1'b1;
+        target_valid = 1'b0;
+        wait_frames(2);
+        check_int("T7 target lost camera PAN hold", camera_pan_pos, 129);
+        check_int("T7 target lost camera TILT hold", camera_tilt_pos, 127);
+        check_int("T7 target lost laser PAN hold", laser_pan_pos, 133);
+        check_int("T7 target lost laser TILT hold", laser_tilt_pos, 123);
+        check_int("T7 target lost LED OFF", laser_led, 0);
+
+        $display("=== 결과 : %0s (errors=%0d) ===",
+                 (errors == 0) ? "ALL PASS" : "FAIL", errors);
+        if (errors != 0) $fatal(1, "tb_dual_head_control FAILED");
+        $finish;
+    end
+
+    initial begin
+        repeat (2) #500_000_000;
+        $fatal(1, "tb_dual_head_control TIMEOUT");
+    end
+
+endmodule
+
+`default_nettype wire
