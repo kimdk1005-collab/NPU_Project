@@ -79,8 +79,19 @@ module servo_pwm #(
                              (pos > POS_MAX[7:0]) ? POS_MAX[7:0] : pos;
 
     // pos * SPAN_CYC : 255 * 125000 = 31,875,000 -> 25 bit. 32 bit 로 여유 확보
-    wire [31:0] scaled   = pos_clamped * SPAN_CYC;
-    wire [31:0] pulse_nx = PULSE_MIN_CYC + (scaled >> 8);
+    // 곱셈 결과를 먼저 등록한다. Servo pos는 Frame 단위로만 바뀌므로 다음
+    // Frame까지 20 ms의 여유가 있고, 이 1-cycle 파이프라인은 PWM 응답 지연을
+    // 늘리지 않으면서 pos -> DSP -> adder -> pulse_cyc 장경로를 끊는다.
+    wire [31:0] scaled_next = pos_clamped * SPAN_CYC;
+    reg  [31:0] scaled_reg;
+    wire [31:0] pulse_nx = PULSE_MIN_CYC + (scaled_reg >> 8);
+
+    always @(posedge clk) begin
+        if (!rst_n)
+            scaled_reg <= 128 * SPAN_CYC;
+        else
+            scaled_reg <= scaled_next;
+    end
 
     // -----------------------------------------------------------------------
     // Frame Counter
