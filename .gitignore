@@ -48,6 +48,8 @@ sim/event_vectors/
 sim/work/
 vivado_proj/
 vivado_bringup/
+vivado_laser_bringup/
+vivado_dual_head_bringup/
 
 # OS
 .DS_Store

@@ -1,6 +1,6 @@
 # C Handoff — Event 입력 / Tracking / Pan-Tilt / Laser
 
-> **상위 권한 문서** — `docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md` (이하 SPEC)
+> **상위 권한 문서** — 팀 공통 통합 명세 **v1.5** 작업본 (이하 SPEC)
 > 본 문서와 SPEC이 다르면 **SPEC이 우선한다** (SPEC §1 문서 우선순위).
 >
 > 본 문서는 SPEC §26이 요구하는 C의 Handoff 문서다.
@@ -9,10 +9,10 @@
 > | | |
 > |---|---|
 > | 담당 | C (김도근) |
-> | 버전 | `c_control_v04` |
-> | 최종 갱신 | 2026-08-21 (D4) |
-> | 기준 SPEC | **v1.2** |
-> | 상태 | D4 — Event Pipeline 단위 TB + Tracking Controller 완료 |
+> | 버전 | `c_control_v05` |
+> | 최종 갱신 | 2026-08-22 (D5) |
+> | 기준 SPEC | **v1.5** |
+> | 상태 | D5 — 2-Head 4-Servo + LED Interlock RTL 완료 |
 >
 > **SPEC v1.1 반영분** — `target_score` = signed INT8 (§7, §10),
 > Event Count 포화 상한 = 127 (§2). 두 항목은 더 이상 TBD가 아니다.
@@ -27,6 +27,10 @@
 > | §14.1 Source → 64×64 Mapping `min(63, floor(raw*64/frame))` | §1.1 `event_adapter.v` Binning |
 > | §14.1 8×8 Argmax → 64×64 `target = heatmap*8 + 4` | §10 A → C 입력 해석 |
 > | §15 Center Dead Zone 최소 `abs(error) <= 4` | §4 `DEAD_ZONE` |
+>
+> **SPEC v1.5 반영분** — 카메라 PT#1과 레이저 PT#2를 분리했고, PT#2는
+> `PT#1 자세 + 화면 잔차 + Offset`으로 절대방향을 계산한다. Laser 출력은
+> `SAFE_LIMIT2`를 포함한 Interlock을 통과하며 첫 실물 검증은 LED로 한다.
 
 ---
 
@@ -40,7 +44,9 @@
 | `rtl/event/event_accumulator.v` | C | **구현 완료** (D3) | `tb_event_accumulator` 15/15 PASS |
 | `rtl/control/tracking_controller.v` | C | **구현 완료** (D4) | `tb_tracking_controller` 30/30 PASS |
 | Adapter→Accumulator 연결 | C | **검증 완료** (D4) | `tb_event_pipeline` 15/15 PASS |
-| `rtl/control/laser_interlock.v` | C | 미착수 | D6 |
+| `rtl/control/laser_head_controller.v` | C | **구현 완료** (D5) | `tb_laser_head_controller` 23/23 PASS |
+| `rtl/control/laser_interlock.v` | C | **LED 우선 구현 완료** (D5) | `tb_laser_interlock` 28/28 PASS |
+| `rtl/control/dual_head_control.v` | C | **4-Servo 통합 완료** (D5) | `tb_dual_head_control` 30/30 PASS |
 
 ---
 
@@ -624,7 +630,7 @@ target_valid/x/y
 - 기본 방향: 화면 X/Y 증가 → Servo pos 증가
 - 기구 방향이 반대면 `PAN_INVERT` / `TILT_INVERT` parameter 사용
 - `target_score`는 Tracking이 재판정하지 않는다. A의 `target_valid`가 권위이며
-  Score는 D6 Laser Interlock이 signed INT8로 사용한다
+  Score는 D5 Laser Interlock이 signed INT8로 사용한다
 - Tracking의 32~224 Soft Limit과 `servo_pwm` 출력 Clamp를 겹쳐 2중 보호한다
 
 `tb_tracking_controller`는 Reset/No-Tick/Target Lost/±4 Dead Zone/PAN·TILT 방향/
@@ -691,14 +697,17 @@ TARGET_LOST_N = TBD     // 실제 Tracking 안정성 확인 후. 담당 C / D9~D
 
 ## 7. Laser Interlock (SPEC §17 — 확정, 변경 금지)
 
-아래 **전부 AND**일 때만 `laser_enable = 1`:
+아래 **전부 AND**이고 새 Target Lock이 3회 연속 확인될 때만 `laser_enable = 1`:
 
 ```text
 target_valid == 1
 target_score >= threshold
 Target inside Safe Zone
-Servo inside Safe Limit
+PT#1/PT#2 Servo inside Safe Limit
 Target inside Lock Zone
+PT#2 aim_ready == 1
+Target update watchdog 정상
+Servo Enable + Laser Arm == 1
 Emergency Stop == 0
 ```
 
@@ -706,9 +715,12 @@ Emergency Stop == 0
 
 | 파라미터 | 상태 | 결정 |
 |---|---|---|
-| `SCORE_TH` | `TBD` | B의 Heatmap 분포 확인 후 / D6~D9 |
-| `LOCK_ZONE_X/Y` | `TBD` | C / D9~D11 |
+| `SCORE_THRESHOLD` | 기본값 `0`, 최종값 TBD | B의 Heatmap 분포 확인 후 |
+| `LOCK_ZONE_X/Y` | 기본값 `4` | 최소 ±4, 실제 추적 안정성으로 최종 조정 |
 | `LASER_OFFSET_X/Y` | `TBD` | C 고정 거리 실측 / D11 |
+| `LOCK_CONFIRM_UPDATES` | `3` | 새 Target 3회 연속 확인 |
+| `TARGET_TIMEOUT_FRAMES` | `3` | 새 결과가 없으면 Fail-Closed |
+| `MAX_ON_FRAMES` | `25` | 50 Hz 기준 약 500 ms 후 OFF/Fault |
 | `target_score` 폭 | **확정 — signed INT8** | SPEC v1.1 §14 / §21 `[x]` (v1.2 유지) |
 
 `target_score`가 signed INT8(`-128 ~ 127`)이므로 `SCORE_TH` 비교는
@@ -723,7 +735,8 @@ Interlock이 잘못 열린다. SPEC §9.1이 Conv4 Heatmap을 ReLU 없는 signed
 - 관객 방향 조준 금지, Target Board 영역만 사용
 - Pan/Tilt 하드·소프트 리밋 적용
 - 보드 버튼에 **Emergency OFF**
-- 카메라와 레이저는 **같은 Pan/Tilt Head**에 고정
+- 카메라 PT#1과 레이저 PT#2를 분리하고 두 Head 모두 Safe Limit 적용
+- 실제 광원은 Camera/NPU 연동과 FOV/Offset 보정 전까지 연결 금지
 
 ---
 
@@ -741,8 +754,9 @@ Interlock이 잘못 열린다. SPEC §9.1이 Conv4 Heatmap을 ReLU 없는 signed
    `board_io.v`는 **125 MHz를 유지한다.** 브링업 전용 top이고 PL sysclk K17을
    직결하며 `top_system`에 들어가지 않는다. 오늘 확인한 `led[0]` 1초 심장박동이
    그 근거다. 여기를 100 MHz로 "고치면" 오히려 깨진다.
-2. **Servo PWM, PAN/TILT 2축 실물 구동, Tracking Controller 단위 검증은 완료했다.**
-   A의 실제 Target 출력과 연결한 실물 Closed-loop는 아직 검증하지 않았다.
+2. **Camera PT#1 + Laser PT#2 4축 Servo와 JD7 RED 실물 구동은 완료했다.**
+   Switch/Button 가상 Target 기준이며, A의 실제 Target 출력과 연결한 영상 기반
+   Closed-loop는 아직 검증하지 않았다.
 3. **`event_accumulator.v`는 구현·단위 검증 완료했다.** Ping-Pong 버퍼와
    Direct Handshake 전송을 포함하며 `tb_event_accumulator` 15/15 PASS,
    Window별 8192 byte 전수 비교를 통과했다. A `npu_core` 및 B Golden과의
@@ -763,10 +777,12 @@ Interlock이 잘못 열린다. SPEC §9.1이 Conv4 Heatmap을 ReLU 없는 signed
 ## 9. C → A 출력 신호 (SPEC §8 팀 인터페이스)
 
 ```text
-PAN PWM
-TILT PWM
+CAMERA PAN PWM
+CAMERA TILT PWM
+LASER PAN PWM
+LASER TILT PWM
 LOCK
-LASER ENABLE
+LASER ENABLE SAFE / LED
 ```
 
 ## 10. A → C 입력 신호 (SPEC §14 — 변경 금지)
