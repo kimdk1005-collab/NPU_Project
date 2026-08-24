@@ -201,6 +201,20 @@ module dual_head_board_io #(
         .target_score         (8'sd127),
         .laser_arm            (laser_arm_i),
         .emergency_stop       (emergency_stop_i),
+        .manual_override      (1'b0),
+        .manual_aim_ready     (1'b0),
+        .manual_camera_pan_pos(8'd0),
+        .manual_camera_tilt_pos(8'd0),
+        .manual_laser_pan_pos (8'd0),
+        .manual_laser_tilt_pos(8'd0),
+        .runtime_limits_en    (1'b0),
+        .runtime_pan1_min     (8'd0), .runtime_pan1_max(8'd0),
+        .runtime_tilt1_min    (8'd0), .runtime_tilt1_max(8'd0),
+        .runtime_pan2_min     (8'd0), .runtime_pan2_max(8'd0),
+        .runtime_tilt2_min    (8'd0), .runtime_tilt2_max(8'd0),
+        .runtime_cal_en       (1'b0),
+        .runtime_pan_offset_pos (16'sd0),
+        .runtime_tilt_offset_pos(16'sd0),
         .camera_pan_pwm       (camera_pan_pwm),
         .camera_tilt_pwm      (camera_tilt_pwm),
         .laser_pan_pwm        (laser_pan_pwm),
@@ -217,7 +231,9 @@ module dual_head_board_io #(
         .laser_aim_ready      (laser_aim_ready),
         .laser_lock_qualified (laser_lock_qualified),
         .laser_target_fresh   (laser_target_fresh),
-        .laser_timeout_fault  (laser_timeout_fault)
+        .laser_timeout_fault  (laser_timeout_fault),
+        .runtime_limits_active(),
+        .runtime_limit_fault  ()
     );
 
     // 1 Hz heartbeat: 50 Hz frame_tick 25회마다 toggle
