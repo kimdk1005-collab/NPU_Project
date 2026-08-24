@@ -9,23 +9,29 @@ Event Input → 64×64×2 Event Tensor → Tiny CNN → INT8 → Integer Golden 
 ## 문서 우선순위 (SPEC §1)
 
 ```text
-1순위  docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md
-2순위  docs/TEAM_ROLE_PLAN_v1.3.md
-3순위  docs/DEVELOPMENT_PLAN_v1.1.md
-4순위  개인 메모 (docs/D1_CHECKLIST_C.md 등)
+1순위  docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md
+2순위  docs/TEAM_ROLE_PLAN.md
+3순위  docs/NPU_DEVELOPMENT_PLAN.md
+4순위  docs/interface_contract.md (인터페이스 세부 계약)
+5순위  개인 메모 (docs/D1_CHECKLIST_C.md 등)
 ```
 
 문서가 서로 다르면 **위쪽이 이긴다.** 규격을 바꿀 때는 SPEC §22 CHANGE REQUEST를 먼저 쓴다.
 
 | 파일 | 내용 |
 |---|---|
-| [docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md](docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md) | **최상위 공통 명세** (A 작성) |
+| [docs/00_DOCUMENT_INDEX.md](docs/00_DOCUMENT_INDEX.md) | 최신 정본 목록과 문서 관리 규칙 |
+| [docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md](docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md) | **최상위 공통 명세** (현재 v1.5) |
+| [docs/interface_contract.md](docs/interface_contract.md) | A/B/C RTL·AXI Interface Contract (현재 v0.4) |
+| [docs/NPU_DEVELOPMENT_PLAN.md](docs/NPU_DEVELOPMENT_PLAN.md) | 전체 개발 계획 (현재 v1.4) |
+| [docs/TEAM_ROLE_PLAN.md](docs/TEAM_ROLE_PLAN.md) | A/B/C 역할과 일정 (현재 v1.6) |
 | [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | 팀 공유용 최신 진행상황, 블로커, 다음 액션 |
 | [docs/D3_CHECKLIST_C.md](docs/D3_CHECKLIST_C.md) | C Day 3 완료 기준과 검증 결과 |
 | [docs/D4_CHECKLIST_C.md](docs/D4_CHECKLIST_C.md) | C Day 4 완료 기준과 검증 결과 |
 | [docs/D5_CHECKLIST_C.md](docs/D5_CHECKLIST_C.md) | C Day 5 — 2-Head 4축 제어와 LED Interlock 검증 |
 | [docs/D5_FINAL_DRIVE_TEST.md](docs/D5_FINAL_DRIVE_TEST.md) | Camera/Laser 4축 + JD7 RED 실물 구동 절차 |
 | [docs/C_TO_A_REPLY_002.md](docs/C_TO_A_REPLY_002.md) | PT#2 좌표식 승인, 통합 포트와 JD 핀 제안 |
+| [docs/C_TO_A_REPLY_003.md](docs/C_TO_A_REPLY_003.md) | A Phase 3 Event/Control 통합 계약과 검증 결과 |
 | [handoff/C_EVENT_CONTROL_HANDOFF.md](handoff/C_EVENT_CONTROL_HANDOFF.md) | C Handoff — Event / Tracking / Servo / Laser |
 | [docs/CHANGE_REQUEST_C_001_servo_command_format.md](docs/CHANGE_REQUEST_C_001_servo_command_format.md) | CR C-001 Servo Command Format (승인 대기) |
 | [docs/CHANGE_REQUEST_C_002_event_window_and_input_source.md](docs/CHANGE_REQUEST_C_002_event_window_and_input_source.md) | CR C-002 Event Window + 입력원 Fallback (승인 대기) |

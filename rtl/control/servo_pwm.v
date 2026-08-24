@@ -3,7 +3,7 @@
 //
 //  담당 : C
 //  규격 : handoff/C_EVENT_CONTROL_HANDOFF.md  §3 Servo Command Format
-//         (상위 권한: docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md)
+//         (상위 권한: docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md)
 //
 //  pos[7:0] 를 표준 하비 서보 펄스폭으로 변환한다.
 //

@@ -2,7 +2,7 @@
 
 > **문서 등급** — SPEC §1 기준 **4순위 (개인별 메모)**.
 > 공유 규격의 근거로 쓰지 않는다. 상위 권한은
-> `docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md` (이하 SPEC).
+> `docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md` (이하 SPEC).
 >
 > **D1 목표** — Event Camera / Trace 형식 확인 + Servo 확인
 > **날짜** 2026-08-20

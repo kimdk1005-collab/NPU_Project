@@ -9,10 +9,10 @@
 > | | |
 > |---|---|
 > | 담당 | C (김도근) |
-> | 버전 | `c_control_v05` |
-> | 최종 갱신 | 2026-08-22 (D5) |
+> | 버전 | `c_control_v06` |
+> | 최종 갱신 | 2026-08-24 (D6) |
 > | 기준 SPEC | **v1.5** |
-> | 상태 | D5 — 2-Head 4-Servo + LED Interlock RTL 완료 |
+> | 상태 | D6 — A Phase 3 포트용 C 통합 래퍼 + AXI 설정/상태 계약 완료 |
 >
 > **SPEC v1.1 반영분** — `target_score` = signed INT8 (§7, §10),
 > Event Count 포화 상한 = 127 (§2). 두 항목은 더 이상 TBD가 아니다.
@@ -31,6 +31,9 @@
 > **SPEC v1.5 반영분** — 카메라 PT#1과 레이저 PT#2를 분리했고, PT#2는
 > `PT#1 자세 + 화면 잔차 + Offset`으로 절대방향을 계산한다. Laser 출력은
 > `SAFE_LIMIT2`를 포함한 Interlock을 통과하며 첫 실물 검증은 LED로 한다.
+>
+> **2026-08-22 Dataset/Label 운영 정정** — Laser는 NPU 추론 이후의 출력 장치다.
+> C는 영상에서 레이저 점을 검출하지 않으며 기존 `target_*` 인터페이스는 변경 없다.
 
 ---
 
@@ -44,9 +47,10 @@
 | `rtl/event/event_accumulator.v` | C | **구현 완료** (D3) | `tb_event_accumulator` 15/15 PASS |
 | `rtl/control/tracking_controller.v` | C | **구현 완료** (D4) | `tb_tracking_controller` 30/30 PASS |
 | Adapter→Accumulator 연결 | C | **검증 완료** (D4) | `tb_event_pipeline` 15/15 PASS |
-| `rtl/control/laser_head_controller.v` | C | **구현 완료** (D5) | `tb_laser_head_controller` 23/23 PASS |
+| `rtl/control/laser_head_controller.v` | C | **런타임 LASER_CAL 포함** (D6) | `tb_laser_head_controller` 27/27 PASS |
 | `rtl/control/laser_interlock.v` | C | **LED 우선 구현 완료** (D5) | `tb_laser_interlock` 28/28 PASS |
-| `rtl/control/dual_head_control.v` | C | **4-Servo 통합 완료** (D5) | `tb_dual_head_control` 30/30 PASS |
+| `rtl/control/dual_head_control.v` | C | **4-Servo + Manual/동적 Limit** (D6) | `tb_dual_head_control` 30/30 PASS |
+| `rtl/control/c_event_control_top.v` | C | **A Phase 3 연동 래퍼 완료** (D6) | `tb_c_event_control_top` 25/25 PASS |
 
 ---
 
@@ -771,6 +775,14 @@ Interlock이 잘못 열린다. SPEC §9.1이 Conv4 Heatmap을 ReLU 없는 signed
    승인 시 `33333` / `1`로 바뀐다. parameter 교체만으로 끝나고 로직 변경은 없다.
 8. `tools/gen_event_vector.py`의 출력은 **C의 로컬 개발용 자극**이다.
    팀 공식 Test Vector(`test_vectors/`, `golden_outputs/`)는 SPEC §5.2에 따라 **B 소유**다.
+9. **현재 브랜치에는 A Phase 3의 `top_system.v`, `npu_axi.v`, `c_module_stub.v`,
+   PS 소프트웨어가 없다.** `c_event_control_top.v`는 A 문서의 포트 계약을 C RTL과
+   연결해 xsim으로 검증한 상태이며, 실제 A NPU/AXI 결합은 A 브랜치 합류 후 다시 검증한다.
+10. A Phase 3 stub에는 실제 Event Source 입력과 NPU `start` 요청 포트가 없다.
+    C 래퍼는 두 포트를 명시적으로 제공한다. A는 §11.4의 START 방식 하나를 선택하고
+    `top_system`에 Event Source 입력을 추가해야 한다.
+11. 동적 Safe Limit을 바꾸는 동안은 Laser Arm을 해제한다. 잘못된 범위는 적용하지 않고
+    정적 parameter 범위로 Fail-Safe fallback하며 `CONTROL_STAT.LIMIT_FAULT`를 세운다.
 
 ---
 
@@ -807,3 +819,136 @@ C는 이 값을 **연속 좌표로 취급하지 않는다.** 최소 오차가 ±
 `target_score`는 Conv4 Heatmap의 signed INT8 최대값이다 (SPEC §14).
 Conv4는 ReLU를 적용하지 않으므로 `-128 ~ 127` 전 범위가 나온다 (SPEC §9.1).
 C 측 비교 연산은 전부 signed로 처리한다.
+
+---
+
+## 11. A Phase 3 통합 계약 — `c_event_control_top.v` (D6)
+
+`rtl/control/c_event_control_top.v`는 C 소유 모듈만 조합하며 A 소유
+`rtl/integration/c_module_stub.v`를 직접 수정하지 않는다. A는 stub 대신 이 모듈을
+인스턴스하거나 동일 포트로 감싼다.
+
+### 11.1 A stub 대비 추가 포트
+
+```verilog
+// 실제 Event Source
+src_valid
+src_x[SRC_COORD_W-1:0]
+src_y[SRC_COORD_W-1:0]
+src_pol
+src_window_end
+
+// Tensor 8192 byte 전송 완료
+tensor_start
+
+// Fail-Closed 물리 입력
+laser_arm_hw
+emergency_stop_hw
+
+// A가 0x58 / 0x5C RO Register 또는 ILA에 연결
+servo_pos_stat[31:0]
+control_stat[31:0]
+```
+
+`npu_done`은 내부에서 `target_update` 1-cycle pulse로 직접 사용한다. PT#2 목표는 이
+pulse에서 현재 PT#1 자세, 화면 잔차, `LASER_CAL`을 합산해 레지스터에 저장한다.
+이후 Servo frame tick은 저장된 목표만 따라가므로 NPU 출력 변경 중간값은 사용하지 않는다.
+
+### 11.2 C 소유 AXI bit 계약
+
+| Register | Bit | 의미 |
+|---|---:|---|
+| `EVENT_CFG 0x08` | 0 | `EVENT_ENABLE` |
+|  | 1 | `POLARITY_INVERT` |
+| `LASER_CTRL 0x28` | 0 | `SERVO_ENABLE` |
+|  | 1 | `SW_LASER_ARM` — 실제 Arm은 이 bit와 `laser_arm_hw`의 AND |
+|  | 2 | `SW_ESTOP` — 실제 E-stop과 OR |
+|  | 3 | `MANUAL_OVERRIDE` |
+|  | 4 | `MANUAL_AIM_READY` — Manual 조준 확인 후에만 1 |
+|  | 8 | `RUNTIME_LIMIT_EN` |
+|  | 9 | `RUNTIME_CAL_EN` |
+| `PAN/TILT/PAN2/TILT2_CMD` | 7:0 | Manual Override용 unsigned Servo pos |
+| `SAFE_LIMIT` | 7:0 / 15:8 | PT#1 PAN MIN / MAX |
+|  | 23:16 / 31:24 | PT#1 TILT MIN / MAX |
+| `SAFE_LIMIT2` | 동일 | PT#2 PAN/TILT MIN/MAX |
+| `LASER_CAL` | 15:0 / 31:16 | PAN/TILT signed offset, Servo pos step 단위 |
+
+Runtime Limit은 정적 `32~224` 범위의 부분집합일 때만 적용한다. 범위를 벗어나거나
+MIN>MAX이면 정적 Limit으로 fallback하고 fault를 표시한다.
+
+### 11.3 `INPUT_STAT 0x0C`
+
+| Bit | 이름 | 의미 |
+|---:|---|---|
+| 0 | `ACC_READY` | 초기 BRAM clear 완료 |
+| 1 | `TENSOR_READY` | Sticky. `tensor_start`에서 1, NPU BUSY에서 0 |
+| 2 | `OVERRUN` | Window 처리 여유 위반 sticky |
+| 3 | `EVENT_ENABLE` | 설정 반영값 |
+| 4 | `NPU_BUSY` | A 입력 mirror |
+| 5 | `TARGET_VALID` | A 입력 mirror |
+| 6 | `LASER_LOCK` | 현재 Interlock qualification |
+| 7 | `LASER_TIMEOUT` | Laser max-on/watchdog fault |
+| 19:8 | `WIN_EVT_COUNT` | 직전 Window 채택 수, 12-bit saturation |
+| 31:20 | `WIN_DROP_COUNT` | 직전 Window 폐기 수, 12-bit saturation |
+
+추가 RO 상태 제안:
+
+```text
+0x58 SERVO_POS_STAT = {TILT2, PAN2, TILT1, PAN1}   // 각 8 bit
+0x5C CONTROL_STAT:
+  [0] LASER_EN        [1] LASER_LOCK       [2] TARGET_FRESH
+  [3] LASER_TIMEOUT   [4] AIM_READY        [5] MANUAL_OVERRIDE
+  [6] LIMIT_ACTIVE    [7] LIMIT_FAULT      [8] SERVO_ENABLE
+  [9] HW_ARM          [10] SW_ARM          [11] EMERGENCY_STOP
+  [12] TENSOR_READY   [13] ACC_READY       [14] OVERRUN
+  [15] TARGET_VALID   [31:16] 0
+```
+
+기존 `TRACK_ERR_X/Y`는 C 하드웨어 Tracking에서 소비하지 않는다. A가 이 두 Register를
+RW 출력으로 유지할 필요가 없으며, 위 실제 위치/상태 RO Register로 교체하는 안을 권장한다.
+
+### 11.4 START 소유권 — A 선택 필요
+
+둘 중 **정확히 하나만** 선택한다.
+
+```text
+Direct 방식 (C 권장):
+  npu_start = INPUT_SRC ? C tensor_start : AXI start pulse
+
+PS-managed 방식:
+  PS가 INPUT_STAT.TENSOR_READY 폴링 -> CTRL.START 기록
+  NPU BUSY가 올라가면 TENSOR_READY 자동 clear
+```
+
+두 경로를 동시에 연결하면 같은 Tensor에 START가 두 번 발생할 수 있으므로 금지한다.
+
+### 11.5 검증
+
+`tb_c_event_control_top`에서 다음 25개 판정을 통과했다.
+
+```text
+Event Disable / Accumulator Ready
+8192 byte 전송 / CHW Positive·Negative count / Polarity Invert
+tensor_start + Sticky TENSOR_READY / BUSY clear
+Manual 4-Servo Command / Runtime SAFE_LIMIT clamp + invalid fallback
+NPU done -> target_update / 3회 Lock
+Hardware E-stop Fail-Closed
+```
+
+전체 C 자동판정 TB 11개를 재실행해 로그 기준 **249 PASS, errors=0**을 확인했다.
+
+Zybo Z7-20 (`xc7z020clg400-1`) 100 MHz 기준 `c_event_control_top` OOC
+implementation 결과는 다음과 같다.
+
+| 항목 | 결과 |
+|---|---:|
+| Slice LUT | 829 (1.56%) |
+| Register | 582 (0.55%) |
+| BRAM Tile | 4 (2.86%) |
+| DSP | 6 (2.73%) |
+| Setup WNS | +1.138 ns |
+| Hold WHS | +0.147 ns |
+| DRC Error | 0 |
+
+이는 C 래퍼 단독 OOC 결과다. A의 `top_system/npu_axi/npu_core`와 통합한 뒤에는
+전체 경로 기준 implementation과 타이밍을 다시 측정한다.

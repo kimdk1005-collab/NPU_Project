@@ -40,6 +40,7 @@ module laser_head_controller #(
     input  wire       clk,
     input  wire       rst_n,
     input  wire       frame_tick,
+    input  wire       target_update,
 
     input  wire       target_valid,
     input  wire [5:0] target_x,
@@ -49,13 +50,18 @@ module laser_head_controller #(
     input  wire [7:0] camera_pan_pos,
     input  wire [7:0] camera_tilt_pos,
 
+    // AXI LASER_CAL(0x54) 런타임 보정값. 비활성화하면 기존 parameter를 쓴다.
+    input  wire                    runtime_cal_en,
+    input  wire signed [15:0]      runtime_pan_offset_pos,
+    input  wire signed [15:0]      runtime_tilt_offset_pos,
+
     // PT#2 실제 Slew 적용 명령
     output reg  [7:0] laser_pan_pos,
     output reg  [7:0] laser_tilt_pos,
 
     // §15.2 변환식의 Clamp 결과. 캘리브레이션/검증용으로 함께 노출한다.
-    output wire [7:0] laser_pan_target,
-    output wire [7:0] laser_tilt_target,
+    output reg  [7:0] laser_pan_target,
+    output reg  [7:0] laser_tilt_target,
     output wire       aim_ready
 );
 
@@ -91,25 +97,32 @@ module laser_head_controller #(
     wire        [6:0] abs_y = error_y[6] ? (~error_y + 7'd1) : error_y;
 
     // 분모는 parameter 상수라 합성 시 고정 나눗셈으로 최적화된다.
-    wire [31:0] pan_mag_u  = (abs_x * PAN_ERR_NUM) / PAN_ERR_DEN;
-    wire [31:0] tilt_mag_u = (abs_y * TILT_ERR_NUM) / TILT_ERR_DEN;
-    wire signed [31:0] pan_mag_s  = $signed(pan_mag_u);
-    wire signed [31:0] tilt_mag_s = $signed(tilt_mag_u);
+    // Servo 위치/오프셋 계산에는 18 bit면 충분하다. 32 bit carry chain을 피해서
+    // target_update -> 목표 Register 경로가 100 MHz 안에 닫히도록 한다.
+    wire [16:0] pan_mag_u  = (abs_x * PAN_ERR_NUM) / PAN_ERR_DEN;
+    wire [16:0] tilt_mag_u = (abs_y * TILT_ERR_NUM) / TILT_ERR_DEN;
+    wire signed [17:0] pan_mag_s  = $signed({1'b0, pan_mag_u});
+    wire signed [17:0] tilt_mag_s = $signed({1'b0, tilt_mag_u});
 
     wire pan_inc  = (error_x > 0) ^ (PAN_ERR_INVERT != 0);
     wire tilt_inc = (error_y > 0) ^ (TILT_ERR_INVERT != 0);
 
-    wire signed [31:0] pan_residual  = pan_inc  ? pan_mag_s  : -pan_mag_s;
-    wire signed [31:0] tilt_residual = tilt_inc ? tilt_mag_s : -tilt_mag_s;
+    wire signed [17:0] pan_residual  = pan_inc  ? pan_mag_s  : -pan_mag_s;
+    wire signed [17:0] tilt_residual = tilt_inc ? tilt_mag_s : -tilt_mag_s;
+
+    wire signed [17:0] pan_offset_s = runtime_cal_en ?
+        {{2{runtime_pan_offset_pos[15]}}, runtime_pan_offset_pos} : PAN_OFFSET_POS;
+    wire signed [17:0] tilt_offset_s = runtime_cal_en ?
+        {{2{runtime_tilt_offset_pos[15]}}, runtime_tilt_offset_pos} : TILT_OFFSET_POS;
 
     // camera pose를 반드시 더한다. error만으로 PT#2를 구하는 구현은 금지다.
-    wire signed [31:0] pan_target_raw =
-        $signed({1'b0, camera_pan_pos}) + pan_residual + PAN_OFFSET_POS;
-    wire signed [31:0] tilt_target_raw =
-        $signed({1'b0, camera_tilt_pos}) + tilt_residual + TILT_OFFSET_POS;
+    wire signed [17:0] pan_target_raw =
+        $signed({1'b0, camera_pan_pos}) + pan_residual + pan_offset_s;
+    wire signed [17:0] tilt_target_raw =
+        $signed({1'b0, camera_tilt_pos}) + tilt_residual + tilt_offset_s;
 
     function [7:0] clamp_pos;
-        input signed [31:0] v;
+        input signed [17:0] v;
         input        [7:0]  lo;
         input        [7:0]  hi;
         begin
@@ -119,8 +132,8 @@ module laser_head_controller #(
         end
     endfunction
 
-    assign laser_pan_target  = clamp_pos(pan_target_raw,  PAN2_MIN_U,  PAN2_MAX_U);
-    assign laser_tilt_target = clamp_pos(tilt_target_raw, TILT2_MIN_U, TILT2_MAX_U);
+    wire [7:0] laser_pan_target_calc  = clamp_pos(pan_target_raw,  PAN2_MIN_U,  PAN2_MAX_U);
+    wire [7:0] laser_tilt_target_calc = clamp_pos(tilt_target_raw, TILT2_MIN_U, TILT2_MAX_U);
 
     function [7:0] slew_to;
         input [7:0] current;
@@ -149,9 +162,20 @@ module laser_head_controller #(
         if (!rst_n) begin
             laser_pan_pos  <= POS_NEUTRAL[7:0];
             laser_tilt_pos <= POS_NEUTRAL[7:0];
-        end else if (frame_tick && target_valid) begin
-            laser_pan_pos  <= slew_to(laser_pan_pos,  laser_pan_target);
-            laser_tilt_pos <= slew_to(laser_tilt_pos, laser_tilt_target);
+            laser_pan_target  <= POS_NEUTRAL[7:0];
+            laser_tilt_target <= POS_NEUTRAL[7:0];
+        end else begin
+            // 새 NPU 결과가 나온 시점의 PT#1 자세 + 화면 잔차를 절대 목표로 고정한다.
+            // 이 Register가 긴 좌표 변환 경로와 Interlock을 분리한다.
+            if (target_update && target_valid) begin
+                laser_pan_target  <= laser_pan_target_calc;
+                laser_tilt_target <= laser_tilt_target_calc;
+            end
+
+            if (frame_tick && target_valid) begin
+                laser_pan_pos  <= slew_to(laser_pan_pos,  laser_pan_target);
+                laser_tilt_pos <= slew_to(laser_tilt_pos, laser_tilt_target);
+            end
         end
         // Target Lost에서는 현재 위치 Hold. Laser 출력은 Interlock이 즉시 차단한다.
     end

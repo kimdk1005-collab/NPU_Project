@@ -1,7 +1,7 @@
 # D4 체크리스트 — 담당 C
 
 > **문서 등급** — SPEC §1 기준 4순위 개인 작업 메모.
-> **D4 목표** (TEAM_ROLE_PLAN_v1.3 §9) — Event Tensor 단위 TB + Tracking Controller
+> **D4 목표** (`TEAM_ROLE_PLAN.md`의 당시 D4 계획) — Event Tensor 단위 TB + Tracking Controller
 > **날짜** 2026-08-21
 
 ## 완료 판정

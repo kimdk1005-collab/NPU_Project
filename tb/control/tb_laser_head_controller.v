@@ -9,11 +9,15 @@ module tb_laser_head_controller;
     reg        clk = 1'b0;
     reg        rst_n = 1'b0;
     reg        frame_tick = 1'b0;
+    reg        target_update = 1'b0;
     reg        target_valid = 1'b0;
     reg  [5:0] target_x = 6'd32;
     reg  [5:0] target_y = 6'd32;
     reg  [7:0] camera_pan_pos = 8'd128;
     reg  [7:0] camera_tilt_pos = 8'd128;
+    reg        runtime_cal_en = 1'b0;
+    reg signed [15:0] runtime_pan_offset_pos = 16'sd0;
+    reg signed [15:0] runtime_tilt_offset_pos = 16'sd0;
 
     wire [7:0] laser_pan_pos, laser_tilt_pos;
     wire [7:0] laser_pan_target, laser_tilt_target;
@@ -30,8 +34,11 @@ module tb_laser_head_controller;
         .SLEW_LIMIT(4)
     ) dut (
         .clk(clk), .rst_n(rst_n), .frame_tick(frame_tick),
+        .target_update(target_update),
         .target_valid(target_valid), .target_x(target_x), .target_y(target_y),
         .camera_pan_pos(camera_pan_pos), .camera_tilt_pos(camera_tilt_pos),
+        .runtime_cal_en(1'b0),
+        .runtime_pan_offset_pos(16'sd0), .runtime_tilt_offset_pos(16'sd0),
         .laser_pan_pos(laser_pan_pos), .laser_tilt_pos(laser_tilt_pos),
         .laser_pan_target(laser_pan_target), .laser_tilt_target(laser_tilt_target),
         .aim_ready(aim_ready)
@@ -46,8 +53,12 @@ module tb_laser_head_controller;
         .SLEW_LIMIT(127)
     ) dut_cal (
         .clk(clk), .rst_n(rst_n), .frame_tick(frame_tick),
+        .target_update(target_update),
         .target_valid(target_valid), .target_x(target_x), .target_y(target_y),
         .camera_pan_pos(camera_pan_pos), .camera_tilt_pos(camera_tilt_pos),
+        .runtime_cal_en(runtime_cal_en),
+        .runtime_pan_offset_pos(runtime_pan_offset_pos),
+        .runtime_tilt_offset_pos(runtime_tilt_offset_pos),
         .laser_pan_pos(cal_pan_pos), .laser_tilt_pos(cal_tilt_pos),
         .laser_pan_target(cal_pan_target), .laser_tilt_target(cal_tilt_target),
         .aim_ready(cal_aim_ready)
@@ -72,6 +83,14 @@ module tb_laser_head_controller;
         end
     endtask
 
+    task pulse_update;
+        begin
+            @(negedge clk); target_update = 1'b1;
+            @(negedge clk); target_update = 1'b0;
+            @(negedge clk);
+        end
+    endtask
+
     initial begin
         $display("=== tb_laser_head_controller : SPEC v1.5 §15.2 ===");
 
@@ -89,7 +108,7 @@ module tb_laser_head_controller;
         camera_tilt_pos = 8'd120;
         target_x = 6'd44;
         target_y = 6'd20;
-        #1;
+        pulse_update;
         check_int("T2 absolute PAN target = camera + residual", laser_pan_target, 152);
         check_int("T2 absolute TILT target = camera + residual", laser_tilt_target, 108);
         check_int("T2 before slew -> aim not ready", aim_ready, 0);
@@ -114,21 +133,33 @@ module tb_laser_head_controller;
         check_int("T5 calibrated TILT command", cal_tilt_pos, 133);
         check_int("T5 calibrated aim_ready", cal_aim_ready, 1);
 
+        // LASER_CAL(0x54) 런타임 signed offset이 parameter보다 우선한다.
+        runtime_cal_en = 1'b1;
+        runtime_pan_offset_pos = -16'sd10;
+        runtime_tilt_offset_pos = 16'sd7;
+        pulse_update;
+        check_int("T6 runtime PAN offset", cal_pan_target, 124);
+        check_int("T6 runtime TILT offset", cal_tilt_target, 145);
+        tick;
+        check_int("T6 runtime PAN command", cal_pan_pos, 124);
+        check_int("T6 runtime TILT command", cal_tilt_pos, 145);
+        runtime_cal_en = 1'b0;
+
         // PT#2 SAFE_LIMIT2 최종 Clamp
         camera_pan_pos = 8'd220;
         camera_tilt_pos = 8'd36;
         target_x = 6'd60;
         target_y = 6'd4;
-        #1;
-        check_int("T6 PAN2 upper clamp", laser_pan_target, 224);
-        check_int("T6 TILT2 lower clamp", laser_tilt_target, 32);
+        pulse_update;
+        check_int("T7 PAN2 upper clamp", laser_pan_target, 224);
+        check_int("T7 TILT2 lower clamp", laser_tilt_target, 32);
 
         // Target Lost에서는 위치를 유지한다.
         target_valid = 1'b0;
         tick;
-        check_int("T7 invalid -> PAN hold", laser_pan_pos, 152);
-        check_int("T7 invalid -> TILT hold", laser_tilt_pos, 108);
-        check_int("T7 invalid -> aim false", aim_ready, 0);
+        check_int("T8 invalid -> PAN hold", laser_pan_pos, 152);
+        check_int("T8 invalid -> TILT hold", laser_tilt_pos, 108);
+        check_int("T8 invalid -> aim false", aim_ready, 0);
 
         $display("=== 결과 : %0s (errors=%0d) ===",
                  (errors == 0) ? "ALL PASS" : "FAIL", errors);

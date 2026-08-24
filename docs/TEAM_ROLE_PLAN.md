@@ -1,8 +1,8 @@
 # 이벤트 카메라 기반 FPGA NPU 팬틸트 추적 시스템
-## 3인 팀 역할분담 및 개발 운영안 v1.3
+## 3인 팀 역할분담 및 개발 운영안 v1.6
 
 > **기준 문서**  
-> `NPU_EVENT_CAMERA_NPU_TURRET_DEVELOPMENT_PLAN_v1.1_LEARNING_ALIGNED`
+> `NPU_DEVELOPMENT_PLAN.md`
 >
 > **팀 구성 전제**
 > - A: 사용자 본인 / 팀 내 가장 높은 난도의 작업 담당
@@ -159,7 +159,7 @@ B는 **AI 모델 및 NPU 검증 기준 생성 담당자**다.
 
 - Event 데이터 정리
 - 64×64×2 Tensor Dataset 생성
-- 자동 Label 생성
+- 실제 추적 표적 중심의 자동 Label 생성
 - Tiny CNN 학습
 - FP32 정확도 측정
 - INT8 Quantization
@@ -174,6 +174,21 @@ B는 **AI 모델 및 NPU 검증 기준 생성 담당자**다.
 - PS CPU INT8 Baseline
 - CPU Latency 측정 스크립트
 - A와 RTL Layer-by-Layer 비교
+
+### Dataset / Label 책임 경계 — 2026-08-22 운영 정정
+
+```text
+Dataset 입력  = 실제 추적 표적의 움직임이 포함된 Event Tensor
+정답 Label    = 같은 시점의 실제 표적 중심 좌표
+Laser         = NPU 추론 이후 동작하는 출력 장치
+```
+
+B는 레이저 점을 CNN의 학습 Target으로 사용하지 않는다. 기존 `ai/dataset.py`의
+Red Laser 검출/Preview는 최종 자동 Label 방식이 아니며, 실제 표적용
+Color/Blob/Teacher 검출기 또는 수동 보정 방식으로 교체한다.
+
+단일 지정 표적 → 8×8 Heatmap → `target_x/y` 범위는 유지하므로 A의 NPU RTL과
+C의 Tracking 인터페이스 변경은 없다.
 
 ## 4.2 주요 산출물
 
@@ -302,6 +317,7 @@ C는 **Event 입력부부터 실제 Pan/Tilt 제어까지 연결하는 실시간
 - Laser Emergency OFF
 - Safe Zone
 - Laser Offset 값 측정
+- 레이저 영상검출은 구현하지 않음 (레이저는 출력 장치)
 - Pan/Tilt 기구 조립
 - Camera + Laser 고정
 - Target Board 제작
@@ -381,6 +397,9 @@ Tilt도 동일하게 검증한다.
 ### Laser Test
 
 초기에는 실제 Laser 대신 LED를 사용한다.
+
+이 테스트는 NPU의 `target_x/y`와 Lock 조건에 따라 출력이 켜지는지를 확인하는
+것이며, 카메라 영상에서 레이저 점을 검출하는 테스트가 아니다.
 
 ```text
 TARGET_VALID = 1
@@ -874,7 +893,103 @@ Event ────────→ A ────────→ Target X/Y
 
 ---
 
-**문서 버전:** v1.3 Team Role Allocation — 상/중/중 조정본  
+# 17. 진척 현황 (2026-08-22 갱신, 역할 분담 자체는 변경 없음)
+
+역할 분담 내용은 v1.1 그대로다. 아래는 상태 기록일 뿐이다.
+**v1.4 갱신: A Phase 2 (AXI / SoC / Bitstream) 완료.**
+**v1.5 갱신: 기구가 Pan/Tilt 2 헤드로 변경 — C 작업량 증가. 역할 경계는 그대로.**
+**v1.6 갱신: A Phase 3 (PS 소프트웨어 + C 통합 사전검증) 완료.**
+**2026-08-22 운영 정정: 레이저 기반 Label을 실제 표적 중심 Label로 교체. A/C 인터페이스 변경 없음.**
+
+## A — §3.2 산출물 진척
+
+```text
+[x] npu_pe.v            [x] npu_conv_dense.v    [x] npu_requant.v
+[x] npu_datapath.v      [x] npu_controller.v    [x] argmax_decoder.v
+[x] npu_axi.v           [x] top_system.v            <- Phase 2
+
+[x] tb_npu_pe.v         [x] tb_npu_conv_dense.v
+[x] tb_npu_requant.v    [x] tb_npu_full.v
+[x] tb_npu_axi.v        [x] tb_top_system.v         <- Phase 2
+
+[x] Vivado Block Design (PS7 + SmartConnect + top_system)
+[x] results/npu_soc.bit   [x] results/npu_soc.xsa
+
+Phase 3 (PS 소프트웨어 / 보드 불필요)
+[x] sw/npu_regs.h  [x] sw/npu_driver.c  [x] sw/npu_test.c
+[x] sw/sim/npu_mock.c + test_driver.c   -> 호스트 45 check PASS
+[x] tools/gen_test_tensor_c.py          -> sw/test_tensor.h
+[x] sw/build_vitis.tcl                  -> results/npu_test.elf
+[x] rtl/integration/c_module_stub.v     -> C 통합 사전측정 (자리표시자)
+```
+
+§11 A 완료 기준 대비:
+
+```text
+[x] Dense NPU Full Inference 성공
+[x] Golden Model과 결과 일치        (임시 weight 기준, B 실물 대기)
+[x] Target (x, y) 출력
+[x] Cycle Counter 정상               125,845 cycle = 1.258 ms @100MHz
+[x] AXI 제어 가능                    tb_npu_axi 74 check / tb_top_system 17 check PASS
+[x] Vivado Timing 통과               전체 시스템 배치배선 WNS +0.782 ns, Fmax 107.7 MHz
+[x] Bitstream 생성                   results/npu_soc.bit (+ npu_soc.xsa)
+[x] PS 소프트웨어                    results/npu_test.elf, 호스트 45 check PASS
+[x] C 통합 타이밍 사전확인            자리표시자 포함 WNS +1.121 ns (100MHz MET)
+[ ] 실제 보드 동작                    <- 보드가 있어야 함 (Phase 4)
+```
+
+A 가 지금 막힌 곳은 **보드 실동작**과 **C 모듈**뿐이다. 그 외 A 단독으로
+할 수 있는 것은 다 했다 (Phase 3 까지).
+상세: `docs/PHASE2_SOC_INTEGRATION_REPORT.md`, `docs/PHASE3_PS_SOFTWARE_REPORT.md`
+
+## B — 진척
+
+```text
+[~] Event Tensor 생성/저장 기반             ai/dataset.py (Webcam Fallback, 재사용 가능)
+[ ] 실제 추적 표적 중심 자동 Label          Red Laser 의존 제거 필요
+[ ] 실제 표적 Dataset 수집/분포 검증         기존 레이저 점 Sample은 최종 학습에서 제외
+[x] Conv 경계 규칙 Freeze 요청 -> A 승인 완료
+[ ] Tiny CNN 학습 / FP32 정확도
+[ ] INT8 Quantization / Weight 변환
+[ ] Python Integer Golden Model
+[ ] Test Vector 생성
+[ ] CPU Baseline
+```
+
+## C — 진척
+
+```text
+[ ] 전 항목 미착수 보고
+    A 가 요구 규격 전달 완료: handoff/C_TO_A_DELIVERY_SPEC.md
+
+v1.5 로 늘어난 C 작업 (Pan/Tilt 2 헤드)
+[ ] Servo PWM 채널 2 -> 4 (PAN1/TILT1/PAN2/TILT2)
+[ ] PT#2 좌표 변환   theta_pan1 + k_x*(target_x-32) + LASER_OFFSET
+                     (공통 지침 v1.5 §15.2 / 계획서 v1.4 §16.2)
+[ ] LASER_OFFSET_PAN / TILT 실측 (고정거리 2m, 5지점)
+[ ] SAFE_LIMIT2 적용 (필수 — 헤드 분리로 안전 자동보장 사라짐)
+[ ] 서보 4채널 전원 용량 확인
+
+NPU / RTL(A) 쪽 작업량 증가는 AXI Register 4개뿐. 이미 구현·검증 완료.
+```
+
+## §8 Interface Freeze 진행
+
+```text
+B -> A : Weight Layout / Quantization / Label Mapping / Conv 경계 규칙  -> 확정
+A -> C : TARGET_VALID / RESULT_X / RESULT_Y / RESULT_SCORE             -> 확정 (npu_core 포트)
+A -> C : AXI Register Bit Field / Base 0x4000_0000 (CR#002 rev.2)      -> A 제안, C 승인 대기
+A -> C : PT#2 좌표 변환식 (공통지침 v1.5 §15.2)                        -> A 제안, C 승인 대기
+C -> A : Event Accumulator (evt_we/addr/data) 구동                     -> 미착수 (A 쪽 포트/mux 는 준비 완료)
+C -> A : PAN PWM / TILT PWM / LOCK / LASER ENABLE                      -> 미착수
+```
+
+상세: 공통 지침 v1.5 §21.4
+
+---
+
+**문서 버전:** v1.6 Team Role Allocation — 상/중/중 조정본
 **기준:** v1.1 Learning-Aligned Revision  
 **인원:** 3명  
+**진척 기록 갱신:** 2026-08-22 (§17 — A Phase 3 완료 + Dataset/Label 운영 정정. 역할 경계 변경 없음)
 **역할 난이도:** A 상 / B 중 / C 중
