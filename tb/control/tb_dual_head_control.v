@@ -45,6 +45,16 @@ module tb_dual_head_control;
         .target_update(target_update), .target_valid(target_valid),
         .target_x(target_x), .target_y(target_y), .target_score(target_score),
         .laser_arm(laser_arm), .emergency_stop(emergency_stop),
+        .manual_override(1'b0), .manual_aim_ready(1'b0),
+        .manual_camera_pan_pos(8'd0), .manual_camera_tilt_pos(8'd0),
+        .manual_laser_pan_pos(8'd0), .manual_laser_tilt_pos(8'd0),
+        .runtime_limits_en(1'b0),
+        .runtime_pan1_min(8'd0), .runtime_pan1_max(8'd0),
+        .runtime_tilt1_min(8'd0), .runtime_tilt1_max(8'd0),
+        .runtime_pan2_min(8'd0), .runtime_pan2_max(8'd0),
+        .runtime_tilt2_min(8'd0), .runtime_tilt2_max(8'd0),
+        .runtime_cal_en(1'b0),
+        .runtime_pan_offset_pos(16'sd0), .runtime_tilt_offset_pos(16'sd0),
         .camera_pan_pwm(camera_pan_pwm), .camera_tilt_pwm(camera_tilt_pwm),
         .laser_pan_pwm(laser_pan_pwm), .laser_tilt_pwm(laser_tilt_pwm),
         .laser_led(laser_led), .laser_enable_safe(laser_enable_safe),
@@ -55,7 +65,8 @@ module tb_dual_head_control;
         .laser_aim_ready(laser_aim_ready),
         .laser_lock_qualified(laser_lock_qualified),
         .laser_target_fresh(laser_target_fresh),
-        .laser_timeout_fault(laser_timeout_fault)
+        .laser_timeout_fault(laser_timeout_fault),
+        .runtime_limits_active(), .runtime_limit_fault()
     );
 
     function integer expect_us(input integer p);
@@ -93,7 +104,8 @@ module tb_dual_head_control;
         integer i;
         begin
             for (i = 0; i < n; i = i + 1) @(posedge frame_tick);
-            repeat (2) @(negedge clk);
+            // frame_tick -> Tracking register -> 최종 Servo command register 두 단계 반영
+            repeat (4) @(negedge clk);
         end
     endtask
 
@@ -138,16 +150,19 @@ module tb_dual_head_control;
         // Lock 밖 표적으로 PT#1이 한 step 움직이고, PT#2 목표가 그 자세를 포함하는지 확인.
         target_x = 6'd60;
         target_y = 6'd4;
+        pulse_update;
         wait_frames(1);
         check_int("T1 camera PAN tracks +1", camera_pan_pos, 129);
         check_int("T1 camera TILT tracks -1", camera_tilt_pos, 127);
-        check_int("T1 PT2 PAN target includes camera pose", laser_pan_target, 157);
-        check_int("T1 PT2 TILT target includes camera pose", laser_tilt_target, 99);
+        // target_update 시점의 PT#1 자세(128/128)를 기준으로 절대 목표를 고정한다.
+        check_int("T1 PT2 PAN target includes camera pose", laser_pan_target, 156);
+        check_int("T1 PT2 TILT target includes camera pose", laser_tilt_target, 100);
         check_int("T1 outside Lock Zone -> LED OFF", laser_led, 0);
 
         // 중앙 양자화 범위로 들어오면 PT#1은 Hold, PT#2는 잔차까지 조준한다.
         target_x = 6'd36;
         target_y = 6'd28;
+        pulse_update;
         wait_frames(3);
         check_int("T2 camera PAN dead-zone hold", camera_pan_pos, 129);
         check_int("T2 camera TILT dead-zone hold", camera_tilt_pos, 127);
