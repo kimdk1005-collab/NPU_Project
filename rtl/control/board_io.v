@@ -2,7 +2,7 @@
 // board_io.v -- Zybo Z7-20 서보 브링업 Top  (순수 PL, PS 미사용)
 //
 //  담당 : C   (SPEC §5.3 이 rtl/control/ 아래 board_io.v 를 C 소유로 명시)
-//  상위 권한 : docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md
+//  상위 권한 : docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md
 //
 //  목적
 //    MG996R 이 실제로 도는지 확인하고, 물리 가동 범위를 실측해

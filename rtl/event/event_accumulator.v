@@ -2,7 +2,7 @@
 // event_accumulator.v -- Event Stream -> 64x64x2 Tensor -> NPU 전송
 //
 //  담당 : C   (SPEC §5.3 이 rtl/event/event_accumulator.v 를 C 소유로 명시)
-//  상위 권한 : docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md
+//  상위 권한 : docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md
 //  규격 : SPEC §6.1  Event 입력 형식 (변경 금지)
 //         SPEC §7.1  Tensor Shape 64x64x2, Ch0 = Positive / Ch1 = Negative
 //         SPEC §9.1  Event Count 0 ~ 127 포화 (Wrap 금지)

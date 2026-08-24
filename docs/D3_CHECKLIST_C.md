@@ -1,7 +1,7 @@
 # D3 체크리스트 — 담당 C
 
 > **문서 등급** — SPEC §1 기준 4순위 개인 작업 메모.
-> **D3 목표** (TEAM_ROLE_PLAN_v1.3 §9) — Event Accumulator + Pan/Tilt 단독 테스트
+> **D3 목표** (`TEAM_ROLE_PLAN.md`의 당시 D3 계획) — Event Accumulator + Pan/Tilt 단독 테스트
 > **날짜** 2026-08-21
 
 ## 완료 판정

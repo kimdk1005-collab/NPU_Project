@@ -2,7 +2,7 @@
 // tracking_controller.v -- NPU Target 좌표 -> PAN/TILT Servo Position
 //
 //  담당 : C
-//  상위 권한 : docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md
+//  상위 권한 : docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md
 //  규격 : SPEC §14  A -> C Target Interface
 //         SPEC §15  Center=(32,32), P Control + Dead Zone
 //         SPEC §16  target_valid=0 이면 현재 위치 Hold
