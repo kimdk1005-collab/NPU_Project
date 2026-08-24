@@ -2,8 +2,11 @@
 
 > 기준: `TEAM_COMMON_AI_INTEGRATION_SPEC.md` v1.5 §26
 > 상태: **Dense INT8 NPU Core + AXI4-Lite + Block Design + Bitstream 완료.**
->       Golden bit-exact 검증 완료. 남은 것은 **보드 실동작(Phase 3)** 과 **C 모듈**.
+>       Golden bit-exact 검증 완료. C 모듈 전달도 완료됐으며 남은 것은
+>       **A 산출물의 현재 저장소 합류, 보드 실동작, A/C 전체 통합**이다.
 > 날짜: 2026-08-21 (Phase 2 반영)
+> 상태 정정: 2026-08-24 — 이 문서는 A 산출물 Handoff 기록이다. 현재 체크아웃에
+> 실제 A RTL/PS/결과물이 있는지는 `PROJECT_STATUS.md`를 최종 기준으로 판단한다.
 
 ---
 
@@ -92,10 +95,10 @@ Dead Zone = C 는 abs(error) <= 4 를 최소 Center/Lock 범위로 사용 (spec 
 Base     : 0x4000_0000 , Range 0x1000 (4 KB)
 경로     : PS7 M_AXI_GP0 -> AXI SmartConnect -> top_system.s_axi
 검증     : tb_npu_axi 84 check PASS / tb_top_system 17 check PASS
-bit field: 공통 지침 v1.5 §20.1  (C 승인 대기 — 0x20~0x34 / 0x48~0x54 방향)
+bit field: 공통 지침 v1.5 §20.1  (C 기본 계약 수용·구현 완료, A Phase 3 확장 회신 대기)
 Pan/Tilt : 2 헤드. PT#1 카메라 0x20/0x24/0x2C , PT#2 레이저 0x48/0x4C/0x50/0x54
            PT#2 각도는 공통 지침 §15.2 좌표 변환식 필수 (C 담당)
-근거서   : docs/freeze/D3_FREEZE_REQUEST_A_002.md
+근거서   : docs/D3_FREEZE_REQUEST_A_002.md
 ```
 
 **PS 가 반드시 지킬 것 하나:** `STATUS.DONE`(bit0, sticky) 을 폴링해라.
@@ -241,5 +244,5 @@ cd build && vivado -mode batch -source ../sim/run_synth.tcl
 | 1 | B | `nn.Conv2d(padding=?)` = 1 확인 |
 | 2 | B | 표적 없는 프레임의 Heatmap max score 분포 → `score_th` 확정 |
 | 3 | B | 실제 `conv{1..4}_weight_int8.mem`, `requant_M.mem`, layer별 golden hex |
-| 4 | C | `ext_we/ext_addr/ext_data` 방식 수용 여부 |
-| 5 | B/C | `docs/freeze/D3_FREEZE_REQUEST_A_001.md` 승인 |
+| 4 | C | `ext_we/ext_addr/ext_data` 수용·구현 완료 (`C_TO_A_REPLY_001.md`) |
+| 5 | B/C | C 승인 완료, B 확인 대기 (`docs/D3_FREEZE_REQUEST_A_001.md`) |

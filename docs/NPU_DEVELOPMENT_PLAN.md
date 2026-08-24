@@ -26,15 +26,14 @@ v1.2는 A의 Phase 1(Dense NPU Core 구현 + Golden 검증) 완료로 확정된 
 | FPGA Resource | 미측정 | **npu_core LUT 573 / FF 279 / BRAM 8 / DSP 12, 전체 시스템 LUT 1441** (배치배선 후). §18.1 |
 | Timing | 미측정 | **100MHz MET. 전체 시스템 배치배선 후 WNS +0.782 ns, Fmax 107.7 MHz**. §18.1 |
 | Conv 경계 규칙 | 미기재 | **Padding=1 / Cross-Correlation Freeze 완료** (공통스펙 v1.3 §8.1) |
-| Tensor Memory Order | 미기재 | **CHW 제안, 승인 대기** (공통스펙 v1.3 §7.4) |
+| Tensor Memory Order | 미기재 | **CHW — C 승인 완료, B 확인 대기** (공통스펙 §7.4) |
 | Golden 검증 | D3 Gate 예정 | **Conv1~4 + Argmax 전수 bit-exact PASS** (임시 weight 기준) |
 | 신규 위험 | — | ~~Zybo board file 미설치~~ → **오기록. 이미 설치돼 있음, 해소.** §17.3 |
-| AXI / SoC | 미착수 | **v1.3: Bitstream + XSA 생성 완료.** Register bit field §20.1(공통지침 v1.4), CR#002 C 승인 대기. `docs/PHASE2_SOC_INTEGRATION_REPORT.md` |
+| AXI / SoC | 미착수 | **v1.3: Bitstream + XSA 생성 완료.** Register 기본 계약은 C 수용·구현 완료, Phase 3 확장은 A 회신 대기. 상세 요약은 `docs/A_NPU_HANDOFF.md` |
 
 | 기구 구성 | Pan/Tilt 1개 (카메라+레이저 한 몸) | **v1.4: Pan/Tilt 2개로 분리.** PT#1 카메라 / PT#2 레이저. §16.1, §16.2 |
 
-Phase 1 상세: `docs/PHASE1_NPU_CORE_REPORT.md`
-Phase 2 상세: `docs/PHASE2_SOC_INTEGRATION_REPORT.md`
+A Phase 1~3 상세 요약: `docs/A_NPU_HANDOFF.md`
 
 ---
 
@@ -951,7 +950,7 @@ v1.3 까지는 카메라와 레이저를 **같은 Head** 에 고정하고
 
 ## 16.2 좌표 변환 — **v1.4 신규, 이 절이 이번 변경의 핵심**
 
-정본: 공통 지침 v1.5 §15.2 / `docs/freeze/D3_FREEZE_REQUEST_A_002.md` rev.2 §2.13.
+정본: 공통 지침 v1.5 §15.2 / `docs/D3_FREEZE_REQUEST_A_002.md` rev.2 §2.13.
 
 **카메라가 움직인다.** 그래서 `error_x = target_x - 32` 는
 카메라 각도에 **상대적인** 값이지 표적의 절대 방향이 아니다.
@@ -1114,7 +1113,7 @@ Vivado 가 실제로 읽는 **사용자 홈의 xhub 캐시**에 이미 들어 �
 
 `sim/run_bd.tcl` 이 이 경로를 자동으로 지정한다. **다운로드할 것 없다.**
 실제로 이 board file 로 Block Design 을 만들고 Bitstream 까지 뽑았다
-(`docs/PHASE2_SOC_INTEGRATION_REPORT.md` §6.2).
+(`docs/A_NPU_HANDOFF.md` 요약 기준, 해당 A 산출물은 현재 저장소 미병합).
 
 참고: board file 은 XDC 가 아니다. XDC 는 "내가 만든 포트를 어느 핀에 붙일지"를
 쓰는 텍스트 제약이고, board file 은 "이 보드에 뭐가 달려 있는지"를 Vivado 에게
@@ -1443,8 +1442,9 @@ B : Dataset 파이프라인(ai/dataset.py) 작성, Webcam Frame Difference 경�
     Conv 경계 규칙 Freeze 요청 -> A 승인 완료.
     남은 작업 = CNN 학습 / INT8 / Integer Golden / Test Vector 3종.
 
-C : 미착수 보고.
-    A 가 요구 규격(handoff/C_TO_A_DELIVERY_SPEC.md)을 전달한 상태.
+C : Event Adapter/Accumulator, 4축 Servo, PT#2 좌표 변환, Fail-Closed Interlock,
+    A Phase 3 연동 래퍼 구현 완료. 249 PASS와 100 MHz OOC 타이밍 확인.
+    남은 작업은 A 실제 RTL 통합, 카메라 Closed-loop, 2 m Offset 실측.
 ```
 
 **GATE A(D3)는 B의 Integer Golden Model 제출로만 최종 통과된다.**
@@ -1515,7 +1515,7 @@ Sparse/Zero-Skip 미구현
 | **Timing 미달** | D4 | **발생함 → 해소.** 조합 Requantize 20.6ns → 4단 파이프라인, MAC 곱셈/누산 분리, `npu_pe` DSP 강제. 전체 시스템 배치배선 후 WNS **+0.782ns** |
 | **Timing 여유 부족 (재발 위험)** | **D7** | **v1.2 의 2.7% → 현재 7.8% 로 해소.** 다만 C 모듈 추가 시 재발 가능하므로 모듈을 붙일 때마다 `sim/run_bd.tcl` 로 재측정. Fallback 유지: PS FCLK 50MHz (Latency 2.52ms, Window 대비 여전히 여유) |
 | ~~Zybo board file 미설치~~ | — | **오기록이었다. 해소.** `~/.Xilinx/.../xhub/board_store` 에 이미 존재하며 이 파일로 Bitstream 생성 완료 (§17.3) |
-| **C 모듈 미착수로 통합 지연** | **D7~D9** | `CTRL.INPUT_SRC=0` PS 경로로 보드 bring-up 을 먼저 끝낸다. C 가 붙으면 `INPUT_SRC=1` 로 전환만 하면 됨 (양쪽 다 TB 검증 완료) |
+| **A/C 전체 시스템 통합 지연** | **D7~D9** | C 래퍼는 완료됐다. A 실제 `top_system/npu_axi` 합류 후 `INPUT_SRC`, START MUX, 신규 RO 상태와 전체 타이밍을 검증한다. |
 | **Argmax 동점 처리 규칙 부재** | D6 | **발견·해소.** FIRST_MAX 규칙 명문화 (공통스펙 v1.3 §14.2). 동점 프레임에서만 좌표가 어긋나는 은닉형 불일치였음 |
 | Sparse/Zero-Skip 미학습·구조 복잡 | D12~D13 | 기본 일정에서 제외, Dense NPU 완성 후 선택 실험 |
 | Servo 진동/Overshoot | D10 | Dead Zone, P Gain 감소, Slew Limit |
@@ -1824,6 +1824,6 @@ Sparse/Zero-Skip이나 SNN을 위해 Dense NPU와 Closed-loop Tracking 완성도
 
 **문서 버전:** v1.4 — Pan/Tilt 2 헤드 구성 반영본 (2026-08-22 Dataset/Label 운영 정정 포함)
 **이전 버전:** v1.3 A Phase 1 + Phase 2 실측 반영본
-**상태:** Sparse·Zero-Skip 선택 확장 유지 / D3 Interface Freeze 진행 중 / A Phase 1+2 완료 / **Pan/Tilt 2 헤드 C 승인 대기**
+**상태:** Sparse·Zero-Skip 선택 확장 유지 / A Phase 1+2 완료 / **Pan/Tilt 2 헤드 C 수용·구현 완료, A 전체 통합 대기**
 **갱신일:** 2026-08-22
-**동반 문서:** 공통 지침 v1.5, 역할분담 v1.6, `docs/PHASE1_NPU_CORE_REPORT.md`, `docs/PHASE2_SOC_INTEGRATION_REPORT.md`, `docs/freeze/D3_FREEZE_REQUEST_A_002.md`
+**동반 문서:** 공통 지침 v1.5, 역할분담 v1.6, `docs/A_NPU_HANDOFF.md`, `docs/D3_FREEZE_REQUEST_A_002.md`

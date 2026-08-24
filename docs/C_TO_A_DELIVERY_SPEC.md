@@ -72,7 +72,7 @@ event_x  = 0 ~ 63
 event_y  = 0 ~ 63
 ```
 
-즉 CHW 순서다. 확정 근거: `docs/freeze/D3_FREEZE_REQUEST_A_001.md` 1번 항목.
+즉 CHW 순서다. 확정 근거: `docs/D3_FREEZE_REQUEST_A_001.md` 1번 항목.
 
 ### 2-3. 전송 프로토콜
 
@@ -227,7 +227,7 @@ Tracking Input Format / Servo PWM Requirement / Dead Zone
 Safe Limit / Target Lost Policy / Laser Interlock / Known Limitation
 ```
 
-`handoff/A_NPU_HANDOFF.md`를 형식 참고용으로 쓰면 된다.
+`docs/A_NPU_HANDOFF.md`를 형식 참고용으로 쓰면 된다.
 
 ---
 
@@ -260,15 +260,15 @@ c_deliver_v01.zip
 
 ## 7. C 체크리스트
 
-- [ ] `rtl/event/` 2파일, `rtl/control/` 3파일
-- [ ] 각 모듈 단위 TB 존재 + PASS
-- [ ] `ext_addr = (polarity<<12)|(y<<6)|x` 주소식 준수
-- [ ] Event Count 0~127 saturation
-- [ ] `npu_busy == 1`일 때 쓰기 안 함
-- [ ] Dead Zone >= 4
-- [ ] `target_valid = 0` 시 Hold + Laser OFF
-- [ ] `handoff/C_EVENT_CONTROL_HANDOFF.md`
-- [ ] `top_system.v` / `constraints/` / Block Design 안 건드림 (spec §5.4)
+- [x] `rtl/event/`, `rtl/control/` 구현 파일 전달
+- [x] 각 모듈 단위/통합 TB 존재 + 자동판정 249 PASS
+- [x] `ext_addr = (polarity<<12)|(y<<6)|x` 주소식 준수
+- [x] Event Count 0~127 saturation
+- [x] `npu_busy == 1`일 때 쓰기 안 함
+- [x] Dead Zone >= 4
+- [x] `target_valid = 0` 시 Hold + Laser OFF
+- [x] `handoff/C_EVENT_CONTROL_HANDOFF.md`
+- [x] A 소유 `top_system.v` / 통합 XDC / Block Design 미수정
 
 ---
 
@@ -276,21 +276,21 @@ c_deliver_v01.zip
 
 | # | 질문 | 상태 |
 |---|---|---|
-| 1 | `ext_we / ext_addr[12:0] / ext_data[7:0]` 직접 write 방식 수용 여부 | **회신 대기** |
-| 2 | `docs/freeze/D3_FREEZE_REQUEST_A_001.md` 승인 (특히 1번 CHW, 5번 ext 포트) | **회신 대기** |
-| 3 | Event Window 값 (5 ms / 10 ms) 결정됐는지 — spec §21 빈칸 | **회신 대기** |
-| 4 | Servo Command Format — spec §21 빈칸 | **회신 대기** |
-| 5 | `docs/freeze/D3_FREEZE_REQUEST_A_002.md` 승인 (AXI Register Bit Field) | **회신 대기** — §9 참조 |
-| 6 | `0x20`~`0x34` / `0x48`~`0x54` 방향 (RW+출력 / RO+입력) | **회신 대기** — §9.2 |
-| 7 | **PT#2 좌표 변환식 (§10.1) 동의 여부** | **회신 대기** — 제일 중요 |
-| 8 | Servo 4채널 PWM 핀 (어느 PMOD 쓸지) | **회신 대기** — A 가 XDC 에 추가 |
+| 1 | `ext_we / ext_addr[12:0] / ext_data[7:0]` 직접 write 방식 수용 여부 | **C 수용·구현 완료** — 회신 001 |
+| 2 | `docs/D3_FREEZE_REQUEST_A_001.md` 승인 (특히 1번 CHW, 5번 ext 포트) | **C 전 항목 수용 완료** — 회신 001, B 확인 별도 |
+| 3 | Event Window 값 (5 ms / 10 ms) 결정됐는지 — spec §21 빈칸 | **A/B 결정 대기** — C는 CR C-002에서 33.3 ms 제안 |
+| 4 | Servo Command Format — spec §21 빈칸 | **C 구현 완료 / A 승인 대기** — CR C-001 |
+| 5 | `docs/D3_FREEZE_REQUEST_A_002.md` 승인 (AXI Register Bit Field) | **C 기본 계약 수용·구현 완료** — 회신 002/003 |
+| 6 | `0x20`~`0x34` / `0x48`~`0x54` 방향 (RW+출력 / RO+입력) | **RW Manual Override 채택 / 신규 RO는 A 회신 대기** — 회신 003 |
+| 7 | **PT#2 좌표 변환식 (§10.1) 동의 여부** | **C 수용·구현 완료** — 회신 002 |
+| 8 | Servo 4채널 PWM 핀 (어느 PMOD 쓸지) | **C JD 배치 제안·실물 검증 완료 / A XDC 반영 대기** |
 
 ---
 
 ## 9. AXI Register — C 가 쓸 수 있는 것 (v1.4 §20.1 신규)
 
 A 가 `rtl/integration/npu_axi.v` 를 구현·검증했다.
-전체 표는 공통 지침 **v1.4 §20.1**, 근거서는 `docs/freeze/D3_FREEZE_REQUEST_A_002.md`.
+전체 표는 공통 지침 **v1.4 §20.1**, 근거서는 `docs/D3_FREEZE_REQUEST_A_002.md`.
 
 ```text
 Base = 0x4000_0000 , Range 4 KB
@@ -362,7 +362,7 @@ C 모듈이 오면 A 가 tie 를 지우고 실제로 연결한 뒤 `sim/run_bd.t
 
 ## 10. Pan/Tilt 2 헤드 — C 가 반드시 지킬 것 (신규)
 
-정본: 공통 지침 **v1.5 §15.2**, 근거서 `docs/freeze/D3_FREEZE_REQUEST_A_002.md` rev.2 §2.13.
+정본: 공통 지침 **v1.5 §15.2**, 근거서 `docs/D3_FREEZE_REQUEST_A_002.md` rev.2 §2.13.
 
 ```text
    PT#1                                 PT#2

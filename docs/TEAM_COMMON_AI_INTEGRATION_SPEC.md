@@ -425,10 +425,10 @@ A의 책임:
 
 ---
 
-## 7.3 물리적 전달 방식 — v1.3 A 제안 / **C 승인 대기**
+## 7.3 물리적 전달 방식 — **C 승인·구현 완료** (`C_TO_A_REPLY_001.md`)
 
 v1.2까지 TBD였다. A의 NPU Core 구현이 완료되어 A가 아래 방식을 제안한다.
-근거 문서: `docs/freeze/D3_FREEZE_REQUEST_A_001.md` 5번 항목.
+근거 문서: `docs/D3_FREEZE_REQUEST_A_001.md` 5번 항목.
 
 ```text
 방식 = Direct RTL Handshake (C가 NPU 입력 버퍼에 직접 write)
@@ -467,10 +467,10 @@ busy == 1 인 동안 ext_we 를 올리면 안 된다.
 
 ---
 
-## 7.4 Tensor Memory Order — v1.3 A 제안 / **B·C 승인 대기**
+## 7.4 Tensor Memory Order — **C 승인 완료 / B 확인 대기**
 
 v1.2 §21 체크리스트의 `Tensor Memory Order` 빈칸을 채운다.
-근거 문서: `docs/freeze/D3_FREEZE_REQUEST_A_001.md` 1번 항목.
+근거 문서: `docs/D3_FREEZE_REQUEST_A_001.md` 1번 항목.
 
 ```text
 TENSOR_MEMORY_ORDER = CHW
@@ -543,7 +543,7 @@ Bounding Box Regression 추가
 ## 8.1 Conv 경계 규칙 — D3 B↔A Freeze **완료 (v1.3 신규)**
 
 B의 `D3_B_to_A_CNN_Convolution_Freeze_Request.md` 를 A가 검토하여 **전 항목 승인**했다.
-승인 문서: `docs/freeze/D3_FREEZE_APPROVAL_A_TO_B_001.md`
+승인 문서: `docs/D3_FREEZE_APPROVAL_A_TO_B_001.md`
 
 ### Conv1 ~ Conv3
 
@@ -1183,9 +1183,9 @@ Trajectory Planner
 
 ---
 
-## 15.2 PT#2 (레이저 헤드) 좌표 변환 — v1.5 신규 / **C 승인 대기**
+## 15.2 PT#2 (레이저 헤드) 좌표 변환 — **C 승인·구현 완료**
 
-근거 문서: `docs/freeze/D3_FREEZE_REQUEST_A_002.md` rev.2 §2.13.
+근거 문서: `docs/D3_FREEZE_REQUEST_A_002.md` rev.2 §2.13.
 
 **카메라가 움직인다는 것이 핵심이다.**
 `error_x = target_x - 32` 는 **카메라 각도에 상대적인 값**이지
@@ -1242,7 +1242,7 @@ baseline <= 10 cm, 시연 거리 고정이면 **상수 오프셋으로 흡수된
 
 v1.2 는 `target_valid == 0` 일 때 C 의 동작만 규정하고 **무엇이 0 을 만드는지**가 없었다.
 생성 주체가 A 이므로 A 가 정의한다.
-근거 문서: `docs/freeze/D3_FREEZE_REQUEST_A_001.md` 4번 항목.
+근거 문서: `docs/D3_FREEZE_REQUEST_A_001.md` 4번 항목.
 
 ```text
 target_valid = (heatmap_max_score > SCORE_TH)
@@ -1534,12 +1534,12 @@ AI가 편의상 Register 순서를 재배치하지 않는다.
 
 ---
 
-## 20.1 Bit Field — v1.4 A 제안 / **C 승인 대기**
+## 20.1 Bit Field — **C 기본 계약 승인·구현 / A Phase 3 확장 회신 대기**
 
 v1.3 까지 "Bit field 는 D3에 확정한다"로 비어 있었다.
 A 가 Phase 2 에서 `rtl/integration/npu_axi.v` 를 구현하며 초안을 만들고
 **구현·검증을 마친 뒤** 승인 요청했다.
-근거 문서: **`docs/freeze/D3_FREEZE_REQUEST_A_002.md`** (전체 bit 표 + PS 코드 예시).
+근거 문서: **`docs/D3_FREEZE_REQUEST_A_002.md`** (전체 bit 표 + PS 코드 예시).
 
 ```text
 AXI Base Address = 0x4000_0000 , Range = 0x1000 (4 KB)
@@ -1623,23 +1623,23 @@ AXI Base Address = 0x4000_0000 , Range = 0x1000 (4 KB)
 [x] 8×8 → 64×64 Coordinate Mapping                          v1.2
 [x] Conv 경계 규칙 (Padding / Cross-Correlation / flip)     v1.3 §8.1  B요청 → A승인 완료
 
-[~] Tensor Memory Order — CHW                               v1.3 §7.4  A제안, B/C 승인 대기
-[~] Event Tensor Physical Transfer 방식 — Direct Handshake  v1.3 §7.3  A제안, C 승인 대기
-[~] NPU Input Buffer Interface — ext_we/addr/data           v1.3 §7.3  A제안, C 승인 대기
+[~] Tensor Memory Order — CHW                               v1.3 §7.4  C승인 완료, B 확인 대기
+[x] Event Tensor Physical Transfer 방식 — Direct Handshake  v1.3 §7.3  C승인·구현 완료
+[x] NPU Input Buffer Interface — ext_we/addr/data           v1.3 §7.3  C승인·구현 완료
 [~] Argmax Tie-Break Rule — FIRST_MAX                       v1.3 §14.2 A제안, B 승인 대기
 [~] target_valid 생성 조건 — score > SCORE_TH               v1.3 §16.1 A제안, B 승인 대기
 
-[~] Register Bit Fields — AXI Base 0x4000_0000              v1.5 §20.1 A제안, C 승인 대기
-[~] PT#2 레이저 헤드 좌표 변환 규칙                          v1.5 §15.2 A제안, C 승인 대기
+[~] Register Bit Fields — AXI Base 0x4000_0000              v1.5 §20.1 C기본 계약 구현, A확장 회신 대기
+[x] PT#2 레이저 헤드 좌표 변환 규칙                          v1.5 §15.2 C승인·구현 완료
 [ ] Event Camera 실제 모델                                  C 미정
 [ ] Event Camera → Zynq Data Path                           C 미정
-[ ] Servo Command Format (PT#1 / PT#2 **2세트**)             C 미정
+[~] Servo Command Format (PT#1 / PT#2 **2세트**)             C 구현 완료, A 승인 대기
 [ ] LASER_OFFSET_PAN / TILT 실측값 (§15.2)                  C 미정
-[ ] Event Window 값                                         C 미정
+[~] Event Window 값                                         C 33.3 ms 제안, A/B 결정 대기
 ```
 
 `[x]` 항목은 임의로 바꾸지 않는다.
-`[~]` 항목은 담당자 승인 회신이 오면 `[x]`로 올리고 v1.4 로 기록한다.
+`[~]` 항목은 남은 담당자 승인 회신이 오면 `[x]`로 올리고 `change_log.md`에 기록한다.
 
 ---
 
@@ -1750,7 +1750,7 @@ result_xy.txt               // Mapping Freeze 후 공식 출력
 ```
 
 Label Mapping 이 v1.2 §14.1 에서 Freeze 되었으므로 `result_xy.txt` 는 이제 공식 출력이다.
-형식은 `handoff/B_TO_A_DELIVERY_SPEC.md` §5-2 를 따른다.
+형식은 `docs/B_TO_A_DELIVERY_SPEC.md` §5-2 를 따른다.
 
 ---
 
@@ -1759,21 +1759,24 @@ Label Mapping 이 v1.2 §14.1 에서 Freeze 되었으므로 `result_xy.txt` 는 
 | 요청 문서 | 방향 | 내용 | A | B | C |
 |---|---|---|:-:|:-:|:-:|
 | `D3_B_to_A_CNN_Convolution_Freeze_Request.md` | B→A | Conv Padding / 경계 / Cross-Correlation | **승인** | 확인 대기 | 영향 없음 |
-| `D3_FREEZE_REQUEST_A_001.md` | A→B/C | CHW / Argmax tie / target_valid / ext 포트 | 승인 | **대기** | **대기** |
-| `D3_FREEZE_REQUEST_A_002.md` | A→C | AXI Register Bit Field / Base Address | 승인 | 참고 | **대기** |
+| `D3_FREEZE_REQUEST_A_001.md` | A→B/C | CHW / Argmax tie / target_valid / ext 포트 | 승인 | **대기** | **승인** |
+| `D3_FREEZE_REQUEST_A_002.md` | A→C | AXI Register Bit Field / Base Address / PT#2 | 승인 | 참고 | **기본 계약 승인·구현** |
 
 승인 회신 문서:
 
 ```text
-docs/freeze/D3_FREEZE_APPROVAL_A_TO_B_001.md      A -> B  전 항목 승인
+docs/D3_FREEZE_APPROVAL_A_TO_B_001.md      A -> B  전 항목 승인
+docs/C_TO_A_REPLY_001.md                   C -> A  A_001 전 항목 수용
+docs/C_TO_A_REPLY_002.md                   C -> A  PT#2 좌표식 / SAFE_LIMIT2 수용·구현
+docs/C_TO_A_REPLY_003.md                   C -> A  Phase 3 Register/START 통합 계약
 ```
 
 전달 규격 문서 (A 작성):
 
 ```text
-handoff/B_TO_A_DELIVERY_SPEC.md    B 산출물을 A 에게 넘기는 형식
-handoff/C_TO_A_DELIVERY_SPEC.md    C RTL 을 A 에게 넘기는 형식
-handoff/A_NPU_HANDOFF.md           A 산출물 인계 (a_npu_v01)
+docs/B_TO_A_DELIVERY_SPEC.md    B 산출물을 A 에게 넘기는 형식
+docs/C_TO_A_DELIVERY_SPEC.md    C RTL 을 A 에게 넘기는 형식
+docs/A_NPU_HANDOFF.md           A 산출물 인계 (a_npu_v01)
 docs/00_DOCUMENT_INDEX.md              문서 전달 인덱스
 ```
 
@@ -1895,7 +1898,7 @@ update
 ## A
 
 ```text
-handoff/A_NPU_HANDOFF.md
+docs/A_NPU_HANDOFF.md
 ```
 
 포함:
@@ -1917,7 +1920,7 @@ Timing Result
 ## B
 
 ```text
-handoff/B_MODEL_HANDOFF.md
+handoff/B_MODEL_HANDOFF.md   // B 산출물 제출 시 생성할 예정 경로
 ```
 
 포함:
@@ -2338,7 +2341,7 @@ Laser가 빠질 경우 LED Lock으로 대체한다.
 - [ ] `.hex` 가 CHW 순서인지 확인 — v1.3 §7.4
 - [ ] argmax 가 FIRST_MAX 인지 확인 — v1.3 §14.2
 
-> 상세 형식: `handoff/B_TO_A_DELIVERY_SPEC.md`
+> 상세 형식: `docs/B_TO_A_DELIVERY_SPEC.md`
 
 ## C → A
 
@@ -2350,7 +2353,7 @@ Laser가 빠질 경우 LED Lock으로 대체한다.
 - [ ] Event Count 0~127 saturation 확인
 - [ ] `busy == 1` 일 때 write 안 함
 
-> 상세 형식: `handoff/C_TO_A_DELIVERY_SPEC.md`
+> 상세 형식: `docs/C_TO_A_DELIVERY_SPEC.md`
 
 ## A → C
 
@@ -2496,14 +2499,14 @@ target_valid 생성 조건 (v1.3, B 승인 대기):
 target_valid = (heatmap_max_score > SCORE_TH)
 SCORE_TH = signed INT8, 기본값 0
 
-Tensor Memory Order (v1.3, B/C 승인 대기):
+Tensor Memory Order (v1.3, C 승인 완료 / B 확인 대기):
 CHW
 addr = (c << 2*log2(W)) + (y << log2(W)) + x
 Event Tensor addr = (polarity << 12) | (y << 6) | x
 PyTorch (C,H,W) 텐서는 flatten() 순서 그대로다.
 HWC (H,W,C) 배열은 np.transpose(t, (2,0,1)) 로 바꾼 뒤 덤프한다.
 
-C → A Event Tensor 전달 (v1.3, C 승인 대기):
+C → A Event Tensor 전달 (v1.3, C 승인·구현 완료):
 Direct RTL Handshake
 ext_we / ext_addr[12:0] / ext_data[7:0] / start / busy / done
 busy == 1 인 동안 ext_we 를 올리지 마라.
@@ -2518,7 +2521,7 @@ Timing @100MHz MET. Bitstream + XSA 생성 완료 (results/npu_soc.bit, results/
 Inference Latency = 125,845 cycle = 1.258 ms
 Event Tensor 전송 = 8192 cycle = 82 us (PS/AXI 경로는 약 16,400 cycle = 164 us)
 Conv1/2/3/4 + Argmax 전부 Python Integer Golden 과 bit-exact 검증 완료
-AXI Base 0x4000_0000 / 4 KB. Register bit field 는 §20.1 (C 승인 대기).
+AXI Base 0x4000_0000 / 4 KB. Register 기본 계약은 C 구현 완료, Phase 3 확장은 A 회신 대기.
 PS 는 STATUS.BUSY 가 아니라 STATUS.DONE(sticky) 을 폴링해야 한다.
 위 수치는 실측값이므로 다른 값을 만들어내지 마라.
 
@@ -2532,8 +2535,8 @@ PS 는 STATUS.BUSY 가 아니라 STATUS.DONE(sticky) 을 폴링해야 한다.
   PAN2_CMD = f(error_x) 로 짜면 레이저가 표적이 아니라 오차를 따라간다. 절대 금지.
   Laser ON 조건에 PT#2 SAFE_LIMIT2 검사가 반드시 들어간다 (§17).
 
-v1.5에서 '승인 대기'로 표시된 항목은 아직 Freeze 값이 아니다.
-해당 항목을 확정값처럼 코드에 박아 넣지 말고, 담당자 승인 후 반영하라.
+현재 `[~]`로 표시된 B 확인 및 A Phase 3 확장 항목은 아직 최종 Freeze가 아니다.
+C 승인 완료 항목은 §21 체크리스트와 `C_TO_A_REPLY_001~003`을 기준으로 구현한다.
 
 공유 규격을 임의 변경하지 마라.
 신호명을 임의 Rename하지 마라.
@@ -2645,10 +2648,10 @@ C가 만든 Tracking / Pan-Tilt
   - OIHW [O][I][KY][KX] 그대로 MAC 사용
   - Padding=1 은 §8 고정 출력 형상에서 유도되는 유일한 값임을 명시
 
-[A 제안 / 승인 대기]
-- Tensor Memory Order = CHW (§7.4 신규)                     B/C 승인 대기
-- Event Tensor Physical Transfer = Direct Handshake (§7.3)  C 승인 대기
-- NPU Input Buffer Interface = ext_we/addr/data (§7.3)      C 승인 대기
+[승인 현황]
+- Tensor Memory Order = CHW (§7.4 신규)                     C 승인 완료 / B 확인 대기
+- Event Tensor Physical Transfer = Direct Handshake (§7.3)  C 승인·구현 완료
+- NPU Input Buffer Interface = ext_we/addr/data (§7.3)      C 승인·구현 완료
 - Argmax Tie-Break = FIRST_MAX, strict '>' (§14.2 신규)     B 승인 대기
 - target_valid = score > SCORE_TH (§16.1 신규)              B 승인 대기
 
@@ -2666,11 +2669,12 @@ C가 만든 Tracking / Pan-Tilt
 ## v1.4 — 2026-08-21
 
 ```text
-[A 제안 / 승인 대기]
+[A Phase 2 제안 / 현재 C 기본 계약 구현 완료]
 - §20.1 신규: AXI Register Bit Field 전체 표 + Base Address 0x4000_0000
-  근거 문서 docs/freeze/D3_FREEZE_REQUEST_A_002.md
+  근거 문서 docs/D3_FREEZE_REQUEST_A_002.md
   0x20~0x34 (PAN/TILT/LASER/SAFE/TRACK_ERR) 는 C 소유이며
-  A 는 32-bit 저장소와 하드웨어 출력 포트만 제공한다. C 승인 대기.
+  A 는 32-bit 저장소와 하드웨어 출력 포트를 제공한다. C는 Manual Override로 채택했고
+  신규 RO 상태 Register와 START MUX는 A Phase 3 회신 대기다.
 - CTRL.INPUT_SRC 신규: 0 = PS가 AXI로 입력 적재 / 1 = C가 evt_* 로 직접 기록
 - 0x38 VERSION / 0x3C INBUF_ADDR / 0x40 INBUF_DATA / 0x44 SCRATCH 신규
   (§20 "새 Register 는 뒤 Offset 에 추가" 규칙 준수. 기존 Offset 무변경)
@@ -2699,7 +2703,7 @@ C가 만든 Tracking / Pan-Tilt
 ## v1.5 — 2026-08-21
 
 ```text
-[기구 변경 — A 제안 / C 승인 대기]
+[기구 변경 — C 승인·구현 완료]
 - Pan/Tilt 를 1개 -> 2개로 분리.
     PT#1 = 이벤트 카메라 헤드 (0x20 / 0x24 / 0x2C)  기존 Offset 의미 유지, 용도만 명확화
     PT#2 = 레이저 전용 헤드   (0x48 / 0x4C / 0x50 / 0x54) 신규
@@ -2747,5 +2751,5 @@ C가 만든 Tracking / Pan-Tilt
 
 > **읽는 순서 안내**
 > `[~]` 표시 항목은 아직 승인 대기 상태다.
-> 각 담당자는 `docs/freeze/D3_FREEZE_REQUEST_A_001.md` 의 승인란에 체크한 뒤 회신한다.
-> 전원 승인이 끝나면 A 가 해당 항목을 `[x]` 로 올려 v1.4 를 배포한다.
+> 각 담당자는 `docs/D3_FREEZE_REQUEST_A_001.md` 의 승인란에 체크한 뒤 회신한다.
+> 남은 담당자 승인이 끝나면 A가 해당 항목을 `[x]`로 올리고 정본과 변경 이력을 갱신한다.

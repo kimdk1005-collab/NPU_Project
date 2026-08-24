@@ -56,7 +56,7 @@
 영향 파일:
   rtl/control/servo_pwm.v            (C, 구현 완료)
   tb/control/tb_servo_pwm.v          (C, 구현 완료)
-  rtl/control/tracking_controller.v  (C, 미착수 - pos 폭에 의존)
+  rtl/control/tracking_controller.v  (요청 당시 미착수, 현재 구현·검증 완료)
   docs/interface_contract.md         (공유 - 승인 후 기록)
 
 영향 담당:

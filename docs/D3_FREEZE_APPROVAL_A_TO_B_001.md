@@ -1,6 +1,6 @@
 # [D3 FREEZE APPROVAL] A → B  #001
 
-> **대상 요청서:** `docs/freeze/D3_B_to_A_CNN_Convolution_Freeze_Request.md`
+> **대상 요청서:** `docs/D3_B_to_A_CNN_Convolution_Freeze_Request.md`
 > **판정:** **전 항목 승인 (수정 없음)**
 > **승인자:** A
 > **날짜:** 2026-08-21
@@ -175,7 +175,7 @@ B 확인: [ ] 확인
 ### 7-2. `.hex` 만들 때 필요한 변환 1줄
 
 `dataset.py`가 저장하는 배열은 HWC `(64,64,2)`다.
-A의 NPU는 **CHW** 순서를 쓴다 (`docs/freeze/D3_FREEZE_REQUEST_A_001` 1번 항목).
+A의 NPU는 **CHW** 순서를 쓴다 (`docs/D3_FREEZE_REQUEST_A_001` 1번 항목).
 
 `integer_golden.py`에서 `.hex`를 만들 때:
 
