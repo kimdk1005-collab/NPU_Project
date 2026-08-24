@@ -2,9 +2,9 @@
 
 > **문서 등급** — SPEC §1 기준 **4순위 (개인별 메모)**.
 > 공유 규격의 근거로 쓰지 않는다. 상위 권한은
-> `docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md` (이하 SPEC).
+> `docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md` (이하 SPEC).
 >
-> **D2 목표** (TEAM_ROLE_PLAN_v1.3 §9) — **Event Adapter 초안 + Servo PWM**
+> **D2 목표** (`TEAM_ROLE_PLAN.md`의 당시 D2 계획) — **Event Adapter 초안 + Servo PWM**
 > **날짜** 2026-08-21
 >
 > **종료 기록** — 이 문서는 D2 당시의 작업 일지라 아래 D/E 절의 대기 항목과

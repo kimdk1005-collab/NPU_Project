@@ -2,7 +2,7 @@
 // event_adapter.v -- Raw Event Source -> SPEC §6.1 내부 표준 Event Stream
 //
 //  담당 : C   (SPEC §5.3 이 rtl/event/event_adapter.v 를 C 소유로 명시)
-//  상위 권한 : docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md
+//  상위 권한 : docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md
 //  규격     : SPEC §6.1  출력 형식 (변경 금지)
 //             SPEC §7.2  C 책임 = Spatial Binning
 //             SPEC §14.1 Source -> 64x64 Mapping  ** v1.2 에서 Freeze 됨 **

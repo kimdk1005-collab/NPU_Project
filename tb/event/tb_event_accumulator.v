@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // tb_event_accumulator.v -- event_accumulator 단위 테스트
 //
-//  상위 권한 : docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md
+//  상위 권한 : docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md
 //  규격     : docs/D3_FREEZE_REQUEST_A_001.md / docs/C_TO_A_DELIVERY_SPEC.md §2
 //
 //  검증 방식

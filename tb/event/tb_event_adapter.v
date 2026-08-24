@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // tb_event_adapter.v -- event_adapter 단위 테스트
 //
-//  상위 권한 : docs/NPU_EVENT_CAMERA_TEAM_COMMON_AI_INTEGRATION_SPEC_v1.2.md
+//  상위 권한 : docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md
 //
 //  CLK_HZ = 1 MHz 로 축소한다. 1 cycle = 1 us 라 Window 길이를 눈으로 읽을 수 있다.
 //
