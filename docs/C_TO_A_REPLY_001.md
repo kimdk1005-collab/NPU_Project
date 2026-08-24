@@ -236,7 +236,7 @@ C 측 반영 (완료):
 영향 파일:
   tools/gen_event_vector.py       (C, 반영 완료)
   rtl/event/event_adapter.v       (C, 주석만)
-  rtl/event/event_accumulator.v   (C, 미착수 - 이 규정으로 구현)
+  rtl/event/event_accumulator.v   (회신 당시 미착수, 현재 구현·검증 완료)
   B 소유 dataset / integer_golden / test_vector
 
 영향 담당:

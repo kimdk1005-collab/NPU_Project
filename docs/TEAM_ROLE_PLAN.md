@@ -938,9 +938,9 @@ Phase 3 (PS 소프트웨어 / 보드 불필요)
 [ ] 실제 보드 동작                    <- 보드가 있어야 함 (Phase 4)
 ```
 
-A 가 지금 막힌 곳은 **보드 실동작**과 **C 모듈**뿐이다. 그 외 A 단독으로
-할 수 있는 것은 다 했다 (Phase 3 까지).
-상세: `docs/PHASE2_SOC_INTEGRATION_REPORT.md`, `docs/PHASE3_PS_SOFTWARE_REPORT.md`
+A가 지금 막힌 곳은 **보드 실동작**과 **A/C 실제 전체 시스템 통합**이다.
+C 모듈 전달은 완료됐고 A 소유 RTL/PS 산출물 합류가 필요하다.
+상세 요약: `docs/A_NPU_HANDOFF.md`, 현재 저장소 상태: `docs/PROJECT_STATUS.md`
 
 ## B — 진척
 
@@ -959,16 +959,16 @@ A 가 지금 막힌 곳은 **보드 실동작**과 **C 모듈**뿐이다. 그 �
 ## C — 진척
 
 ```text
-[ ] 전 항목 미착수 보고
-    A 가 요구 규격 전달 완료: handoff/C_TO_A_DELIVERY_SPEC.md
+[x] Event Adapter + Ping-Pong Accumulator + 8192-byte Tensor 전송
+[x] A Phase 3 포트용 c_event_control_top 전달
 
 v1.5 로 늘어난 C 작업 (Pan/Tilt 2 헤드)
-[ ] Servo PWM 채널 2 -> 4 (PAN1/TILT1/PAN2/TILT2)
-[ ] PT#2 좌표 변환   theta_pan1 + k_x*(target_x-32) + LASER_OFFSET
+[x] Servo PWM 채널 2 -> 4 (PAN1/TILT1/PAN2/TILT2)
+[x] PT#2 좌표 변환   theta_pan1 + k_x*(target_x-32) + LASER_OFFSET
                      (공통 지침 v1.5 §15.2 / 계획서 v1.4 §16.2)
 [ ] LASER_OFFSET_PAN / TILT 실측 (고정거리 2m, 5지점)
-[ ] SAFE_LIMIT2 적용 (필수 — 헤드 분리로 안전 자동보장 사라짐)
-[ ] 서보 4채널 전원 용량 확인
+[x] SAFE_LIMIT2 적용 (필수 — 헤드 분리로 안전 자동보장 사라짐)
+[~] 서보 4채널 외부전원 단기 구동 확인, 장시간/최종 부하 검증 대기
 
 NPU / RTL(A) 쪽 작업량 증가는 AXI Register 4개뿐. 이미 구현·검증 완료.
 ```
@@ -978,10 +978,10 @@ NPU / RTL(A) 쪽 작업량 증가는 AXI Register 4개뿐. 이미 구현·검증
 ```text
 B -> A : Weight Layout / Quantization / Label Mapping / Conv 경계 규칙  -> 확정
 A -> C : TARGET_VALID / RESULT_X / RESULT_Y / RESULT_SCORE             -> 확정 (npu_core 포트)
-A -> C : AXI Register Bit Field / Base 0x4000_0000 (CR#002 rev.2)      -> A 제안, C 승인 대기
-A -> C : PT#2 좌표 변환식 (공통지침 v1.5 §15.2)                        -> A 제안, C 승인 대기
-C -> A : Event Accumulator (evt_we/addr/data) 구동                     -> 미착수 (A 쪽 포트/mux 는 준비 완료)
-C -> A : PAN PWM / TILT PWM / LOCK / LASER ENABLE                      -> 미착수
+A -> C : AXI Register Bit Field / Base 0x4000_0000 (CR#002 rev.2)      -> C 기본 계약 수용·구현, A Phase 3 확장 회신 대기
+A -> C : PT#2 좌표 변환식 (공통지침 v1.5 §15.2)                        -> C 수용·구현 완료
+C -> A : Event Accumulator (evt_we/addr/data) 구동                     -> 완료, 8192 byte 전수 TB 통과
+C -> A : Camera/Laser 4축 PWM / LOCK / LASER ENABLE                    -> 완료, LED 우선 실물 검증 통과
 ```
 
 상세: 공통 지침 v1.5 §21.4

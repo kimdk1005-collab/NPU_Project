@@ -6,7 +6,8 @@
 > **대상 항목:** 공통 지침 §21 Freeze 목록의 `[ ] Register Bit Fields`
 > **승인 필요:** **C (필수)** — `0x20`~`0x34` 는 C 담당 영역이다.
 >              B 는 참고만 하면 된다 (B 산출물에 영향 없음).
-> **상태:** ⏳ **C 승인 대기**
+> **상태:** ✅ **C 기본 계약 수용·구현 완료** (`C_TO_A_REPLY_002/003`).
+> START MUX, 신규 RO 상태 Register, 통합 XDC는 A 회신 대기.
 > **개정:** **rev.2 (2026-08-21)** — Pan/Tilt **2호기(레이저 전용 헤드)** 반영.
 >          `0x48`~`0x54` 4개 추가 + §2.13 좌표 변환 규칙 신규.
 >          rev.1 은 배포 전이므로 §22 재요청 없이 이 문서를 갱신한다.
@@ -148,8 +149,9 @@ C 모듈이 없는 현재 빌드에서는 0 으로 묶여 있다.
 | `0x30` | `TRACK_ERR_X` | RW | 32-bit 저장소 + `top_system.track_err_x[31:0]` 출력 |
 | `0x34` | `TRACK_ERR_Y` | RW | 32-bit 저장소 + `top_system.track_err_y[31:0]` 출력 |
 
-**A 는 이 6개의 bit 의미를 정하지 않았다.** 일부러 그렇게 했다.
-Servo Command Format 도 Safe Limit 정책도 §21 에서 `[ ] C 미정` 이기 때문이다.
+**A는 이 6개의 bit 의미를 정하지 않고 C 회신을 요청했다.** 당시 Servo Command
+Format과 Safe Limit 정책은 미정이었으나, 현재는 `C_TO_A_REPLY_003.md`의 bit 배치와
+Manual Override/Runtime Limit 정책으로 C 구현이 완료됐다.
 
 **C 가 결정해서 알려 줘야 할 것:**
 
@@ -397,14 +399,14 @@ B 의 input_event.hex 덤프 순서와 PS 의 적재 순서가 동일하다.
 
 | 담당 | 항목 | 상태 | 일자 |
 |---|---|---|---|
-| C | §1 Base Address | ⏳ 대기 | |
-| C | §2.3/2.4 `EVENT_CFG` / `INPUT_STAT` | ⏳ 대기 | |
-| C | §2.8 `0x20`~`0x34` 방향 (PT#1 카메라 헤드) | ⏳ 대기 | |
-| C | §2.12 `0x48`~`0x54` (PT#2 레이저 헤드) | ⏳ 대기 | |
-| C | **§2.13 좌표 변환식** | ⏳ 대기 | |
-| C | §2.15 `SAFE_LIMIT2` 필수화 | ⏳ 대기 | |
-| C | §2.1 `CTRL.INPUT_SRC` | ⏳ 대기 | |
+| C | §1 Base Address | ✅ 구현 기준 수용 | 2026-08-24 |
+| C | §2.3/2.4 `EVENT_CFG` / `INPUT_STAT` | ✅ bit 배치 회신·구현 | 2026-08-24 |
+| C | §2.8 `0x20`~`0x34` 방향 (PT#1 카메라 헤드) | ✅ RW Manual Override 채택, RO 확장은 A 회신 대기 | 2026-08-24 |
+| C | §2.12 `0x48`~`0x54` (PT#2 레이저 헤드) | ✅ RW Manual Override/Limit/Cal 구현 | 2026-08-24 |
+| C | **§2.13 좌표 변환식** | ✅ 수용·구현 | 2026-08-22 |
+| C | §2.15 `SAFE_LIMIT2` 필수화 | ✅ 수용·구현 | 2026-08-22 |
+| C | §2.1 `CTRL.INPUT_SRC` | ✅ C 권장 MUX 회신, A 연결 결정 대기 | 2026-08-24 |
 | B | §5 참고 확인 | ⏳ 대기 | |
 
-승인되면 공통 지침 §21 의 `[ ] Register Bit Fields` 를 `[x]` 로 바꾸고
-§20 에 Bit field 표를 정식 편입한다.
+C 회신 근거는 `C_TO_A_REPLY_002.md`와 `C_TO_A_REPLY_003.md`다. A가 START MUX와
+신규 RO 상태 Register를 확정하면 공통 지침의 Phase 3 통합 항목을 최종 완료 처리한다.

@@ -1,9 +1,9 @@
 # Interface Contract — A(NPU RTL / SoC) 확정본 v0.4
 
-> **상태:** A 초안. B/C 확인 후 확정.
+> **상태:** C 기본 계약 수용·구현 완료. B 확인 항목과 A Phase 3 확장 회신 대기.
 > **기준 문서:** `TEAM_COMMON_AI_INTEGRATION_SPEC.md` **v1.5**
 > **작성 시점:** NPU Core RTL 구현 + Golden 일치 검증 완료 후
-> **갱신:** 2026-08-21 — v0.4 에서 Pan/Tilt 2 헤드(§11) 추가. 본 문서 내용은 공통 지침 v1.5 본문에 반영됨
+> **갱신:** 2026-08-24 — C 회신 001~003 승인 상태 반영. Interface 값 변경 없음.
 >
 > 공통 스펙에서 이미 Freeze된 항목(Weight Layout OIHW, Bias 미사용,
 > Rounding ties-away-from-zero, Requantize M×2^24 / >>24, Clamp, Heatmap Mapping,
@@ -13,13 +13,13 @@
 >
 > | 이 문서 절 | 공통 지침 v1.3 위치 | 승인 상태 |
 > |---|---|---|
-> | 1. Tensor Memory Order (CHW) | §7.4 | B/C 승인 대기 |
+> | 1. Tensor Memory Order (CHW) | §7.4 | C 승인 완료 / B 확인 대기 |
 > | 2. Conv Padding | **§8.1 (Freeze 완료)** | A 승인 완료 |
 > | 3. Argmax Tie-Break | §14.2 | B 승인 대기 |
 > | 4. target_valid 조건 | §16.1 | B 승인 대기 |
-> | 6. Event Tensor 전달 (ext_*) | §7.3 | C 승인 대기 |
-> | **10. AXI Register Bit Field** | **§20.1** | **C 승인 대기 (CR#002 rev.2)** |
-> | **11. PT#2 레이저 헤드 좌표 변환** | **§15.2** | **C 승인 대기 (CR#002 rev.2 §2.13)** |
+> | 6. Event Tensor 전달 (ext_*) | §7.3 | C 승인·구현 완료 |
+> | **10. AXI Register Bit Field** | **§20.1** | **C 기본 계약 승인·구현 / A Phase 3 확장 회신 대기** |
+> | **11. PT#2 레이저 헤드 좌표 변환** | **§15.2** | **C 승인·구현 완료** |
 >
 > 승인이 모두 끝나면 이 문서는 공통 지침 v1.5를 참조하는 요약본으로 유지한다.
 
@@ -152,7 +152,7 @@ input wire signed [7:0] ext_data;
 - 1 byte / cycle, 8192 cycle (= 82 us @100MHz)
 ```
 
-### 제약 (해결 예정, docs/TODO_LATER.md 참조)
+### 제약 (후속 상태는 `docs/PROJECT_STATUS.md` 참조)
 현재 입력 버퍼가 내부 ping-pong 버퍼 2개 중 하나를 공유한다.
 따라서 **NPU 추론 중에는 다음 Window Tensor를 미리 쓸 수 없다.**
 연속 실시간 동작이 필요해지면 입력 전용 버퍼 1개(BRAM 4개)를 추가한다.
@@ -222,9 +222,9 @@ WEIGHT_ROM      = 770 B x 8 bank
 
 ---
 
-## 10. AXI Register 계약 — v0.3 신규 (C 승인 대기)
+## 10. AXI Register 계약 — C 기본 계약 승인·구현 / A Phase 3 확장 회신 대기
 
-전체 bit 표와 PS 코드 예시는 **`docs/freeze/D3_FREEZE_REQUEST_A_002.md`**,
+전체 bit 표와 PS 코드 예시는 **`docs/D3_FREEZE_REQUEST_A_002.md`**,
 정본 편입 위치는 **공통 지침 v1.4 §20.1** 이다. 여기서는 C 가 반드시 알아야 할
 3가지만 적는다.
 
@@ -253,8 +253,9 @@ FCLK_CLK0 = 100 MHz = NPU clk = s_axi_aclk   (단일 클럭 도메인, CDC 없�
                       -> PT#2 = 레이저 헤드
 ```
 
-**C 회신 필요:** `TRACK_ERR_X/Y` 를 C 하드웨어가 계산하면 RO+입력으로 바꿔야 한다.
-PS 소프트웨어가 계산하면 지금 그대로가 맞다.
+**C 회신 완료:** 기존 Command RW 값은 Manual Override로 사용한다. C 자동 위치는
+`0x58 SERVO_POS_STAT`, `0x5C CONTROL_STAT` 신규 RO로 공개하고 `TRACK_ERR_X/Y`는
+유지 또는 RO Status 교체를 A가 결정한다 (`C_TO_A_REPLY_003.md`).
 
 ### 10.3 C 의 Event Accumulator 연결 방법
 
@@ -287,10 +288,10 @@ STATUS.DONE(bit0) 을 폴링해라. STATUS.BUSY(bit1) 를 폴링하지 마라.
 
 ---
 
-## 11. Pan/Tilt 2 헤드 — v0.4 신규 (C 승인 대기)
+## 11. Pan/Tilt 2 헤드 — v0.4 신규 / C 승인·구현 완료
 
 정본: 공통 지침 **v1.5 §15.0 / §15.2 / §17**,
-근거서 `docs/freeze/D3_FREEZE_REQUEST_A_002.md` rev.2 §2.13~2.15.
+근거서 `docs/D3_FREEZE_REQUEST_A_002.md` rev.2 §2.13~2.15.
 
 ```text
    PT#1  0x20 PAN_CMD / 0x24 TILT_CMD / 0x2C SAFE_LIMIT

@@ -196,7 +196,7 @@ case02 : 표적 없음 또는 score 낮은 프레임 (target_valid 검증용)
 
 ---
 
-## 6. Handoff 문서 — `handoff/B_MODEL_HANDOFF.md`
+## 6. Handoff 문서 — B 제출 시 생성할 `handoff/B_MODEL_HANDOFF.md`
 
 spec §26 필수 항목:
 
@@ -206,7 +206,7 @@ Quantization Parameter / Rounding / Clamp
 Weight Files / Golden Files / Accuracy / CPU Baseline
 ```
 
-`handoff/A_NPU_HANDOFF.md`를 형식 참고용으로 쓰면 된다.
+`docs/A_NPU_HANDOFF.md`를 형식 참고용으로 쓰면 된다.
 
 ---
 
@@ -280,4 +280,4 @@ TV_DIR=../test_vectors/case02/ ./sim/run_sim.sh
 |---|---|---|
 | 1 | `nn.Conv2d(padding=?)` = 1 | **해결됨** — `D3_B_to_A_CNN_Convolution_Freeze_Request` 로 확정, A 승인 완료 |
 | 2 | 표적 없는 프레임의 Heatmap max score 분포 | **회신 대기** — `score_th` 실값 확정용 |
-| 3 | `docs/freeze/D3_FREEZE_REQUEST_A_001.md` 승인 (CHW / Argmax tie / target_valid / ext 포트) | **회신 대기** |
+| 3 | `docs/D3_FREEZE_REQUEST_A_001.md` 승인 (CHW / Argmax tie / target_valid / ext 포트) | **B 회신 대기** — C는 `C_TO_A_REPLY_001.md`에서 수용 완료 |
