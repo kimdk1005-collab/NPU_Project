@@ -16,6 +16,9 @@ Event Input
 - 기준 툴체인: Vivado 2024.2 / Vitis / xsim
 - 팀 구성: A=NPU·SoC, B=Model·Golden, C=Event·Control
 
+`main`과 `integration`은 삭제하지 않는 장기 브랜치다. 기능 브랜치만 병합 후 삭제하며,
+두 장기 브랜치는 GitHub 보호 규칙으로 강제 Push와 삭제를 차단한다.
+
 ## 처음 시작할 때
 
 ```bash
@@ -32,6 +35,7 @@ git switch integration
 5. 작업·단위 검증·Handoff를 끝낸 뒤 `integration` 대상으로 PR을 연다.
 
 브랜치 생성과 PR 규칙은 [CONTRIBUTING.md](CONTRIBUTING.md)를 따른다.
+저장소 구조·문서 링크·구버전 문서·생성물은 `Repository Policy` GitHub Actions로 검사한다.
 
 ## 역할과 작업 공간
 

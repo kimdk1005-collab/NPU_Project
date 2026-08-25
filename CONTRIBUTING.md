@@ -23,6 +23,26 @@ integration → 전체 통합 Test·Timing → PR(main)
 ```
 
 `main`과 `integration`에 직접 커밋하지 않는다. 긴급 수정도 기능 브랜치와 PR을 사용한다.
+두 브랜치는 삭제하지 않는 장기 브랜치이며 강제 Push와 삭제를 GitHub 보호 규칙으로 막는다.
+병합 후 자동 삭제는 `feature/*`, `docs/*`, `chore/*` 같은 단기 브랜치에만 적용한다.
+
+### `integration` 유지 확인
+
+`integration → main` PR을 병합한 뒤 저장소 관리자는 `integration`이 남아 있는지 확인한다.
+
+```bash
+git fetch origin --prune
+git branch -r
+```
+
+만약 운영 실수로 삭제됐다면 최신 `main`에서 즉시 복구하고 보호 규칙을 다시 확인한다.
+
+```bash
+git push origin origin/main:refs/heads/integration
+```
+
+복구 명령은 저장소 관리자만 수행한다. 일반 작업자는 삭제된 브랜치를 임의의 과거
+Commit에서 만들지 않는다.
 
 ## 작업 시작
 
@@ -96,6 +116,9 @@ PR은 `.github/PULL_REQUEST_TEMPLATE.md`의 항목을 채운다.
 4. Interface/Model/Weight/Golden 버전 변화
 5. Change Request 또는 승인 필요 여부
 6. 아직 수행하지 못한 실물·통합 검증과 블로커
+
+`Repository Policy / repository-structure` 검사는 필수다. 이 검사는 역할별 기본 경로,
+Markdown 상대 링크, `docs/` 구버전 사본과 생성 가능한 빌드 산출물의 추적 여부를 확인한다.
 
 공유 인터페이스나 `constraints/`를 변경한 PR은 영향받는 역할 전원의 확인을 받은 뒤
 병합한다. PR 작성자가 자신의 단위 검증 결과를 먼저 확인하고, 리뷰어는 계약·경로·재현성을

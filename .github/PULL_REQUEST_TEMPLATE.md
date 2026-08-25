@@ -17,6 +17,7 @@
 |  |  |  |
 
 - [ ] 변경 범위의 단위 검증을 완료했다.
+- [ ] `Repository Policy / repository-structure` 검사를 통과했다.
 - [ ] 실패·미실행 항목과 이유를 아래에 적었다.
 - [ ] 생성 파일, 비밀정보, 불필요한 대용량 파일이 포함되지 않았다.
 
@@ -26,6 +27,8 @@
 - [ ] 공유 인터페이스 변경을 문서/Change Request에 반영함
 - [ ] `docs/integration_manifest.md` 갱신 필요 여부를 확인함
 - [ ] 관련 역할 Handoff를 갱신함
+- [ ] 대상 브랜치가 역할 작업은 `integration`, 통합 완료는 `main`인지 확인함
+- [ ] `integration → main` PR이면 병합 후 `integration`을 삭제하지 않는 규칙을 확인함
 
 ## 남은 작업·블로커
 

@@ -1,0 +1,46 @@
+name: Repository Policy
+
+on:
+  pull_request:
+    branches:
+      - main
+      - integration
+  push:
+    branches:
+      - main
+      - integration
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-policy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repository-structure:
+    name: repository-structure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check changed lines
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            git diff --check "$BASE_SHA...$HEAD_SHA"
+          else
+            git show --check --format= "$GITHUB_SHA"
+          fi
+
+      - name: Check repository structure and documents
+        run: bash tools/check_repository_structure.sh
