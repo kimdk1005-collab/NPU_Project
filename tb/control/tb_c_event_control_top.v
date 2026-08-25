@@ -212,7 +212,10 @@ module tb_c_event_control_top;
         emergency_stop_hw = 1'b1;
         repeat (2) @(negedge clk);
         check_int("T8 hardware E-stop fail-closed", laser_en, 0);
+        check_int("T8 CONTROL_STAT rearm required", control_stat[16], 1);
         emergency_stop_hw = 1'b0;
+        pulse_done; pulse_done; pulse_done;
+        check_int("T8 E-stop release stays OFF", laser_en, 0);
 
         // 잘못된 runtime 범위는 적용하지 않고 fault를 세운다.
         safe_limit = {8'd150, 8'd90, 8'd100, 8'd200};

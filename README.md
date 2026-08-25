@@ -22,7 +22,7 @@ Event Input → 64×64×2 Event Tensor → Tiny CNN → INT8 → Integer Golden 
 |---|---|
 | [docs/00_DOCUMENT_INDEX.md](docs/00_DOCUMENT_INDEX.md) | 최신 정본 목록과 문서 관리 규칙 |
 | [docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md](docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md) | **최상위 공통 명세** (현재 v1.5) |
-| [docs/interface_contract.md](docs/interface_contract.md) | A/B/C RTL·AXI Interface Contract (현재 v0.4) |
+| [docs/interface_contract.md](docs/interface_contract.md) | A/B/C RTL·AXI Interface Contract (현재 v0.5) |
 | [docs/NPU_DEVELOPMENT_PLAN.md](docs/NPU_DEVELOPMENT_PLAN.md) | 전체 개발 계획 (현재 v1.4) |
 | [docs/TEAM_ROLE_PLAN.md](docs/TEAM_ROLE_PLAN.md) | A/B/C 역할과 일정 (현재 v1.6) |
 | [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | 팀 공유용 최신 진행상황, 블로커, 다음 액션 |
@@ -104,10 +104,12 @@ python3 tools/probe_webcam.py            # 기본 /dev/video0
 ./sim/run_xsim.sh tb_servo_pwm         # 판정 TB — 6/6 PASS 확인용
 ./sim/run_xsim.sh tb_board_io           # 판정 TB — 19/19 PASS 확인용
 ./sim/run_xsim.sh tb_tracking_controller # 판정 TB — 30/30 PASS 확인용
-./sim/run_xsim.sh tb_laser_head_controller # 판정 TB — 23/23 PASS 확인용
-./sim/run_xsim.sh tb_laser_interlock    # 판정 TB — 28/28 PASS 확인용
-./sim/run_xsim.sh tb_dual_head_control  # 판정 TB — 30/30 PASS 확인용
-./sim/run_xsim.sh tb_dual_head_board_io # 판정 TB — 최종 4축+RED 32/32 PASS
+./sim/run_xsim.sh tb_laser_head_controller # 판정 TB — 27/27 PASS 확인용
+./sim/run_xsim.sh tb_laser_interlock    # 판정 TB — 수동 재무장 포함 38/38 PASS
+./sim/run_xsim.sh tb_dual_head_control  # 판정 TB — 33/33 PASS 확인용
+./sim/run_xsim.sh tb_dual_head_board_io # 판정 TB — 최종 4축+RED 36/36 PASS
+./sim/run_xsim.sh tb_c_event_control_top # 판정 TB — A/C 통합+재무장 상태 27/27 PASS
+./sim/run_xsim.sh tb_ky008_laser_board_io # 판정 TB — KY-008 100 ms Gate 19/19 PASS
 ./sim/run_xsim.sh tb_servo_pwm_sweep   # pos 0~255 스윕, 파형 관찰용
 ```
 
@@ -165,6 +167,22 @@ Camera Servo는 JD1/JD2, Laser Servo는 JD3/JD4, 저항 내장 RGB LED 모듈의
 이 보드 테스트 Top은 카메라/NPU 대신 Switch와 Button으로 가상 Target 좌표를
 만든다. 실제 영상 기반 중앙 판정은 A의 NPU `target_*` 신호를 연결한 뒤 검증한다.
 
+### KY-008 실제 광원 사전 브링업
+
+KY-008은 `S=+5 V`, middle=`NC`, `-=GND`, 30 mA 사양이다. JD7/U14는 광원
+전원선이 아니라 default-OFF High-side load switch의 3.3 V Enable만 구동한다.
+
+```bash
+./sim/run_xsim.sh tb_ky008_laser_board_io
+vivado -mode batch -source sim/create_ky008_laser_gate_project.tcl
+```
+
+전용 Top은 Servo 범위를 112~144, 최대 연속 Gate를 5 frame(100 ms @ 50 Hz)으로
+제한한다. Power-on Arm HIGH, E-stop release, max-on timeout 뒤에는 Arm LOW→HIGH
+수동 재무장 전까지 Gate가 다시 켜지지 않는다. 배선·dummy load·실제 광원 승인표는
+[docs/KY008_PREARRIVAL_CHECKLIST_C.md](docs/KY008_PREARRIVAL_CHECKLIST_C.md)를 따른다.
+Zybo Z7-20 implementation 결과는 DRC 0 Error, WNS +1.529 ns, WHS +0.153 ns다.
+
 ## Git (SPEC §24, §25)
 
 ```text
@@ -182,11 +200,13 @@ Commit 형식: `[C][CTRL] Add servo dead-zone logic`
 | `rtl/control/servo_pwm.v` | 구현 완료 (D1) | `tb_servo_pwm` 6/6 PASS |
 | `rtl/control/board_io.v` | 구현 완료 (D1, 브링업 전용) | 19/19 PASS + 2축 실물 검증 완료 |
 | `rtl/control/laser_board_io.v` | PT#2 단독 실물 브링업 완료 | JD3/JD4 Servo 방향·범위 정상, WNS +0.396 ns / WHS +0.165 ns |
-| `rtl/control/dual_head_board_io.v` | 최종 4축+RED 실물 검증 완료 | 32/32 PASS + 실물 전 항목 PASS, WNS +1.068 ns / WHS +0.179 ns |
+| `rtl/control/dual_head_board_io.v` | 최종 4축+RED 실물 검증 완료 | 36/36 PASS + 실물 전 항목 PASS, WNS +1.068 ns / WHS +0.179 ns |
 | `rtl/event/event_adapter.v` | 구현 완료 (D2) | `tb_event_adapter` 23/23 PASS |
 | `rtl/event/event_accumulator.v` | 구현 완료 (D3) | `tb_event_accumulator` 15/15 PASS, 8192 B 전수 비교 |
 | Adapter→Accumulator 통합 경로 | 검증 완료 (D4) | `tb_event_pipeline` 15/15 PASS, 2 Window × 8192 B 전수 비교 |
 | `rtl/control/tracking_controller.v` | 구현 완료 (D4) | `tb_tracking_controller` 30/30 PASS |
-| `rtl/control/laser_head_controller.v` | 구현 완료 (D5) | `tb_laser_head_controller` 23/23 PASS |
-| `rtl/control/laser_interlock.v` | LED 우선 구현 완료 (D5) | `tb_laser_interlock` 28/28 PASS |
-| `rtl/control/dual_head_control.v` | 4 Servo + LED 경로 구현 완료 (D5) | `tb_dual_head_control` 30/30 PASS |
+| `rtl/control/laser_head_controller.v` | Runtime LASER_CAL 포함 | `tb_laser_head_controller` 27/27 PASS |
+| `rtl/control/laser_interlock.v` | Power-on/E-stop 수동 재무장 포함 | `tb_laser_interlock` 38/38 PASS |
+| `rtl/control/dual_head_control.v` | 4 Servo + 재무장 통합 | `tb_dual_head_control` 33/33 PASS |
+| `rtl/control/c_event_control_top.v` | A Phase 3 + 재무장 상태 | `tb_c_event_control_top` 27/27 PASS |
+| `rtl/control/ky008_laser_board_io.v` | KY-008 100 ms 안전 게이트 Top | 19/19 PASS, DRC 0 Error, WNS +1.529 ns / WHS +0.153 ns |

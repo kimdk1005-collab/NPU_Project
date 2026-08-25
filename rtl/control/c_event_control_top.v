@@ -34,6 +34,7 @@
 //     [4] AIM_READY, [5] MANUAL_OVERRIDE, [6] LIMIT_ACTIVE, [7] LIMIT_FAULT
 //     [8] SERVO_ENABLE, [9] HW_ARM, [10] SW_ARM, [11] EMERGENCY_STOP
 //     [12] TENSOR_READY, [13] ACC_READY, [14] OVERRUN, [15] TARGET_VALID
+//     [16] LASER_REARM_REQUIRED
 // ---------------------------------------------------------------------------
 `timescale 1ns / 1ps
 `default_nettype none
@@ -192,6 +193,7 @@ module c_event_control_top #(
     wire laser_lock_qualified;
     wire laser_target_fresh;
     wire laser_timeout_fault;
+    wire laser_rearm_required;
     wire runtime_limits_active;
     wire runtime_limit_fault;
 
@@ -249,6 +251,7 @@ module c_event_control_top #(
         .laser_lock_qualified(laser_lock_qualified),
         .laser_target_fresh(laser_target_fresh),
         .laser_timeout_fault(laser_timeout_fault),
+        .laser_rearm_required(laser_rearm_required),
         .runtime_limits_active(runtime_limits_active),
         .runtime_limit_fault(runtime_limit_fault)
     );
@@ -282,7 +285,8 @@ module c_event_control_top #(
     };
 
     assign control_stat = {
-        16'd0,
+        15'd0,
+        laser_rearm_required,
         target_valid,
         overrun,
         acc_ready,

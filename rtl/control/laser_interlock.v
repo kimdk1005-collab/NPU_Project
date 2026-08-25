@@ -6,8 +6,9 @@
 //    PT#1 SAFE_LIMIT, PT#2 SAFE_LIMIT2, Emergency Stop 해제
 //
 //  추가 보수 조건:
-//    system_arm, PT#2 aim_ready, 연속 LOCK_CONFIRM_UPDATES,
+//    system_arm, actuator_ready, PT#2 aim_ready, 연속 LOCK_CONFIRM_UPDATES,
 //    Target Update watchdog, 연속 출력 시간 제한
+//    Power-on 또는 E-stop 해제 후에는 Arm LOW를 한 번 관측해야 재무장 가능
 //
 //  laser_enable은 우선 LED에만 연결한다. 실제 레이저 전환 시에도 이 신호 뒤에
 //  별도 물리 Arm/E-stop과 트랜지스터 구동단을 둔다.
@@ -47,6 +48,7 @@ module laser_interlock #(
     input  wire                    target_update,
 
     input  wire                    system_arm,
+    input  wire                    actuator_ready,
     input  wire                    emergency_stop,
     input  wire                    target_valid,
     input  wire [5:0]              target_x,
@@ -62,7 +64,8 @@ module laser_interlock #(
     output reg                     laser_enable,
     output wire                    lock_qualified,
     output reg                     target_fresh,
-    output reg                     timeout_fault
+    output reg                     timeout_fault,
+    output wire                    rearm_required
 );
 
     localparam integer CONFIRM_W = (LOCK_CONFIRM_UPDATES <= 1) ? 1 :
@@ -78,6 +81,8 @@ module laser_interlock #(
     reg [CONFIRM_W-1:0] confirm_count;
     reg [AGE_W-1:0]     target_age;
     reg [ON_W-1:0]      on_count;
+    reg                  arm_seen_low;
+    reg                  estop_latched;
 
     initial begin
         if (SCORE_THRESHOLD < -128 || SCORE_THRESHOLD > 127)
@@ -120,7 +125,13 @@ module laser_interlock #(
 
     // 첫 유효 Update도 확인 횟수에 포함한다.
     wire fresh_for_check = target_fresh || target_update;
-    wire qualification_inputs_ok = system_arm && !emergency_stop &&
+    // Power-on 시 Arm이 이미 HIGH여도 자동 점등하지 않는다. Arm LOW를 최소 한
+    // clock 관측해야 arm_seen_low가 서고, E-stop도 Arm LOW에서만 해제된다.
+    assign rearm_required = !arm_seen_low || estop_latched || timeout_fault;
+
+    wire qualification_inputs_ok = system_arm && actuator_ready &&
+                                   arm_seen_low && !estop_latched &&
+                                   !emergency_stop &&
                                    target_valid && score_ok && target_safe &&
                                    pt1_safe && pt2_safe && target_locked &&
                                    aim_ready && fresh_for_check;
@@ -141,7 +152,20 @@ module laser_interlock #(
             confirm_count <= {CONFIRM_W{1'b0}};
             target_age <= {AGE_W{1'b0}};
             on_count <= {ON_W{1'b0}};
+            arm_seen_low <= 1'b0;
+            estop_latched <= 1'b0;
         end else begin
+            // 레이저 Arm 자체가 LOW였던 이력이 있어야 Power-on 재무장이 가능하다.
+            if (!system_arm)
+                arm_seen_low <= 1'b1;
+
+            // E-stop은 해제만으로 복귀하지 않는다. E-stop을 놓은 뒤에도 Arm을
+            // 명시적으로 LOW로 내려야 latch가 풀린다.
+            if (emergency_stop)
+                estop_latched <= 1'b1;
+            else if (!system_arm)
+                estop_latched <= 1'b0;
+
             // NPU 결과 freshness watchdog
             if (target_update) begin
                 target_fresh <= target_valid;
@@ -155,8 +179,8 @@ module laser_interlock #(
                 end
             end
 
-            // 연속 출력 시간 초과는 Arm 해제 또는 Target Lock 이탈 전까지 유지한다.
-            if (!system_arm || !target_valid || !target_locked) begin
+            // 연속 출력 시간 초과도 Arm LOW 전까지 유지해 자동 재점등을 막는다.
+            if (!system_arm) begin
                 timeout_fault <= 1'b0;
             end else if (max_on_expires) begin
                 timeout_fault <= 1'b1;

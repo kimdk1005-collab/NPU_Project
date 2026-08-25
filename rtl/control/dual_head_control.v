@@ -100,6 +100,7 @@ module dual_head_control #(
     output wire                    laser_lock_qualified,
     output wire                    laser_target_fresh,
     output wire                    laser_timeout_fault,
+    output wire                    laser_rearm_required,
     output wire                    runtime_limits_active,
     output wire                    runtime_limit_fault
 );
@@ -275,8 +276,10 @@ module dual_head_control #(
         .rst_n           (rst_n),
         .frame_tick      (frame_tick),
         .target_update   (target_update),
-        // Servo가 꺼진 상태에서 광원만 켜지는 경로를 만들지 않는다.
-        .system_arm      (laser_arm && servo_enable),
+        // Laser Arm과 Servo 준비 상태를 분리한다. Servo enable이 LOW였다는 이유만으로
+        // Power-on/E-stop 수동 재무장 조건이 충족되면 안 된다.
+        .system_arm      (laser_arm),
+        .actuator_ready  (servo_enable),
         .emergency_stop  (emergency_stop),
         .target_valid    (target_valid),
         .target_x        (target_x),
@@ -290,7 +293,8 @@ module dual_head_control #(
         .laser_enable    (laser_enable_safe),
         .lock_qualified  (laser_lock_qualified),
         .target_fresh    (laser_target_fresh),
-        .timeout_fault   (laser_timeout_fault)
+        .timeout_fault   (laser_timeout_fault),
+        .rearm_required  (laser_rearm_required)
     );
 
     // LED가 실제 레이저 출력과 동일한 논리 신호를 미리 보여준다.

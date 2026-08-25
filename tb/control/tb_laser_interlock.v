@@ -11,6 +11,7 @@ module tb_laser_interlock;
     reg               frame_tick = 1'b0;
     reg               target_update = 1'b0;
     reg               system_arm = 1'b0;
+    reg               actuator_ready = 1'b1;
     reg               emergency_stop = 1'b0;
     reg               target_valid = 1'b0;
     reg  [5:0]        target_x = 6'd36;
@@ -23,7 +24,9 @@ module tb_laser_interlock;
     reg               aim_ready = 1'b1;
 
     wire laser_enable, lock_qualified, target_fresh, timeout_fault;
+    wire rearm_required;
     wire wd_enable, wd_qualified, wd_fresh, wd_timeout_fault;
+    wire wd_rearm_required;
     integer errors = 0;
 
     always #5 clk = ~clk;
@@ -36,13 +39,14 @@ module tb_laser_interlock;
     ) dut (
         .clk(clk), .rst_n(rst_n), .frame_tick(frame_tick),
         .target_update(target_update), .system_arm(system_arm),
+        .actuator_ready(actuator_ready),
         .emergency_stop(emergency_stop), .target_valid(target_valid),
         .target_x(target_x), .target_y(target_y), .target_score(target_score),
         .camera_pan_pos(camera_pan_pos), .camera_tilt_pos(camera_tilt_pos),
         .laser_pan_pos(laser_pan_pos), .laser_tilt_pos(laser_tilt_pos),
         .aim_ready(aim_ready), .laser_enable(laser_enable),
         .lock_qualified(lock_qualified), .target_fresh(target_fresh),
-        .timeout_fault(timeout_fault)
+        .timeout_fault(timeout_fault), .rearm_required(rearm_required)
     );
 
     // Max-on을 끈 별도 인스턴스로 freshness watchdog만 독립 검증한다.
@@ -54,13 +58,14 @@ module tb_laser_interlock;
     ) dut_watchdog (
         .clk(clk), .rst_n(rst_n), .frame_tick(frame_tick),
         .target_update(target_update), .system_arm(system_arm),
+        .actuator_ready(actuator_ready),
         .emergency_stop(emergency_stop), .target_valid(target_valid),
         .target_x(target_x), .target_y(target_y), .target_score(target_score),
         .camera_pan_pos(camera_pan_pos), .camera_tilt_pos(camera_tilt_pos),
         .laser_pan_pos(laser_pan_pos), .laser_tilt_pos(laser_tilt_pos),
         .aim_ready(aim_ready), .laser_enable(wd_enable),
         .lock_qualified(wd_qualified), .target_fresh(wd_fresh),
-        .timeout_fault(wd_timeout_fault)
+        .timeout_fault(wd_timeout_fault), .rearm_required(wd_rearm_required)
     );
 
     task check_int(input [8*48-1:0] nm, input integer got, input integer exp_v);
@@ -108,6 +113,7 @@ module tb_laser_interlock;
     task restore_good;
         begin
             system_arm = 1'b1;
+            actuator_ready = 1'b1;
             emergency_stop = 1'b0;
             target_valid = 1'b1;
             target_x = 6'd36;
@@ -128,8 +134,11 @@ module tb_laser_interlock;
             frame_tick = 1'b0;
             target_update = 1'b0;
             restore_good;
+            system_arm = 1'b0;
             repeat (3) @(negedge clk);
             rst_n = 1'b1;
+            repeat (2) @(negedge clk);
+            system_arm = 1'b1;
             repeat (2) @(negedge clk);
         end
     endtask
@@ -145,10 +154,24 @@ module tb_laser_interlock;
     initial begin
         $display("=== tb_laser_interlock : SPEC v1.5 §17 / LED first ===");
 
+        // Power-on 시 Arm이 이미 HIGH면 유효 Target이 있어도 자동 점등하지 않는다.
+        @(negedge clk);
+        rst_n = 1'b0;
+        restore_good;
+        repeat (3) @(negedge clk);
+        rst_n = 1'b1;
+        repeat (2) @(negedge clk);
+        confirm_lock;
+        check_int("T0 boot with Arm HIGH stays OFF", laser_enable, 0);
+        check_int("T0 boot requires manual rearm", rearm_required, 1);
+        system_arm = 1'b0; idle_cycle;
+        check_int("T0 Arm LOW acknowledges rearm", rearm_required, 0);
+
         do_reset;
         check_int("T1 reset -> laser OFF", laser_enable, 0);
         check_int("T1 reset -> target stale", target_fresh, 0);
         check_int("T1 reset -> no timeout fault", timeout_fault, 0);
+        check_int("T1 valid Arm cycle clears rearm", rearm_required, 0);
 
         // 연속 3개의 새 NPU 결과가 Lock 조건을 만족해야 켜진다.
         pulse_update;
@@ -163,12 +186,21 @@ module tb_laser_interlock;
         // 모든 조건은 동기식 1 clock 이내 Fail-Closed 한다.
         emergency_stop = 1'b1; idle_cycle;
         check_int("T3 emergency stop -> OFF", laser_enable, 0);
+        check_int("T3 emergency stop latches rearm", rearm_required, 1);
         emergency_stop = 1'b0; confirm_lock;
-        check_int("T3 re-confirm after E-stop", laser_enable, 1);
+        check_int("T3 E-stop release stays OFF", laser_enable, 0);
+        system_arm = 1'b0; idle_cycle;
+        check_int("T3 Arm LOW clears E-stop latch", rearm_required, 0);
+        system_arm = 1'b1; confirm_lock;
+        check_int("T3 explicit rearm restores output", laser_enable, 1);
 
         system_arm = 1'b0; idle_cycle;
         check_int("T4 arm removed -> OFF", laser_enable, 0);
         system_arm = 1'b1; confirm_lock;
+
+        actuator_ready = 1'b0; idle_cycle;
+        check_int("T4 actuator not ready -> OFF", laser_enable, 0);
+        actuator_ready = 1'b1; confirm_lock;
 
         target_score = -8'sd1; idle_cycle;
         check_int("T5 signed score below threshold -> OFF", laser_enable, 0);
@@ -220,7 +252,10 @@ module tb_laser_interlock;
         confirm_lock;
         check_int("T13 locked fault blocks re-enable", laser_enable, 0);
         target_valid = 1'b0; idle_cycle;
-        check_int("T13 target lost clears fault", timeout_fault, 0);
+        check_int("T13 target lost keeps timeout latched", timeout_fault, 1);
+        system_arm = 1'b0; idle_cycle;
+        check_int("T13 Arm LOW clears timeout fault", timeout_fault, 0);
+        check_int("T13 Arm LOW clears rearm request", rearm_required, 0);
 
         $display("=== 결과 : %0s (errors=%0d) ===",
                  (errors == 0) ? "ALL PASS" : "FAIL", errors);

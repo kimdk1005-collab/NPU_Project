@@ -28,7 +28,7 @@ module tb_dual_head_control;
     wire [7:0] laser_pan_pos, laser_tilt_pos;
     wire [7:0] laser_pan_target, laser_tilt_target;
     wire laser_aim_ready, laser_lock_qualified;
-    wire laser_target_fresh, laser_timeout_fault;
+    wire laser_target_fresh, laser_timeout_fault, laser_rearm_required;
 
     integer errors = 0;
     integer m_cam_pan, m_cam_tilt, m_laser_pan, m_laser_tilt, m_total;
@@ -66,6 +66,7 @@ module tb_dual_head_control;
         .laser_lock_qualified(laser_lock_qualified),
         .laser_target_fresh(laser_target_fresh),
         .laser_timeout_fault(laser_timeout_fault),
+        .laser_rearm_required(laser_rearm_required),
         .runtime_limits_active(), .runtime_limit_fault()
     );
 
@@ -143,6 +144,8 @@ module tb_dual_head_control;
 
         repeat (3) @(negedge clk);
         rst_n = 1'b1;
+        // Power-on 재무장 조건: Reset 해제 후 Laser Arm LOW를 한 clock 관측한다.
+        repeat (2) @(negedge clk);
         servo_enable = 1'b1;
         laser_arm = 1'b1;
         target_valid = 1'b1;
@@ -189,9 +192,18 @@ module tb_dual_head_control;
         check_int("T5 emergency stop -> LED OFF", laser_led, 0);
         emergency_stop = 1'b0;
 
-        // Servo 출력 자체를 끄면 Laser Arm도 유효하지 않도록 통합한다.
+        // E-stop 해제만으로는 켜지지 않고 Laser Arm LOW->HIGH가 필요하다.
         pulse_update; pulse_update; pulse_update;
-        check_int("T6 re-confirm -> LED ON", laser_led, 1);
+        check_int("T6 E-stop release remains OFF", laser_led, 0);
+        check_int("T6 manual rearm requested", laser_rearm_required, 1);
+        laser_arm = 1'b0;
+        repeat (2) @(negedge clk);
+        check_int("T6 Arm LOW clears rearm", laser_rearm_required, 0);
+        laser_arm = 1'b1;
+        pulse_update; pulse_update; pulse_update;
+        check_int("T6 explicit rearm -> LED ON", laser_led, 1);
+
+        // Servo 출력 자체를 끄면 광원도 즉시 Fail-Closed 한다.
         servo_enable = 1'b0;
         repeat (2) @(negedge clk);
         check_int("T6 servo disable -> LED OFF", laser_led, 0);

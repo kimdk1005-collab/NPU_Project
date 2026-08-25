@@ -9,10 +9,10 @@
 > | | |
 > |---|---|
 > | 담당 | C (김도근) |
-> | 버전 | `c_control_v06` |
-> | 최종 갱신 | 2026-08-24 (D6) |
+> | 버전 | `c_control_v07` |
+> | 최종 갱신 | 2026-08-25 (D6 + KY-008 사전 안전 준비) |
 > | 기준 SPEC | **v1.5** |
-> | 상태 | D6 — A Phase 3 포트용 C 통합 래퍼 + AXI 설정/상태 계약 완료 |
+> | 상태 | D6 — A Phase 3 통합 + 실제 광원 수동 재무장/100 ms 브링업 경로 완료 |
 >
 > **SPEC v1.1 반영분** — `target_score` = signed INT8 (§7, §10),
 > Event Count 포화 상한 = 127 (§2). 두 항목은 더 이상 TBD가 아니다.
@@ -48,9 +48,10 @@
 | `rtl/control/tracking_controller.v` | C | **구현 완료** (D4) | `tb_tracking_controller` 30/30 PASS |
 | Adapter→Accumulator 연결 | C | **검증 완료** (D4) | `tb_event_pipeline` 15/15 PASS |
 | `rtl/control/laser_head_controller.v` | C | **런타임 LASER_CAL 포함** (D6) | `tb_laser_head_controller` 27/27 PASS |
-| `rtl/control/laser_interlock.v` | C | **LED 우선 구현 완료** (D5) | `tb_laser_interlock` 28/28 PASS |
-| `rtl/control/dual_head_control.v` | C | **4-Servo + Manual/동적 Limit** (D6) | `tb_dual_head_control` 30/30 PASS |
-| `rtl/control/c_event_control_top.v` | C | **A Phase 3 연동 래퍼 완료** (D6) | `tb_c_event_control_top` 25/25 PASS |
+| `rtl/control/laser_interlock.v` | C | **Power-on/E-stop 수동 재무장 포함** | `tb_laser_interlock` 38/38 PASS |
+| `rtl/control/dual_head_control.v` | C | **4-Servo + Manual/동적 Limit/재무장** | `tb_dual_head_control` 33/33 PASS |
+| `rtl/control/c_event_control_top.v` | C | **A Phase 3 연동 + 재무장 상태** | `tb_c_event_control_top` 27/27 PASS |
+| `rtl/control/ky008_laser_board_io.v` | C | **KY-008 100 ms 안전 게이트 Top** | `tb_ky008_laser_board_io` 19/19 PASS |
 
 ---
 
@@ -713,6 +714,7 @@ PT#2 aim_ready == 1
 Target update watchdog 정상
 Servo Enable + Laser Arm == 1
 Emergency Stop == 0
+Power-on/E-stop/max-on 뒤 Laser Arm LOW 관측 완료
 ```
 
 하나라도 불만족 → `laser_enable = 0`
@@ -731,6 +733,11 @@ Emergency Stop == 0
 **signed 비교**로 구현한다. unsigned로 비교하면 음수 Score가 큰 값으로 뒤집혀
 Interlock이 잘못 열린다. SPEC §9.1이 Conv4 Heatmap을 ReLU 없는 signed INT8로
 규정했으므로 음수 Score는 실제로 발생한다.
+
+실제 KY-008 브링업 Top은 `MAX_ON_FRAMES=5`로 제한해 50 Hz 기준 약 100 ms만
+허용한다. Power-on Arm HIGH, E-stop release, max-on timeout 뒤에는
+`laser_rearm_required=1`이며 Laser Arm LOW→HIGH 수동 사이클 전까지 재점등하지 않는다.
+Servo Enable LOW는 Laser Arm LOW 이력을 대신하지 않는다.
 
 ### 안전 원칙
 
@@ -901,7 +908,8 @@ MIN>MAX이면 정적 Limit으로 fallback하고 fault를 표시한다.
   [6] LIMIT_ACTIVE    [7] LIMIT_FAULT      [8] SERVO_ENABLE
   [9] HW_ARM          [10] SW_ARM          [11] EMERGENCY_STOP
   [12] TENSOR_READY   [13] ACC_READY       [14] OVERRUN
-  [15] TARGET_VALID   [31:16] 0
+  [15] TARGET_VALID   [16] LASER_REARM_REQUIRED
+  [31:17] 0
 ```
 
 기존 `TRACK_ERR_X/Y`는 C 하드웨어 Tracking에서 소비하지 않는다. A가 이 두 Register를
@@ -924,7 +932,7 @@ PS-managed 방식:
 
 ### 11.5 검증
 
-`tb_c_event_control_top`에서 다음 25개 판정을 통과했다.
+`tb_c_event_control_top`에서 다음 27개 판정을 통과했다.
 
 ```text
 Event Disable / Accumulator Ready
@@ -933,9 +941,11 @@ tensor_start + Sticky TENSOR_READY / BUSY clear
 Manual 4-Servo Command / Runtime SAFE_LIMIT clamp + invalid fallback
 NPU done -> target_update / 3회 Lock
 Hardware E-stop Fail-Closed
+E-stop release 자동 재점등 금지 / CONTROL_STAT 재무장 상태
 ```
 
-전체 C 자동판정 TB 11개를 재실행해 로그 기준 **249 PASS, errors=0**을 확인했다.
+KY-008 전용 TB를 포함한 C 자동판정 TB 12개를 재실행해 로그 기준
+**287 PASS, errors=0**을 확인했다.
 
 Zybo Z7-20 (`xc7z020clg400-1`) 100 MHz 기준 `c_event_control_top` OOC
 implementation 결과는 다음과 같다.
@@ -952,3 +962,7 @@ implementation 결과는 다음과 같다.
 
 이는 C 래퍼 단독 OOC 결과다. A의 `top_system/npu_axi/npu_core`와 통합한 뒤에는
 전체 경로 기준 implementation과 타이밍을 다시 측정한다.
+
+별도 `ky008_laser_board_io` 실보드 Top은 2026-08-25 Zybo Z7-20 implementation에서
+LUT 448, Register 373, DSP 4, DRC 0 Error, WNS +1.529 ns, WHS +0.153 ns를
+확인했다. 이 Top의 JD7/U14는 KY-008 전원이 아니라 외부 High-side switch Enable이다.

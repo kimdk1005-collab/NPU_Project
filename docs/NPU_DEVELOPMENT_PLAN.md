@@ -1443,8 +1443,10 @@ B : Dataset 파이프라인(ai/dataset.py) 작성, Webcam Frame Difference 경�
     남은 작업 = CNN 학습 / INT8 / Integer Golden / Test Vector 3종.
 
 C : Event Adapter/Accumulator, 4축 Servo, PT#2 좌표 변환, Fail-Closed Interlock,
-    A Phase 3 연동 래퍼 구현 완료. 249 PASS와 100 MHz OOC 타이밍 확인.
-    남은 작업은 A 실제 RTL 통합, 카메라 Closed-loop, 2 m Offset 실측.
+    A Phase 3 연동 래퍼와 KY-008 수동 재무장/100 ms Gate 준비 완료.
+    C 자동판정 12종 287 PASS. 기존 D6 C 래퍼 100 MHz OOC 타이밍 확인.
+    남은 작업은 A 실제 RTL 통합, High-side driver 실측, 카메라 Closed-loop,
+    실제 광출력 확인과 2 m Offset 실측.
 ```
 
 **GATE A(D3)는 B의 Integer Golden Model 제출로만 최종 통과된다.**
