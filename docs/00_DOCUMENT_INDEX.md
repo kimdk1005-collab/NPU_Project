@@ -24,6 +24,7 @@
 | 파일 | 방향 | 내용 |
 |---|---|---|
 | `A_NPU_HANDOFF.md` | A → 팀 | NPU/SoC 포트, 타이밍, Known Limitation |
+| `../handoff/B_MODEL_HANDOFF.md` | B → 팀 | Model/Weight/Quantization/Golden 전달 템플릿 |
 | `B_TO_A_DELIVERY_SPEC.md` | A → B | B 산출물 전달 형식 |
 | `C_TO_A_DELIVERY_SPEC.md` | A → C | C RTL 전달 형식과 Phase 3 포트 계약 |
 | `C_TO_A_REPLY_003.md` | C → A | Phase 3 통합 설정·상태·START·Laser 재무장 계약 |
