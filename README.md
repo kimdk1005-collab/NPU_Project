@@ -58,6 +58,7 @@ results/model/     B 소유
 rtl/npu/           A 소유
 rtl/integration/   A 소유 — npu_axi.v, top_system.v
 tb/npu/            A 소유
+sw/                A 소유 — PS 드라이버, 보드 자체시험, 호스트 Mock
 
 rtl/event/         C 소유 — event_adapter.v, event_accumulator.v
 rtl/control/       C 소유 — tracking/laser-head/interlock/dual-head/servo RTL
@@ -69,6 +70,9 @@ handoff/           각자 Handoff 문서
 docs/              문서
 sim/               시뮬레이션 러너 및 C 로컬 자극
 ```
+
+각 역할 폴더의 `README.md`에는 담당 범위, 예상 산출물, 검증·커밋 규칙이 정리돼 있다.
+생성 가능한 Bitstream/XSA/ELF와 Vivado/Vitis 프로젝트는 소스 폴더에 커밋하지 않는다.
 
 ## 사용법
 
