@@ -40,6 +40,8 @@
 | 2026-08-24 | C Event/Control | D6 | A Phase 3 포트용 `c_event_control_top` 구현, AXI 설정/상태·Manual Override·Runtime Limit 계약 및 249 PASS/OOC 타이밍 확인 | `C_TO_A_REPLY_003.md` | C 완료 · A 통합 대기 |
 | 2026-08-24 | 문서 구조 | — | `docs/`를 버전 없는 최신 정본으로 통일하고 대체된 버전 사본과 `(1)` 중복본 제거 | `00_DOCUMENT_INDEX.md` | — |
 | 2026-08-24 | 문서 경로·승인 상태 | — | `docs/freeze`·`handoff`의 잘못된 내부 참조를 실제 정본 경로로 통일하고 C 회신 001~003의 승인·구현 상태 반영. Interface 값 변경 없음 | `C_TO_A_REPLY_001.md`~`003.md` | — |
+| 2026-08-25 | interface_contract / C Handoff / KY-008 checklist | **v0.5 / c_control_v07** | 실제 광원 안전 확장. Power-on Arm HIGH, E-stop release, max-on timeout 뒤 Laser Arm LOW→HIGH 수동 재무장 필수. `CONTROL_STAT[16]=LASER_REARM_REQUIRED`, KY-008 100 ms Gate Top/XDC/TB 추가. C TB 12종 **287 PASS, errors=0** | `KY008_PREARRIVAL_CHECKLIST_C.md` | C 구현 완료 · A 상태 bit 연동 대기 |
+| 2026-08-25 | A Phase 4 문서 / integration manifest / C 회신 | — | A-only 보드 기능 판정 16/16과 Fmax 108.5 MHz 기록을 정본에 반영. 배포본의 C 미착수·잘못된 `docs/freeze` 경로는 현재 승인/구현 상태로 재조정. `C_TO_A_REPLY_004.md`에 stub→C actual 교체 포트와 START 단일 소유권 확정 | A 제공 Phase 4 문서 묶음 | C 완료 · A/C 실제 통합 대기 |
 
 ## 대기 중인 요청
 

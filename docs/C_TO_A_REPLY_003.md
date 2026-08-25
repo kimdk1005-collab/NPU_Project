@@ -1,7 +1,8 @@
 # C → A 회신 003 — Phase 3 C Stub 통합 계약
 
 > 회신일: 2026-08-24
-> 대상: `C_TO_A_DELIVERY_SPEC.md` Phase 3 §11 / `interface_contract.md` v0.4
+> 안전 확장: 2026-08-25 — KY-008 실제 광원 사전 준비 / 수동 재무장 상태 추가
+> 대상: `C_TO_A_DELIVERY_SPEC.md` Phase 3 §11 / `interface_contract.md` v0.5
 > C 산출물: `rtl/control/c_event_control_top.v`, `tb/control/tb_c_event_control_top.v`
 
 ## 결론
@@ -12,6 +13,7 @@
 4. C 자동 추적 위치는 `0x58/0x5C` 신규 RO 상태 Register로 PS에 공개할 것을 요청한다.
 5. `SAFE_LIMIT/SAFE_LIMIT2`, `LASER_CAL`, `INPUT_STAT` bit 배치를 C가 확정했다.
 6. A stub에 빠진 실제 Event Source 포트와 `tensor_start`를 추가해야 한다.
+7. 실제 광원은 Power-on/E-stop/max-on 뒤 Laser Arm LOW→HIGH 수동 재무장을 요구한다.
 
 공통 명세의 PT#2 좌표식, 4-Servo, SAFE_LIMIT2, LED 우선 정책은 변경하지 않았다.
 2026-08-22 Dataset/Label 운영 정정도 C 인터페이스 변경이 없으므로 RTL 영향이 없다.
@@ -95,8 +97,12 @@ bit7 LASER_TIMEOUT
   [6] LIMIT_ACTIVE    [7] LIMIT_FAULT      [8] SERVO_ENABLE
   [9] HW_ARM          [10] SW_ARM          [11] EMERGENCY_STOP
   [12] TENSOR_READY   [13] ACC_READY       [14] OVERRUN
-  [15] TARGET_VALID   [31:16] 0
+  [15] TARGET_VALID   [16] LASER_REARM_REQUIRED
+  [31:17] 0
 ```
+
+`LASER_REARM_REQUIRED=1`이면 Lock 조건이 다시 만족되어도 출력은 유지 OFF다. PS는
+Laser Arm을 0으로 내린 뒤 상태가 0으로 clear된 것을 확인하고 다시 Arm해야 한다.
 
 ## START 연결 권장안
 
@@ -144,7 +150,7 @@ A stub 문서의 임시 Pmod JC 배치 대신 위 JD 배치를 통합 XDC에 반
 
 ## 검증
 
-`tb_c_event_control_top` 25/25 PASS:
+`tb_c_event_control_top` 27/27 PASS:
 
 ```text
 8192 byte CHW Tensor 전송
@@ -154,10 +160,11 @@ NPU done -> target_update
 4-Servo Manual Override
 Runtime SAFE_LIMIT clamp / invalid fallback
 Hardware E-stop Fail-Closed
+E-stop release 자동 재점등 금지 / CONTROL_STAT[16] 재무장 상태
 ```
 
-기존 C TB를 포함해 자동판정 TB 11개를 재실행했으며 로그 기준
-**249 PASS, errors=0**이다.
+KY-008 전용 TB를 포함해 자동판정 TB 12개를 재실행했으며 로그 기준
+**287 PASS, errors=0**이다.
 
 Zybo Z7-20 (`xc7z020clg400-1`) 100 MHz 기준 C 래퍼 단독 OOC implementation은
 LUT 829, Register 582, BRAM Tile 4, DSP 6을 사용했고 DRC 0 Error,

@@ -893,13 +893,15 @@ Event ────────→ A ────────→ Target X/Y
 
 ---
 
-# 17. 진척 현황 (2026-08-22 갱신, 역할 분담 자체는 변경 없음)
+# 17. 진척 현황 (2026-08-25 갱신, 역할 분담 자체는 변경 없음)
 
 역할 분담 내용은 v1.1 그대로다. 아래는 상태 기록일 뿐이다.
 **v1.4 갱신: A Phase 2 (AXI / SoC / Bitstream) 완료.**
 **v1.5 갱신: 기구가 Pan/Tilt 2 헤드로 변경 — C 작업량 증가. 역할 경계는 그대로.**
 **v1.6 갱신: A Phase 3 (PS 소프트웨어 + C 통합 사전검증) 완료.**
 **2026-08-22 운영 정정: 레이저 기반 Label을 실제 표적 중심 Label로 교체. A/C 인터페이스 변경 없음.**
+**2026-08-24 A 제공 기록: Phase 4 실보드 STEP 1~5, 기능 판정 16/16 완료.**
+**2026-08-25 C 갱신: KY-008 실제 광원 사전 안전 준비와 수동 재무장 계약 완료.**
 
 ## A — §3.2 산출물 진척
 
@@ -921,6 +923,11 @@ Phase 3 (PS 소프트웨어 / 보드 불필요)
 [x] tools/gen_test_tensor_c.py          -> sw/test_tensor.h
 [x] sw/build_vitis.tcl                  -> results/npu_test.elf
 [x] rtl/integration/c_module_stub.v     -> C 통합 사전측정 (자리표시자)
+
+Phase 4 (A 제공 기록, 2026-08-24)
+[x] 새 개발 PC에서 전 단계 재현         TB / 호스트 45 check / OOC / BD / ELF
+[x] Zybo Z7-20 A-only STEP 1~5          기능 판정 16/16 PASS
+[x] integration_manifest.md             A 산출물 지문과 BOARD_VERIFIED 기록
 ```
 
 §11 A 완료 기준 대비:
@@ -930,16 +937,18 @@ Phase 3 (PS 소프트웨어 / 보드 불필요)
 [x] Golden Model과 결과 일치        (임시 weight 기준, B 실물 대기)
 [x] Target (x, y) 출력
 [x] Cycle Counter 정상               125,845 cycle = 1.258 ms @100MHz
-[x] AXI 제어 가능                    tb_npu_axi 74 check / tb_top_system 17 check PASS
-[x] Vivado Timing 통과               전체 시스템 배치배선 WNS +0.782 ns, Fmax 107.7 MHz
+[x] AXI 제어 가능                    tb_npu_axi 84 check / tb_top_system 17 check PASS
+[x] Vivado Timing 통과               전체 시스템 배치배선 WNS +0.782 ns, Fmax 108.5 MHz
 [x] Bitstream 생성                   results/npu_soc.bit (+ npu_soc.xsa)
 [x] PS 소프트웨어                    results/npu_test.elf, 호스트 45 check PASS
 [x] C 통합 타이밍 사전확인            자리표시자 포함 WNS +1.121 ns (100MHz MET)
-[ ] 실제 보드 동작                    <- 보드가 있어야 함 (Phase 4)
+[x] 실제 보드 동작                    2026-08-24 A-only 기능 판정 16/16 PASS
 ```
 
-A가 지금 막힌 곳은 **보드 실동작**과 **A/C 실제 전체 시스템 통합**이다.
-C 모듈 전달은 완료됐고 A 소유 RTL/PS 산출물 합류가 필요하다.
+A가 지금 막힌 곳은 **B 실제 weight/golden**과 **A/C 실제 전체 시스템 통합**이다.
+C 모듈 전달은 완료됐고 A 소유 RTL/PS 산출물과 같은 통합 브랜치에서 결합해야 한다.
+Phase 4 세부 산출물은 현재 C 체크아웃에 없으므로 `integration_manifest.md`의 A 제공
+지문을 A 브랜치에서 재확인한다.
 상세 요약: `docs/A_NPU_HANDOFF.md`, 현재 저장소 상태: `docs/PROJECT_STATUS.md`
 
 ## B — 진척
@@ -991,5 +1000,5 @@ C -> A : Camera/Laser 4축 PWM / LOCK / LASER ENABLE                    -> 완�
 **문서 버전:** v1.6 Team Role Allocation — 상/중/중 조정본
 **기준:** v1.1 Learning-Aligned Revision  
 **인원:** 3명  
-**진척 기록 갱신:** 2026-08-22 (§17 — A Phase 3 완료 + Dataset/Label 운영 정정. 역할 경계 변경 없음)
+**진척 기록 갱신:** 2026-08-25 (§17 — A Phase 4 기록 + C KY-008 사전 안전 준비. 역할 경계 변경 없음)
 **역할 난이도:** A 상 / B 중 / C 중

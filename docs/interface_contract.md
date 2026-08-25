@@ -1,9 +1,9 @@
-# Interface Contract — A(NPU RTL / SoC) 확정본 v0.4
+# Interface Contract — A(NPU RTL / SoC) 확정본 v0.5
 
 > **상태:** C 기본 계약 수용·구현 완료. B 확인 항목과 A Phase 3 확장 회신 대기.
 > **기준 문서:** `TEAM_COMMON_AI_INTEGRATION_SPEC.md` **v1.5**
 > **작성 시점:** NPU Core RTL 구현 + Golden 일치 검증 완료 후
-> **갱신:** 2026-08-24 — C 회신 001~003 승인 상태 반영. Interface 값 변경 없음.
+> **갱신:** 2026-08-25 — C Laser 수동 재무장 정책과 `CONTROL_STAT[16]` 반영.
 >
 > 공통 스펙에서 이미 Freeze된 항목(Weight Layout OIHW, Bias 미사용,
 > Rounding ties-away-from-zero, Requantize M×2^24 / >>24, Clamp, Heatmap Mapping,
@@ -213,7 +213,7 @@ WEIGHT_ROM      = 770 B x 8 bank
 | 배치배선 `npu_core` (OOC) | LUT 573 (1.08%), FF 279, BRAM 8 tile (5.71%), DSP 12 (5.45%) |
 | 배치배선 `top_system` (OOC) | LUT 1060 (1.99%), FF 849, BRAM 8 tile, DSP 12 |
 | **Bitstream 전체 시스템** | LUT 1441 (2.71%), FF 1392 (1.31%), BRAM 8, DSP 12 |
-| Timing @100MHz | **MET** — 전체 시스템 배치배선 WNS **+0.782 ns** / WHS +0.043 ns, Fmax **107.7 MHz** |
+| Timing @100MHz | **MET** — 전체 시스템 배치배선 WNS **+0.782 ns** / WHS +0.043 ns, Fmax **108.5 MHz** |
 | NPU Latency | **125,845 cycle = 1.258 ms @100MHz** |
 | 산출물 | `results/npu_soc.bit` , `results/npu_soc.xsa` |
 
@@ -257,6 +257,21 @@ FCLK_CLK0 = 100 MHz = NPU clk = s_axi_aclk   (단일 클럭 도메인, CDC 없�
 `0x58 SERVO_POS_STAT`, `0x5C CONTROL_STAT` 신규 RO로 공개하고 `TRACK_ERR_X/Y`는
 유지 또는 RO Status 교체를 A가 결정한다 (`C_TO_A_REPLY_003.md`).
 
+실제 광원 전환 전 C 안전 확장:
+
+```text
+0x5C CONTROL_STAT bit16 = LASER_REARM_REQUIRED
+
+Power-on Arm HIGH       -> Laser OFF, REARM_REQUIRED=1
+E-stop assert/release   -> Laser OFF, REARM_REQUIRED=1
+Max-on timeout          -> Laser OFF, REARM_REQUIRED=1
+Laser Arm LOW 관측      -> latch clear
+Laser Arm LOW->HIGH 후  -> 새 Target Lock 3회부터 다시 qualification
+```
+
+Servo Enable은 광원 qualification 조건이지만 Laser Arm LOW 이력을 대신하지 않는다.
+따라서 Servo OFF→ON만으로 Power-on/E-stop 수동 재무장이 완료되지 않는다.
+
 ### 10.3 C 의 Event Accumulator 연결 방법
 
 ```text
@@ -288,7 +303,7 @@ STATUS.DONE(bit0) 을 폴링해라. STATUS.BUSY(bit1) 를 폴링하지 마라.
 
 ---
 
-## 11. Pan/Tilt 2 헤드 — v0.4 신규 / C 승인·구현 완료
+## 11. Pan/Tilt 2 헤드 — v0.4 신규 / v0.5 Laser 재무장 확장
 
 정본: 공통 지침 **v1.5 §15.0 / §15.2 / §17**,
 근거서 `docs/D3_FREEZE_REQUEST_A_002.md` rev.2 §2.13~2.15.

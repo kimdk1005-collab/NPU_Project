@@ -1,7 +1,8 @@
 // ---------------------------------------------------------------------------
 // c_event_control_top.v -- C Event/Tracking/2-Head Control integration wrapper
 //
-// A Phase 3의 c_module_stub 포트 골격과 C의 검증 완료 RTL을 연결한다.
+// A Phase 4 문서의 c_module_stub 포트 골격과 C의 검증 완료 RTL을 연결한다.
+// PWM_W는 A stub named-parameter 교체 호환용이며 실제 PWM 폭은 CLK_HZ/PWM_HZ로 정한다.
 // A 골격에 없던 실제 Event Source 입력과 tensor_start를 명시적으로 추가했다.
 // tensor_start는 다음 두 통합 방식 중 하나에서만 사용한다.
 //   1) Direct: tensor_start -> NPU start
@@ -34,11 +35,13 @@
 //     [4] AIM_READY, [5] MANUAL_OVERRIDE, [6] LIMIT_ACTIVE, [7] LIMIT_FAULT
 //     [8] SERVO_ENABLE, [9] HW_ARM, [10] SW_ARM, [11] EMERGENCY_STOP
 //     [12] TENSOR_READY, [13] ACC_READY, [14] OVERRUN, [15] TARGET_VALID
+//     [16] LASER_REARM_REQUIRED
 // ---------------------------------------------------------------------------
 `timescale 1ns / 1ps
 `default_nettype none
 
 module c_event_control_top #(
+    parameter integer PWM_W                 = 20,
     parameter integer CLK_HZ                 = 100_000_000,
     parameter integer SENSOR_W               = 640,
     parameter integer SENSOR_H               = 480,
@@ -129,6 +132,11 @@ module c_event_control_top #(
     output wire                         laser_en
 );
 
+    initial begin
+        if (PWM_W < 1)
+            $error("c_event_control_top: PWM_W compatibility parameter 오류");
+    end
+
     wire event_enable = event_cfg[0];
     wire event_pol = src_pol ^ event_cfg[1];
 
@@ -192,6 +200,7 @@ module c_event_control_top #(
     wire laser_lock_qualified;
     wire laser_target_fresh;
     wire laser_timeout_fault;
+    wire laser_rearm_required;
     wire runtime_limits_active;
     wire runtime_limit_fault;
 
@@ -249,6 +258,7 @@ module c_event_control_top #(
         .laser_lock_qualified(laser_lock_qualified),
         .laser_target_fresh(laser_target_fresh),
         .laser_timeout_fault(laser_timeout_fault),
+        .laser_rearm_required(laser_rearm_required),
         .runtime_limits_active(runtime_limits_active),
         .runtime_limit_fault(runtime_limit_fault)
     );
@@ -282,7 +292,8 @@ module c_event_control_top #(
     };
 
     assign control_stat = {
-        16'd0,
+        15'd0,
+        laser_rearm_required,
         target_valid,
         overrun,
         acc_ready,

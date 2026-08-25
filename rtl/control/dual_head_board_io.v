@@ -121,6 +121,7 @@ module dual_head_board_io #(
     wire laser_lock_qualified;
     wire laser_target_fresh;
     wire laser_timeout_fault;
+    wire laser_rearm_required;
     wire [7:0] camera_pan_pos;
     wire [7:0] camera_tilt_pos;
     wire [7:0] laser_pan_pos;
@@ -232,6 +233,7 @@ module dual_head_board_io #(
         .laser_lock_qualified (laser_lock_qualified),
         .laser_target_fresh   (laser_target_fresh),
         .laser_timeout_fault  (laser_timeout_fault),
+        .laser_rearm_required (laser_rearm_required),
         .runtime_limits_active(),
         .runtime_limit_fault  ()
     );

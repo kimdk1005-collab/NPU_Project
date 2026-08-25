@@ -3,7 +3,7 @@
 > **작성:** A
 > **대상:** C
 > **기준:** `TEAM_COMMON_AI_INTEGRATION_SPEC.md` **v1.5** §5.3 / §6 / §7 / §14 / **§15.2** / **§20.1** / §26 / §39
-> **갱신:** 2026-08-21 — A Phase 2 완료 + **Pan/Tilt 2 헤드** 반영. §9 AXI Register / §10 PT#2 추가.
+> **갱신:** 2026-08-25 — A Phase 4 문서와 C `c_control_v07` 상태 재조정. §11 포트 골격/추가 포트 확정.
 > **목적:** C의 RTL을 A가 **포트만 연결하면 되는** 형태로 고정
 
 A쪽 NPU Core는 완성·검증되어 있고 C가 붙일 포트를 이미 전부 노출하고 있다.
@@ -192,28 +192,28 @@ target_valid == 0 -> Target Lost (spec §16)
 
 ### Event 입력
 
-- [ ] 같은 좌표 Event 누적됨
-- [ ] Positive / Negative 채널 분리됨
-- [ ] `event_window_end`에서 Tensor 확정
-- [ ] 다음 Window 시작 시 버퍼 초기화
-- [ ] 범위 밖 좌표 무시
-- [ ] 0~127 saturation 확인
-- [ ] 저장 Event Trace 입력 테스트 PASS
+- [x] 같은 좌표 Event 누적됨
+- [x] Positive / Negative 채널 분리됨
+- [x] `event_window_end`에서 Tensor 확정
+- [x] 다음 Window 시작 시 버퍼 초기화
+- [x] 범위 밖 좌표 무시
+- [x] 0~127 saturation 확인
+- [x] 저장 Event Trace 입력 테스트 PASS
 
 ### Servo / Tracking
 
-- [ ] `target_x = 10` → Pan Left
-- [ ] `target_x = 32` → Hold
-- [ ] `target_x = 50` → Pan Right
-- [ ] Tilt 동일
-- [ ] `abs(error) <= 4` → Hold (Dead Zone)
-- [ ] Servo Angle Limit 동작
-- [ ] `target_valid = 0` → Hold + Laser OFF
+- [x] `target_x < 32` → Pan Left
+- [x] `target_x = 32` → Hold
+- [x] `target_x > 32` → Pan Right
+- [x] Tilt 동일
+- [x] `abs(error) <= 4` → Hold (Dead Zone)
+- [x] Servo Angle Limit 동작
+- [x] `target_valid = 0` → Hold + Laser OFF
 
 ### Laser
 
-- [ ] LOCK_ZONE / SAFE_ZONE / Emergency 조건 확인
-- [ ] Emergency OFF 즉시 동작
+- [x] LOCK_ZONE / SAFE_ZONE / Emergency 조건 확인
+- [x] Emergency OFF와 수동 재무장 동작
 
 ---
 
@@ -260,14 +260,14 @@ c_deliver_v01.zip
 
 ## 7. C 체크리스트
 
-- [x] `rtl/event/`, `rtl/control/` 구현 파일 전달
-- [x] 각 모듈 단위/통합 TB 존재 + 자동판정 249 PASS
+- [x] `rtl/event/`, `rtl/control/` 실제 C RTL 전달
+- [x] 단위/통합/KY-008 TB 12종 존재 — 자동판정 **287 PASS, errors=0**
 - [x] `ext_addr = (polarity<<12)|(y<<6)|x` 주소식 준수
 - [x] Event Count 0~127 saturation
 - [x] `npu_busy == 1`일 때 쓰기 안 함
 - [x] Dead Zone >= 4
 - [x] `target_valid = 0` 시 Hold + Laser OFF
-- [x] `handoff/C_EVENT_CONTROL_HANDOFF.md`
+- [x] `handoff/C_EVENT_CONTROL_HANDOFF.md` (`c_control_v07`)
 - [x] A 소유 `top_system.v` / 통합 XDC / Block Design 미수정
 
 ---
@@ -281,9 +281,9 @@ c_deliver_v01.zip
 | 3 | Event Window 값 (5 ms / 10 ms) 결정됐는지 — spec §21 빈칸 | **A/B 결정 대기** — C는 CR C-002에서 33.3 ms 제안 |
 | 4 | Servo Command Format — spec §21 빈칸 | **C 구현 완료 / A 승인 대기** — CR C-001 |
 | 5 | `docs/D3_FREEZE_REQUEST_A_002.md` 승인 (AXI Register Bit Field) | **C 기본 계약 수용·구현 완료** — 회신 002/003 |
-| 6 | `0x20`~`0x34` / `0x48`~`0x54` 방향 (RW+출력 / RO+입력) | **RW Manual Override 채택 / 신규 RO는 A 회신 대기** — 회신 003 |
+| 6 | `0x20`~`0x34` / `0x48`~`0x54` 방향 (RW+출력 / RO+입력) | **RW Manual Override 채택 / 신규 RO는 A 회신 대기** — 회신 003/004 |
 | 7 | **PT#2 좌표 변환식 (§10.1) 동의 여부** | **C 수용·구현 완료** — 회신 002 |
-| 8 | Servo 4채널 PWM 핀 (어느 PMOD 쓸지) | **C JD 배치 제안·실물 검증 완료 / A XDC 반영 대기** |
+| 8 | Servo 4채널 PWM 핀 (어느 PMOD 쓸지) | **C JD 배치 제안·실물 검증 완료 / A 통합 XDC 반영 대기** |
 
 ---
 
@@ -355,8 +355,8 @@ evt_we / evt_addr / evt_data / input_stat  -> xlconstant 0 으로 묶여 있음
 event_cfg / pan_cmd / ... / track_err_y    -> 미연결 (합성에서 제거됨)
 ```
 
-C 모듈이 오면 A 가 tie 를 지우고 실제로 연결한 뒤 `sim/run_bd.tcl` 로
-리소스·타이밍을 다시 측정한다.
+C 모듈은 전달 완료됐다. A가 tie를 지우고 `c_event_control_top`과 §11 추가 포트를
+연결한 뒤 `sim/run_bd.tcl`로 리소스·타이밍을 다시 측정한다.
 
 ---
 
@@ -440,3 +440,90 @@ Servo 채널  2 -> 4  (PAN1 / TILT1 / PAN2 / TILT2)
 전류        2배. 외부 5V 전원 용량 확인. 보드 5V 에서 뽑지 마라.
 PWM 핀      4개 필요. 어느 PMOD 쓸지 알려주면 A 가 XDC 에 추가한다.
 ```
+
+---
+
+## 11. A Phase 4 포트 골격과 C 실제 모듈 — `c_event_control_top.v`
+
+A가 통합 측정용으로 만든 `rtl/integration/c_module_stub.v`의 기본 포트는
+C의 `rtl/control/c_event_control_top.v`와 일치한다. 다만 실제 Event Source,
+물리 Arm/E-stop, START 및 RO 상태 포트는 stub에 없으므로 A 통합 시 추가해야 한다.
+
+```verilog
+module c_module_stub #(parameter PWM_W = 20) (
+    input  wire        clk, rstn,
+    // AXI Register 에서 오는 설정 (C 소유)
+    input  wire [31:0] event_cfg, pan_cmd, tilt_cmd, laser_ctrl, safe_limit,
+    input  wire [31:0] track_err_x, track_err_y,
+    input  wire [31:0] pan2_cmd, tilt2_cmd, safe_limit2, laser_cal,
+    // NPU 결과 (A -> C)
+    input  wire        npu_busy, npu_done, target_valid,
+    input  wire [5:0]  target_x, target_y,
+    input  wire signed [7:0] target_score,
+    // Event Tensor 기록 (C -> A)
+    output reg         evt_we,
+    output reg  [12:0] evt_addr,
+    output reg  signed [7:0] evt_data,
+    output wire [31:0] input_stat,
+    // 외부 핀
+    output wire [3:0]  servo_pwm,   // {TILT2, PAN2, TILT1, PAN1}
+    output wire        laser_en
+);
+```
+
+실제 C 모듈에 들어 있는 것:
+
+```text
+1. Servo PWM 4채널 + Slew/동적 Safe Limit
+2. Tracking/PT#2 좌표 변환 + Runtime `LASER_CAL`
+3. Event Adapter + Ping-Pong Accumulator + CHW 8192-byte 전송
+4. Laser Fail-Closed Interlock + Power-on/E-stop/max-on 수동 재무장
+```
+
+stub 대비 필수 추가 포트:
+
+```text
+src_valid/src_x/src_y/src_pol/src_window_end
+tensor_start
+laser_arm_hw/emergency_stop_hw
+servo_pos_stat[31:0]/control_stat[31:0]
+```
+
+정확한 연결과 START 단일 소유권은 `C_TO_A_REPLY_004.md` 및
+`handoff/C_EVENT_CONTROL_HANDOFF.md` §11을 따른다.
+
+### 통합 사전측정 결과 — 자리표시자 기준
+
+| | A 단독 | 자리표시자 포함 |
+|---|---:|---:|
+| Slice LUT | 1441 (2.71%) | 1785 (3.36%) |
+| Slice Register | 1392 | 1565 |
+| WNS @100MHz | +0.782 ns | **+1.121 ns (MET)** |
+
+**C 규모의 로직이 들어와도 100 MHz 는 안 깨진다.**
+FPGA 는 96% 이상 비어 있다. 여유 걱정 말고 짜면 된다.
+
+> 위 수치는 **A 가 만든 자리표시자**의 것이지 C 실물의 수치가 아니다.
+> C 실물이 오면 다시 잰다.
+
+### 빌드
+
+```bash
+# A 단독 (기본)
+cd build && vivado -mode batch -source ../sim/run_bd.tcl
+
+# 자리표시자 포함
+cd build && vivado -mode batch -source ../sim/run_bd.tcl -tclargs -stub
+```
+
+### 핀 (임시)
+
+`constraints/zybo_z7_20_cstub.xdc` — Pmod JC 에 임시 배치.
+
+```text
+servo_pwm[0] PAN1  V15      servo_pwm[2] PAN2  T11
+servo_pwm[1] TILT1 W15      servo_pwm[3] TILT2 T10
+laser_en           W14      (개발 중에는 LED 로 검증)
+```
+
+**실제로 쓸 커넥터를 알려주면 A 가 바꾼다.**

@@ -24,7 +24,7 @@ v1.2는 A의 Phase 1(Dense NPU Core 구현 + Golden 검증) 완료로 확정된 
 | PE Array 규모 | "D4 합성 후 16 PE 검토" (근거 없음) | **8 PE 실측 확보** — LUT 2.65%, 16 PE 시 1.53x. §10.2 |
 | NPU Latency | 미측정 | **125,845 cycle = 1.258 ms @100MHz**. §18.1 |
 | FPGA Resource | 미측정 | **npu_core LUT 573 / FF 279 / BRAM 8 / DSP 12, 전체 시스템 LUT 1441** (배치배선 후). §18.1 |
-| Timing | 미측정 | **100MHz MET. 전체 시스템 배치배선 후 WNS +0.782 ns, Fmax 107.7 MHz**. §18.1 |
+| Timing | 미측정 | **100MHz MET. 전체 시스템 배치배선 후 WNS +0.782 ns, Fmax 108.5 MHz**. §18.1 |
 | Conv 경계 규칙 | 미기재 | **Padding=1 / Cross-Correlation Freeze 완료** (공통스펙 v1.3 §8.1) |
 | Tensor Memory Order | 미기재 | **CHW — C 승인 완료, B 확인 대기** (공통스펙 §7.4) |
 | Golden 검증 | D3 Gate 예정 | **Conv1~4 + Argmax 전수 bit-exact PASS** (임시 weight 기준) |
@@ -683,7 +683,7 @@ xc7z020clg400-1, 100 MHz 제약:
 Timing @100MHz : MET  (전부 배치배선 후 실측)
   npu_core 단독 (OOC)         WNS = +0.994 ns , WHS = +0.054 ns , Fmax 111.0 MHz
   top_system (+AXI, OOC)      WNS = +0.302 ns , WHS = +0.100 ns  (OOC 리셋트리 부재 인공물)
-  전체 시스템 (bitstream)     WNS = +0.782 ns , WHS = +0.043 ns , Fmax 107.7 MHz
+  전체 시스템 (bitstream)     WNS = +0.782 ns , WHS = +0.043 ns , Fmax 108.5 MHz
 ```
 
 > **v1.2 의 LUT 1373 / WNS +0.266 ns / Fmax 102.7 MHz 는 무효다.**
@@ -1161,7 +1161,7 @@ Zynq PS 의 DDR3 타이밍·MIO·클럭 preset 이 여기서 자동으로 채워
                         LUT    FF     BRAM   DSP    WNS        Fmax
 npu_core 단독 (OOC)      573    279    8      12     +0.994 ns  111.0 MHz
 top_system (+AXI, OOC)  1060    849    8      12     +0.302 ns  (OOC 인공물)
-전체 시스템 (bitstream) 1441   1392    8      12     +0.782 ns  107.7 MHz
+전체 시스템 (bitstream) 1441   1392    8      12     +0.782 ns  108.5 MHz
 
 전체 대비 : LUT 2.71% / FF 1.31% / BRAM 5.71% / DSP 5.45%
 산출물    : results/npu_soc.bit , results/npu_soc.xsa
@@ -1433,18 +1433,20 @@ top_system.v
 ## 21.1 v1.2 시점 진척 (2026-08-21)
 
 ```text
-A : D4 ~ D7 의 NPU Core 부분을 조기 완료.
-    임시 weight/golden 을 A 가 직접 만들어 B 산출물을 기다리지 않고 진행함.
-    Conv1~4 + Argmax 전수 bit-exact PASS, 100MHz Timing MET.
-    남은 D7 작업 = AXI-Lite wrapper + Vivado Block Design.
+A : NPU Core + AXI-Lite + Block Design + PS 소프트웨어 완료.
+    임시 weight/golden으로 Conv1~4 + Argmax 전수 bit-exact PASS, 100MHz Timing MET.
+    A 제공 기록 기준 2026-08-24 Zybo Z7-20 A-only 기능 판정 16/16 PASS.
+    남은 작업은 B 실제 weight/golden 재검증과 C 실제 모듈 전체 통합.
 
 B : Dataset 파이프라인(ai/dataset.py) 작성, Webcam Frame Difference 경로.
     Conv 경계 규칙 Freeze 요청 -> A 승인 완료.
     남은 작업 = CNN 학습 / INT8 / Integer Golden / Test Vector 3종.
 
 C : Event Adapter/Accumulator, 4축 Servo, PT#2 좌표 변환, Fail-Closed Interlock,
-    A Phase 3 연동 래퍼 구현 완료. 249 PASS와 100 MHz OOC 타이밍 확인.
-    남은 작업은 A 실제 RTL 통합, 카메라 Closed-loop, 2 m Offset 실측.
+    A Phase 3 연동 래퍼와 KY-008 수동 재무장/100 ms Gate 준비 완료.
+    C 자동판정 12종 287 PASS. 기존 D6 C 래퍼 100 MHz OOC 타이밍 확인.
+    남은 작업은 A 실제 RTL 통합, High-side driver 실측, 카메라 Closed-loop,
+    실제 광출력 확인과 2 m Offset 실측.
 ```
 
 **GATE A(D3)는 B의 Integer Golden Model 제출로만 최종 통과된다.**
@@ -1824,6 +1826,6 @@ Sparse/Zero-Skip이나 SNN을 위해 Dense NPU와 Closed-loop Tracking 완성도
 
 **문서 버전:** v1.4 — Pan/Tilt 2 헤드 구성 반영본 (2026-08-22 Dataset/Label 운영 정정 포함)
 **이전 버전:** v1.3 A Phase 1 + Phase 2 실측 반영본
-**상태:** Sparse·Zero-Skip 선택 확장 유지 / A Phase 1+2 완료 / **Pan/Tilt 2 헤드 C 수용·구현 완료, A 전체 통합 대기**
-**갱신일:** 2026-08-22
-**동반 문서:** 공통 지침 v1.5, 역할분담 v1.6, `docs/A_NPU_HANDOFF.md`, `docs/D3_FREEZE_REQUEST_A_002.md`
+**상태:** Sparse·Zero-Skip 선택 확장 유지 / A Phase 1~4 기록 반영 / **Pan/Tilt 2 헤드·KY-008 사전 안전 C 구현 완료, A 전체 통합 대기**
+**갱신일:** 2026-08-25
+**동반 문서:** 공통 지침 v1.5, 역할분담 v1.6, `docs/A_NPU_HANDOFF.md`, `docs/D3_FREEZE_REQUEST_A_002.md`, `docs/integration_manifest.md`

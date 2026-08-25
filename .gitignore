@@ -50,6 +50,7 @@ vivado_proj/
 vivado_bringup/
 vivado_laser_bringup/
 vivado_dual_head_bringup/
+vivado_ky008_bringup/
 
 # OS
 .DS_Store

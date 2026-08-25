@@ -170,12 +170,20 @@ module tb_dual_head_board_io;
         check("T8 emergency stop RED off", laser_red, 0);
         sw[3] = 1'b0;
         run_frames(5);
-        check("T8 re-confirm after E-stop", laser_red, 1);
+        check("T8 E-stop release stays off", laser_red, 0);
+        check("T8 manual rearm required", dut.laser_rearm_required, 1);
+        sw[1] = 1'b0;
+        repeat (8) @(posedge sysclk);
+        check("T8 Arm LOW clears rearm", dut.laser_rearm_required, 0);
+        sw[1] = 1'b1;
+        run_frames(5);
+        check("T8 explicit rearm restores RED", laser_red, 1);
 
         // 연속 ON 500 ms 제한.
         run_frames(30);
         check("T9 max-on RED off", laser_red, 0);
         check("T9 timeout fault latched", dut.laser_timeout_fault, 1);
+        check("T9 timeout requires rearm", dut.laser_rearm_required, 1);
 
         // Arm off로 fault를 clear한 뒤 Servo disable까지 확인한다.
         sw[1] = 1'b0;

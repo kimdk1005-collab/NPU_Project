@@ -1,12 +1,15 @@
 # A — NPU Handoff  (a_npu_v01 / a_soc_v01)
 
 > 기준: `TEAM_COMMON_AI_INTEGRATION_SPEC.md` v1.5 §26
-> 상태: **Dense INT8 NPU Core + AXI4-Lite + Block Design + Bitstream 완료.**
->       Golden bit-exact 검증 완료. C 모듈 전달도 완료됐으며 남은 것은
->       **A 산출물의 현재 저장소 합류, 보드 실동작, A/C 전체 통합**이다.
-> 날짜: 2026-08-21 (Phase 2 반영)
-> 상태 정정: 2026-08-24 — 이 문서는 A 산출물 Handoff 기록이다. 현재 체크아웃에
-> 실제 A RTL/PS/결과물이 있는지는 `PROJECT_STATUS.md`를 최종 기준으로 판단한다.
+> 상태: **NPU Core + AXI4-Lite + Block Design + Bitstream + PS 소프트웨어 + Phase 4 보드 검증 완료.**
+>       A 제공 기록 기준 보드 기능 판정 16/16 PASS. C 모듈도 전달 완료됐으며,
+>       남은 것은 **B 실제 weight/golden과 A/C 실제 전체 시스템 통합**이다.
+> 날짜: 2026-08-25 (A Phase 4 문서 + C 최신 상태 조정)
+>
+> 산출물: `results/npu_soc.bit` , `npu_soc.xsa` , **`npu_test.elf`**
+>
+> 상태 주의: 현재 C 체크아웃에는 위 A RTL/PS/결과물이 없다. 실제 파일 존재 여부와
+> 지문은 `integration_manifest.md`를 기준으로 A 브랜치에서 다시 확인한다.
 
 ---
 
@@ -47,7 +50,7 @@ RESET 규칙 = rstn 해제 후 최소 2 cycle 뒤 start 인가
 Timing     = 100 MHz MET (xc7z020clg400-1, 배치배선 후 실측)
              npu_core 단독 (OOC)     WNS +0.994 ns / WHS +0.054 ns / Fmax 111.0 MHz
              top_system (+AXI, OOC)  WNS +0.302 ns  (OOC 인공물)
-             전체 시스템 bitstream   WNS +0.782 ns / WHS +0.043 ns / Fmax 107.7 MHz
+             전체 시스템 bitstream   WNS +0.782 ns / WHS +0.043 ns / Fmax 108.5 MHz
              실제 시스템 클럭 = PS7 FCLK_CLK0 = 100 MHz (clk_fpga_0)
 ```
 
@@ -95,7 +98,7 @@ Dead Zone = C 는 abs(error) <= 4 를 최소 Center/Lock 범위로 사용 (spec 
 Base     : 0x4000_0000 , Range 0x1000 (4 KB)
 경로     : PS7 M_AXI_GP0 -> AXI SmartConnect -> top_system.s_axi
 검증     : tb_npu_axi 84 check PASS / tb_top_system 17 check PASS
-bit field: 공통 지침 v1.5 §20.1  (C 기본 계약 수용·구현 완료, A Phase 3 확장 회신 대기)
+bit field: 공통 지침 v1.5 §20.1  (C 기본 계약 수용·구현 완료, A 확장 회신 대기)
 Pan/Tilt : 2 헤드. PT#1 카메라 0x20/0x24/0x2C , PT#2 레이저 0x48/0x4C/0x50/0x54
            PT#2 각도는 공통 지침 §15.2 좌표 변환식 필수 (C 담당)
 근거서   : docs/D3_FREEZE_REQUEST_A_002.md
@@ -119,8 +122,9 @@ Pan/Tilt : 2 헤드. PT#1 카메라 0x20/0x24/0x2C , PT#2 레이저 0x48/0x4C/0x
 
 ```text
 A_NPU                 = a_npu_v01
-PROJECT_SPEC          = common_v1.2
-ROLE_SPEC             = role_v1.3
+PROJECT_SPEC          = common_v1.5
+ROLE_SPEC             = role_v1.6
+INTERFACE             = ifc_v0.5
 
 Current Model Version = model_v01_dummy      <- B 실물 미수령
 Weight Version        = weight_v01_dummy     <- A 가 tools/gen_dummy.py 로 생성
@@ -142,8 +146,8 @@ L1. 입력 버퍼가 내부 ping-pong 버퍼를 공유
     -> 현재 Latency 1.258 ms << Window 5~10 ms 라 MVP 문제 없음.
     -> 필요 시 입력 전용 8KB 버퍼 추가 (BRAM 4개, 현재 사용률 5.71%)
 
-L2. [해소] AXI-Lite / Block Design / Bitstream 완료 (Phase 2).
-    남은 것은 보드 실동작 확인뿐이다.
+L2. [해소] AXI-Lite / Block Design / Bitstream 완료 (Phase 2),
+    A 제공 기록 기준 Phase 4 실보드 기능 판정 16/16 PASS.
 
 L3. Conv4 는 cout=1 이라 PE 8개 중 1개만 사용
     -> 전체 cycle 의 2.5% 라 무시. 구조 변경 안 함.
@@ -161,10 +165,11 @@ L7. [해소] 100 MHz Timing 여유 2.7% 문제.
     npu_pe 에 (* use_dsp = "yes" *) 적용 -> 여유 2.7% -> 7.1%.
     Fallback(PS FCLK 50 MHz, Latency 2.52 ms)은 그대로 남겨 둔다.
 
-L8. BD 안에서 C 인터페이스가 0 으로 묶여 있다.
+L8. A-only BD 안에서 C 인터페이스가 0 으로 묶여 있다.
     evt_we/evt_addr/evt_data/input_stat -> xlconstant 0
     event_cfg/pan_cmd/tilt_cmd/laser_ctrl/safe_limit/track_err_* -> 미연결(합성 제거)
-    -> C 모듈이 오면 tie 를 지우고 실제 연결. 그때 리소스/타이밍 재측정 필수.
+    -> C `c_event_control_top.v`는 전달 완료. A가 tie/stub를 실제 모듈로 교체하고
+       추가 Event/안전/상태 포트를 연결한 뒤 리소스/타이밍 재측정 필수.
 
 L9. PS 인터럽트 핸들러 미작성.
     IRQ_F2P 배선과 CTRL.IRQ_EN 은 검증했지만 Vitis 쪽 핸들러는 없다.
@@ -185,7 +190,7 @@ xc7z020clg400-1 (Zybo Z7-20), 100 MHz 제약. **전부 배치배선 후 실측.*
 ```text
 npu_core 단독 (OOC)      WNS = +0.994 ns , WHS = +0.054 ns , Fmax 111.0 MHz
 top_system (+AXI, OOC)   WNS = +0.302 ns , WHS = +0.100 ns   (OOC 리셋트리 부재 인공물)
-전체 시스템 (bitstream)  WNS = +0.782 ns , WHS = +0.043 ns , Fmax 107.7 MHz
+전체 시스템 (bitstream)  WNS = +0.782 ns , WHS = +0.043 ns , Fmax 108.5 MHz
 -> 전부 TIMING MET
 
 산출물: results/npu_soc.bit , results/npu_soc.xsa
@@ -246,3 +251,37 @@ cd build && vivado -mode batch -source ../sim/run_synth.tcl
 | 3 | B | 실제 `conv{1..4}_weight_int8.mem`, `requant_M.mem`, layer별 golden hex |
 | 4 | C | `ext_we/ext_addr/ext_data` 수용·구현 완료 (`C_TO_A_REPLY_001.md`) |
 | 5 | B/C | C 승인 완료, B 확인 대기 (`docs/D3_FREEZE_REQUEST_A_001.md`) |
+
+---
+
+## 11. PS 소프트웨어 및 Phase 4 보드 검증
+
+```text
+sw/npu_regs.h      AXI 레지스터 맵 (이 문서 §5 와 동일 내용)
+sw/npu_driver.c    제어 드라이버. Xilinx BSP 의존 없음
+sw/npu_test.c      보드 자체시험 STEP 1~5
+results/npu_test.elf  Vitis 빌드 결과
+```
+
+검증: `cd sw && make test` — 호스트 목으로 **45 check PASS** (보드 불필요).
+목(`sw/sim/npu_mock.c`)은 `npu_axi.v` 와 같은 계약을 구현한 것이다.
+
+### Phase 4 실보드 결과 — A 제공 기록
+
+```text
+A-only Zybo Z7-20 STEP 1~5 기능 판정 16/16 PASS (2026-08-24)
+VERSION=0x4E50_0100 / INBUF_ADDR=8192
+target=(52,28), score=127, cycle=125845 — dummy Golden과 일치
+LD0 heartbeat / LD2 target_valid 확인
+```
+
+이 기록은 A가 전달한 `integration_manifest.md` 기준이다. 현재 C 체크아웃에는
+`results/`와 UART 원본 로그가 없으므로 C에서 독립 재검증한 결과로 표기하지 않는다.
+
+### C 에게
+
+`rtl/integration/c_module_stub.v`는 A가 만든 자리표시자이며, C 실제 산출물은
+`rtl/control/c_event_control_top.v`다. 기본 AXI/NPU/PWM 포트는 맞지만 stub에 없는
+Event Source, `tensor_start`, 물리 Arm/E-stop, `0x58/0x5C` RO 상태 포트를 추가해야 한다.
+정확한 교체 순서는 `C_TO_A_REPLY_004.md`를 따른다. 자리표시자 측정 WNS +1.121 ns는
+C 실물 수치가 아니며, 실제 통합 후 전체 implementation을 다시 수행한다.
