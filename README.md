@@ -26,6 +26,8 @@ Event Input → 64×64×2 Event Tensor → Tiny CNN → INT8 → Integer Golden 
 | [docs/NPU_DEVELOPMENT_PLAN.md](docs/NPU_DEVELOPMENT_PLAN.md) | 전체 개발 계획 (현재 v1.4) |
 | [docs/TEAM_ROLE_PLAN.md](docs/TEAM_ROLE_PLAN.md) | A/B/C 역할과 일정 (현재 v1.6) |
 | [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | 팀 공유용 최신 진행상황, 블로커, 다음 액션 |
+| [docs/integration_manifest.md](docs/integration_manifest.md) | A/C 통합 전 버전·지문·stub 교체 조건 대조 |
+| [docs/C_TO_A_REPLY_004.md](docs/C_TO_A_REPLY_004.md) | A Phase 4 stub → C 실제 모듈 교체 계약 |
 | [docs/D3_CHECKLIST_C.md](docs/D3_CHECKLIST_C.md) | C Day 3 완료 기준과 검증 결과 |
 | [docs/D4_CHECKLIST_C.md](docs/D4_CHECKLIST_C.md) | C Day 4 완료 기준과 검증 결과 |
 | [docs/D5_CHECKLIST_C.md](docs/D5_CHECKLIST_C.md) | C Day 5 — 2-Head 4축 제어와 LED Interlock 검증 |
@@ -208,5 +210,5 @@ Commit 형식: `[C][CTRL] Add servo dead-zone logic`
 | `rtl/control/laser_head_controller.v` | Runtime LASER_CAL 포함 | `tb_laser_head_controller` 27/27 PASS |
 | `rtl/control/laser_interlock.v` | Power-on/E-stop 수동 재무장 포함 | `tb_laser_interlock` 38/38 PASS |
 | `rtl/control/dual_head_control.v` | 4 Servo + 재무장 통합 | `tb_dual_head_control` 33/33 PASS |
-| `rtl/control/c_event_control_top.v` | A Phase 3 + 재무장 상태 | `tb_c_event_control_top` 27/27 PASS |
+| `rtl/control/c_event_control_top.v` | A Phase 4 stub 호환 + 재무장 상태 | `tb_c_event_control_top` 27/27 PASS |
 | `rtl/control/ky008_laser_board_io.v` | KY-008 100 ms 안전 게이트 Top | 19/19 PASS, DRC 0 Error, WNS +1.529 ns / WHS +0.153 ns |

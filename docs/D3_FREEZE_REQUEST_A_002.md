@@ -408,5 +408,6 @@ B 의 input_event.hex 덤프 순서와 PS 의 적재 순서가 동일하다.
 | C | §2.1 `CTRL.INPUT_SRC` | ✅ C 권장 MUX 회신, A 연결 결정 대기 | 2026-08-24 |
 | B | §5 참고 확인 | ⏳ 대기 | |
 
-C 회신 근거는 `C_TO_A_REPLY_002.md`와 `C_TO_A_REPLY_003.md`다. A가 START MUX와
-신규 RO 상태 Register를 확정하면 공통 지침의 Phase 3 통합 항목을 최종 완료 처리한다.
+C 회신 근거는 `C_TO_A_REPLY_002.md`, `C_TO_A_REPLY_003.md`,
+`C_TO_A_REPLY_004.md`다. A가 START MUX와 신규 RO 상태 Register를 확정하면
+공통 지침의 Phase 3 통합 항목을 최종 완료 처리한다.

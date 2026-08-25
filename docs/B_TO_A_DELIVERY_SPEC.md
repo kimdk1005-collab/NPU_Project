@@ -196,7 +196,7 @@ case02 : 표적 없음 또는 score 낮은 프레임 (target_valid 검증용)
 
 ---
 
-## 6. Handoff 문서 — B 제출 시 생성할 `handoff/B_MODEL_HANDOFF.md`
+## 6. Handoff 문서 — `handoff/B_MODEL_HANDOFF.md`
 
 spec §26 필수 항목:
 

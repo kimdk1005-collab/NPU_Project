@@ -58,6 +58,7 @@ module tb_c_event_control_top;
     always #500 clk = ~clk;
 
     c_event_control_top #(
+        .PWM_W(20),
         .CLK_HZ(CLK_HZ),
         .SENSOR_W(64), .SENSOR_H(64), .SRC_COORD_W(6),
         .WINDOW_SRC(1), .WINDOW_US(10),

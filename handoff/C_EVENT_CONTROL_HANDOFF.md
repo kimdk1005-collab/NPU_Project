@@ -50,7 +50,7 @@
 | `rtl/control/laser_head_controller.v` | C | **런타임 LASER_CAL 포함** (D6) | `tb_laser_head_controller` 27/27 PASS |
 | `rtl/control/laser_interlock.v` | C | **Power-on/E-stop 수동 재무장 포함** | `tb_laser_interlock` 38/38 PASS |
 | `rtl/control/dual_head_control.v` | C | **4-Servo + Manual/동적 Limit/재무장** | `tb_dual_head_control` 33/33 PASS |
-| `rtl/control/c_event_control_top.v` | C | **A Phase 3 연동 + 재무장 상태** | `tb_c_event_control_top` 27/27 PASS |
+| `rtl/control/c_event_control_top.v` | C | **A Phase 4 stub 호환 + 재무장 상태** | `tb_c_event_control_top` 27/27 PASS |
 | `rtl/control/ky008_laser_board_io.v` | C | **KY-008 100 ms 안전 게이트 Top** | `tb_ky008_laser_board_io` 19/19 PASS |
 
 ---
@@ -829,11 +829,15 @@ C 측 비교 연산은 전부 signed로 처리한다.
 
 ---
 
-## 11. A Phase 3 통합 계약 — `c_event_control_top.v` (D6)
+## 11. A Phase 4 통합 계약 — `c_event_control_top.v` (D6 + 문서 재조정)
 
 `rtl/control/c_event_control_top.v`는 C 소유 모듈만 조합하며 A 소유
 `rtl/integration/c_module_stub.v`를 직접 수정하지 않는다. A는 stub 대신 이 모듈을
 인스턴스하거나 동일 포트로 감싼다.
+
+A가 전달한 Phase 4 문서의 A-only 보드 판정 16/16은 확인했지만, 현재 C 체크아웃에는
+A RTL/PS/결과물이 없으므로 실제 A/C 전체 implementation은 아직 수행하지 않았다.
+교체 체크리스트의 정본은 `docs/C_TO_A_REPLY_004.md`다.
 
 ### 11.1 A stub 대비 추가 포트
 

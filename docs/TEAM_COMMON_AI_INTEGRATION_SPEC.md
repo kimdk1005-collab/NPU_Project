@@ -1397,7 +1397,7 @@ Timing @100MHz : MET   (전부 배치배선 후 실측)
 
   npu_core 단독 (OOC)         WNS = +0.994 ns , WHS = +0.054 ns , Fmax 111.0 MHz
   top_system (+AXI, OOC)      WNS = +0.302 ns , WHS = +0.100 ns , Fmax 103.1 MHz
-  전체 시스템 (bitstream)     WNS = +0.782 ns , WHS = +0.043 ns , Fmax 107.7 MHz
+  전체 시스템 (bitstream)     WNS = +0.782 ns , WHS = +0.043 ns , Fmax 108.5 MHz
 
   top_system OOC 가 전체 시스템보다 나쁜 것은 OOC 인공물이다.
   OOC 에는 리셋 트리가 없어 s_axi_aresetn 이 850개 FF 로 긴 배선을 탄다.
@@ -1966,21 +1966,22 @@ Known Limitation
 
 # 27. 통합 전에 반드시 확인할 Version 표
 
-`integration_manifest.md`를 만든다.
+현재 정본 값은 `integration_manifest.md`에서 확인한다. 아래는 형식 예시다.
 
 예:
 
 ```text
-PROJECT_SPEC     = common_v1.0
-ROLE_SPEC        = role_v1.3
+PROJECT_SPEC     = common_v1.5
+ROLE_SPEC        = role_v1.6
+INTERFACE        = ifc_v0.5
 
 MODEL            = model_v03
 WEIGHT           = weight_v03
 GOLDEN           = golden_v03
 
-A_NPU            = a_npu_v05
+A_NPU            = a_npu_v01
 C_EVENT          = c_event_v04
-C_CONTROL        = c_control_v03
+C_CONTROL        = c_control_v07
 
 BITSTREAM        = build_v02
 ```
@@ -2516,7 +2517,7 @@ A NPU Core / SoC 구현 상태 (a_npu_v01 + a_soc_v01, 전부 배치배선 후 �
 PE 8개, output-stationary, xc7z020clg400-1 (Zybo Z7-20)
   npu_core 단독        LUT 573  / FF 279  / BRAM 8 / DSP 12 , WNS +0.994 ns , Fmax 111.0 MHz
   top_system (+AXI)    LUT 1060 / FF 849  / BRAM 8 / DSP 12 , WNS +0.302 ns (OOC 인공물)
-  전체 시스템 bitstream LUT 1441 / FF 1392 / BRAM 8 / DSP 12 , WNS +0.782 ns , Fmax 107.7 MHz
+  전체 시스템 bitstream LUT 1441 / FF 1392 / BRAM 8 / DSP 12 , WNS +0.782 ns , Fmax 108.5 MHz
 Timing @100MHz MET. Bitstream + XSA 생성 완료 (results/npu_soc.bit, results/npu_soc.xsa).
 Inference Latency = 125,845 cycle = 1.258 ms
 Event Tensor 전송 = 8192 cycle = 82 us (PS/AXI 경로는 약 16,400 cycle = 164 us)
@@ -2536,7 +2537,7 @@ PS 는 STATUS.BUSY 가 아니라 STATUS.DONE(sticky) 을 폴링해야 한다.
   Laser ON 조건에 PT#2 SAFE_LIMIT2 검사가 반드시 들어간다 (§17).
 
 현재 `[~]`로 표시된 B 확인 및 A Phase 3 확장 항목은 아직 최종 Freeze가 아니다.
-C 승인 완료 항목은 §21 체크리스트와 `C_TO_A_REPLY_001~003`을 기준으로 구현한다.
+C 승인 완료 항목은 §21 체크리스트와 `C_TO_A_REPLY_001~004`를 기준으로 구현한다.
 
 공유 규격을 임의 변경하지 마라.
 신호명을 임의 Rename하지 마라.

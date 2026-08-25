@@ -213,7 +213,7 @@ WEIGHT_ROM      = 770 B x 8 bank
 | 배치배선 `npu_core` (OOC) | LUT 573 (1.08%), FF 279, BRAM 8 tile (5.71%), DSP 12 (5.45%) |
 | 배치배선 `top_system` (OOC) | LUT 1060 (1.99%), FF 849, BRAM 8 tile, DSP 12 |
 | **Bitstream 전체 시스템** | LUT 1441 (2.71%), FF 1392 (1.31%), BRAM 8, DSP 12 |
-| Timing @100MHz | **MET** — 전체 시스템 배치배선 WNS **+0.782 ns** / WHS +0.043 ns, Fmax **107.7 MHz** |
+| Timing @100MHz | **MET** — 전체 시스템 배치배선 WNS **+0.782 ns** / WHS +0.043 ns, Fmax **108.5 MHz** |
 | NPU Latency | **125,845 cycle = 1.258 ms @100MHz** |
 | 산출물 | `results/npu_soc.bit` , `results/npu_soc.xsa` |
 

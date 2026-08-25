@@ -1,6 +1,6 @@
 # 프로젝트 진행상황
 
-> 기준점: 2026-08-25 Day 06 A Phase 3 연동 + KY-008 실제 광원 사전 안전 준비 완료
+> 기준점: 2026-08-25 A Phase 4 제공 기록 반영 + C 실제 모듈 교체 계약/KY-008 사전 안전 준비 완료
 >
 > 최종 검증: 2026-08-25, C 자동판정 TB 12개 전체 재실행 결과
 >
@@ -17,6 +17,11 @@ Power-on/E-stop/max-on 뒤 수동 재무장 latch, `CONTROL_STAT[16]`, KY-008 �
 C 래퍼의 기존 D6 OOC implementation은 100 MHz에서
 WNS +1.138 ns / WHS +0.147 ns, DRC 0 Error를 확인했다. 기존 네 Servo와 JD7 RED 실물 결과는 유지되며,
 전체 시스템 기준으로는 A/B 실제 산출물 합류와 Camera/NPU Closed-loop 검증이 남아 있다.
+
+A가 새로 전달한 문서에는 A-only Zybo Z7-20 Phase 4 기능 판정 16/16 PASS가 기록돼
+있다. 다만 현재 C 체크아웃에는 A의 `rtl/npu`, `rtl/integration`, `sw`, `results`가
+없으므로 해당 기록은 `integration_manifest.md`의 지문으로 A 통합 브랜치에서 다시
+대조한다. `C_TO_A_REPLY_004.md`에 stub→C 실제 모듈 교체 조건을 확정했다.
 
 | 전체 성공 기준 | 현재 저장소 상태 | 다음 Gate |
 |---|---|---|
@@ -52,6 +57,8 @@ WNS +1.138 ns / WHS +0.147 ns, DRC 0 Error를 확인했다. 기존 네 Servo와 
 | Zybo Z7-20 제약/Tcl 빌드 경로 | 준비 완료 | WNS +0.357 ns, WHS +0.047 ns |
 | 웹캠 Fallback 능력 측정 도구 | 구현 완료 | APC850 기준 640×480 YUYV 30 fps 확인 |
 | C Handoff | `c_control_v07` | A Phase 3 + KY-008 실제 광원 사전 안전 계약 반영 |
+| A Phase 4 문서 조정 | A-only 기능 판정 16/16 기록 수신 | C 상태 회귀 제거, `integration_manifest.md`를 ifc_v0.5/C actual로 갱신 |
+| A/C 교체 계약 | `C_TO_A_REPLY_004.md` | stub 추가 포트, START 단일 소유권, 0x58/0x5C, JD7 전원 경계 확정 |
 
 재현 명령:
 
@@ -94,7 +101,8 @@ Fail-Safe fallback이다. 상세 bit 배치는 `handoff/C_EVENT_CONTROL_HANDOFF.
 - B: CR C-004 채널 순서와 CR C-002의 33.3 ms Window 영향을 검토한다.
 - C: `docs/KY008_PREARRIVAL_CHECKLIST_C.md`의 dummy load 승인표를 먼저 수행한다.
 - C: 레이저 부품 도착 후 광출력/핀/소비전류를 확인하고 2 m에서 FOV Scale과 Offset을 실측한다.
-- A/C: A Phase 3 stub 대신 `c_event_control_top`을 연결하고 실제 NPU Target으로 검증한다.
+- A/C: A Phase 4 문서의 stub 대신 `c_event_control_top`을 연결하고 실제 NPU Target으로 검증한다.
+- A/C: `C_TO_A_REPLY_004.md` 순서로 Event/물리 안전/RO 상태 포트를 추가하고 전체 implementation을 재측정한다.
 - A/C: `event_accumulator` Direct Handshake를 NPU 입력에 연결해 Golden과 비교한다.
 - 팀: A/B 브랜치를 `integration`에 합쳐 이 문서를 전체 프로젝트 기준으로 갱신한다.
 
