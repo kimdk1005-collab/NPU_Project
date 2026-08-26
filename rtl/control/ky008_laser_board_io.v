@@ -1,13 +1,16 @@
 // ---------------------------------------------------------------------------
 // ky008_laser_board_io.v -- KY-008 실제 광원 사전 브링업 전용 Top
 //
-//  KY-008 사양(구매처): S=+5 V supply, middle=NC, -=GND, 650 nm, 30 mA.
-//  laser_gate_cmd는 광원 전원선이 아니다. JD7/U14의 3.3 V 논리 출력이며,
-//  반드시 default-OFF High-side load switch의 Enable만 구동한다.
+//  2026-08-26 수령품 브링업 배선:
+//    S=active-HIGH control, middle=external +5 V, -=common GND.
+//  laser_gate_cmd는 JD7/U14의 3.3 V 논리 출력이다. 수령품 S에는 외부 1 kOhm
+//  직렬 보호를 거쳐 연결하며, KY-008 전원이나 레이저 전류를 직접 공급하지 않는다.
+//  KY-008 변형마다 핀 내부회로가 다르므로 다른 모듈에는 이 배선을 재사용하지 않는다.
 //
 //  외부 필수 경로:
-//    5 V -> fuse/current limit -> Key Arm -> NC E-stop -> load switch -> KY-008 S
-//    JD7 laser_gate_cmd ---------------------------> load switch Enable
+//    5 V -> fuse/current limit -> Key Arm -> NC E-stop -> KY-008 middle
+//    JD7 laser_gate_cmd -> 1 kOhm series protection -> KY-008 S
+//    KY-008 '-' -> external 5 V GND, Zybo GND -> same common GND
 //
 //  Bring-up 제한:
 //    - PT#1/PT#2 Servo pos 112~144

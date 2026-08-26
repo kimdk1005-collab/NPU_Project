@@ -1,11 +1,12 @@
 # ---------------------------------------------------------------------------
-# c_ky008_laser_gate_test.xdc -- KY-008 사전 브링업 전용 제약
+# c_ky008_laser_gate_test.xdc -- KY-008 수령품 브링업 전용 제약
 #   Board : Zybo Z7-20
 #   Top   : rtl/control/ky008_laser_board_io.v
 #
-# JD7/U14는 KY-008의 S 핀이나 5 V 전원에 직접 연결하지 않는다.
-# 3.3 V compatible, default-OFF High-side load switch의 Enable만 구동한다.
-# 실제 5 V 경로에는 별도 Key Arm, NC E-stop, 전류 제한/퓨즈가 필요하다.
+# 2026-08-26 수령품: S=control, middle=+5 V, -=GND로 100 ms 단발 확인.
+# JD7/U14는 외부 1 kOhm 직렬 보호를 거쳐 S만 구동한다. 5 V 전원이나 레이저
+# 전류를 직접 공급하지 않는다. 실제 5 V 경로에는 별도 Key Arm, NC E-stop,
+# 전류 제한/퓨즈가 필요하며 다른 KY-008 변형에는 실물 확인 없이 재사용하지 않는다.
 # ---------------------------------------------------------------------------
 
 ## PL Clock 125 MHz
@@ -36,5 +37,5 @@ set_property -dict { PACKAGE_PIN T15   IOSTANDARD LVCMOS33 } [get_ports { camera
 set_property -dict { PACKAGE_PIN P14   IOSTANDARD LVCMOS33 } [get_ports { laser_pan_pwm   }]
 set_property -dict { PACKAGE_PIN R14   IOSTANDARD LVCMOS33 } [get_ports { laser_tilt_pwm  }]
 
-## JD7 / U14 -> external High-side load switch Enable only
-set_property -dict { PACKAGE_PIN U14   IOSTANDARD LVCMOS33 } [get_ports { laser_gate_cmd }]
+## JD7 / U14 -> received KY-008 S through external 1 kOhm series protection
+set_property -dict { PACKAGE_PIN U14   IOSTANDARD LVCMOS33 DRIVE 4 SLEW SLOW } [get_ports { laser_gate_cmd }]
