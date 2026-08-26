@@ -1,8 +1,8 @@
 # C → A 회신 004 — A Phase 4 문서 수신 및 실제 C 모듈 교체 계약
 
-> 회신일: 2026-08-25
+> 회신일: 2026-08-26
 > 대상: A Phase 4 `integration_manifest.md`, `C_TO_A_DELIVERY_SPEC.md` §11
-> C 버전: `C_EVENT=c_event_v04`, `C_CONTROL=c_control_v07`, `INTERFACE=ifc_v0.5`
+> C 버전: `C_EVENT=c_event_v04`, `C_CONTROL=c_control_v08`, `INTERFACE=ifc_v0.5`
 > 상태: **C RTL 전달 완료 / A 실제 NPU·AXI 통합 대기**
 
 ## 1. 결론
@@ -114,12 +114,19 @@ Power-on Arm HIGH, E-stop release, max-on timeout 뒤에는 Laser Arm LOW→HIGH
 ```text
 JD1/JD2 = Camera PT#1 PAN/TILT
 JD3/JD4 = Laser PT#2 PAN/TILT
-JD7/U14 = KY-008 전원선이 아닌 external High-side switch Enable
+JD7/U14 = active-HIGH 3.3 V laser gate logic
+
+2026-08-26 received KY-008 only:
+  JD7/U14 -> external 1 kOhm series protection -> S
+  regulated/current-limited 5 V -> Key -> NC E-stop -> middle
+  external GND + Zybo GND -> '-'
 ```
 
-KY-008 `S`는 5 V/약 30 mA 전원 입력이므로 FPGA GPIO에 직접 연결하지 않는다.
-실제 전원 경로에는 current limit/fuse, Key Arm, NC E-stop, default-OFF High-side
-load switch를 둔다. 세부 승인 순서는 `KY008_PREARRIVAL_CHECKLIST_C.md`를 따른다.
+수령품은 `S=control`, middle=`+5 V`, `-=GND` 배선에서 LED3과 동기된 100 ms
+단발 발광을 확인했다. `laser_en`은 여전히 광원 전원선이 아니며 다른 KY-008
+변형에는 이 직접 신호 배선을 재사용하지 않는다. 최종 자동 시연은 S 입력전류,
+Power-on 기본-OFF, 물리 Key/NC E-stop, 광출력 등급을 별도로 승인한 뒤 진행한다.
+세부 기록은 `KY008_PREARRIVAL_CHECKLIST_C.md`를 따른다.
 
 ## 7. C 검증 근거
 
@@ -141,7 +148,7 @@ OOC와 KY-008 전용 수치는 A/C 전체 시스템 수치가 아니다. A는 st
 - [ ] Event Source와 물리 Arm/E-stop 포트 추가
 - [ ] START Direct/PS-managed 중 하나만 연결
 - [ ] `0x58/0x5C` RO Register 추가 또는 ILA 임시 연결
-- [ ] Servo 4채널과 JD7 Enable을 통합 XDC에 반영
+- [ ] Servo 4채널과 JD7 Gate를 통합 XDC에 반영
 - [ ] C TB 후 A NPU `INPUT_SRC=1` Golden 비교
 - [ ] 전체 implementation DRC/타이밍 재측정
 - [ ] 실제 광원 없이 LED/dummy load로 Closed-loop 먼저 검증

@@ -3,7 +3,7 @@
 > **작성:** A
 > **대상:** C
 > **기준:** `TEAM_COMMON_AI_INTEGRATION_SPEC.md` **v1.5** §5.3 / §6 / §7 / §14 / **§15.2** / **§20.1** / §26 / §39
-> **갱신:** 2026-08-25 — A Phase 4 문서와 C `c_control_v07` 상태 재조정. §11 포트 골격/추가 포트 확정.
+> **갱신:** 2026-08-26 — A Phase 4 문서와 C `c_control_v08` 상태 재조정. KY-008 수령품 단발 결과 반영.
 > **목적:** C의 RTL을 A가 **포트만 연결하면 되는** 형태로 고정
 
 A쪽 NPU Core는 완성·검증되어 있고 C가 붙일 포트를 이미 전부 노출하고 있다.
@@ -267,7 +267,7 @@ c_deliver_v01.zip
 - [x] `npu_busy == 1`일 때 쓰기 안 함
 - [x] Dead Zone >= 4
 - [x] `target_valid = 0` 시 Hold + Laser OFF
-- [x] `handoff/C_EVENT_CONTROL_HANDOFF.md` (`c_control_v07`)
+- [x] `handoff/C_EVENT_CONTROL_HANDOFF.md` (`c_control_v08`)
 - [x] A 소유 `top_system.v` / 통합 XDC / Block Design 미수정
 
 ---

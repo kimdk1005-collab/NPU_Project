@@ -1445,7 +1445,7 @@ B : Dataset 파이프라인(ai/dataset.py) 작성, Webcam Frame Difference 경�
 C : Event Adapter/Accumulator, 4축 Servo, PT#2 좌표 변환, Fail-Closed Interlock,
     A Phase 3 연동 래퍼와 KY-008 수동 재무장/100 ms Gate 준비 완료.
     C 자동판정 12종 287 PASS. 기존 D6 C 래퍼 100 MHz OOC 타이밍 확인.
-    남은 작업은 A 실제 RTL 통합, High-side driver 실측, 카메라 Closed-loop,
+    남은 작업은 A 실제 RTL 통합, KY-008 소비전류/default-OFF/물리 E-stop 승인, 카메라 Closed-loop,
     실제 광출력 확인과 2 m Offset 실측.
 ```
 
@@ -1826,6 +1826,6 @@ Sparse/Zero-Skip이나 SNN을 위해 Dense NPU와 Closed-loop Tracking 완성도
 
 **문서 버전:** v1.4 — Pan/Tilt 2 헤드 구성 반영본 (2026-08-22 Dataset/Label 운영 정정 포함)
 **이전 버전:** v1.3 A Phase 1 + Phase 2 실측 반영본
-**상태:** Sparse·Zero-Skip 선택 확장 유지 / A Phase 1~4 기록 반영 / **Pan/Tilt 2 헤드·KY-008 사전 안전 C 구현 완료, A 전체 통합 대기**
-**갱신일:** 2026-08-25
+**상태:** Sparse·Zero-Skip 선택 확장 유지 / A Phase 1~4 기록 반영 / **Pan/Tilt 2 헤드·KY-008 C 독립 단발 완료, 물리 안전 승인·A 전체 통합 대기**
+**갱신일:** 2026-08-26
 **동반 문서:** 공통 지침 v1.5, 역할분담 v1.6, `docs/A_NPU_HANDOFF.md`, `docs/D3_FREEZE_REQUEST_A_002.md`, `docs/integration_manifest.md`

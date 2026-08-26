@@ -9,10 +9,10 @@
 > | | |
 > |---|---|
 > | 담당 | C (김도근) |
-> | 버전 | `c_control_v07` |
-> | 최종 갱신 | 2026-08-25 (D6 + KY-008 사전 안전 준비) |
+> | 버전 | `c_control_v08` |
+> | 최종 갱신 | 2026-08-26 (KY-008 수령품 100 ms 단발 브링업) |
 > | 기준 SPEC | **v1.5** |
-> | 상태 | D6 — A Phase 3 통합 + 실제 광원 수동 재무장/100 ms 브링업 경로 완료 |
+> | 상태 | D6 — C 독립 RTL/4축/KY-008 단발 브링업 완료, A 실제 통합 대기 |
 >
 > **SPEC v1.1 반영분** — `target_score` = signed INT8 (§7, §10),
 > Event Count 포화 상한 = 127 (§2). 두 항목은 더 이상 TBD가 아니다.
@@ -768,6 +768,10 @@ Servo Enable LOW는 Laser Arm LOW 이력을 대신하지 않는다.
 2. **Camera PT#1 + Laser PT#2 4축 Servo와 JD7 RED 실물 구동은 완료했다.**
    Switch/Button 가상 Target 기준이며, A의 실제 Target 출력과 연결한 영상 기반
    Closed-loop는 아직 검증하지 않았다.
+   2026-08-26에는 수령한 KY-008을 `S <- JD7/U14(1 kOhm 직렬)`, middle=`+5 V`,
+   `-`=공통 GND로 연결해 LED3과 동기된 약 100 ms 단발 및 timeout 뒤 자동
+   재점등 금지를 확인했다. 이는 C 독립 브링업 결과이며 광출력 등급, S 입력전류,
+   물리 Key/NC E-stop, A/NPU Closed-loop 승인을 대신하지 않는다.
 3. **`event_accumulator.v`는 구현·단위 검증 완료했다.** Ping-Pong 버퍼와
    Direct Handshake 전송을 포함하며 `tb_event_accumulator` 15/15 PASS,
    Window별 8192 byte 전수 비교를 통과했다. A `npu_core` 및 B Golden과의
@@ -969,4 +973,6 @@ implementation 결과는 다음과 같다.
 
 별도 `ky008_laser_board_io` 실보드 Top은 2026-08-25 Zybo Z7-20 implementation에서
 LUT 448, Register 373, DSP 4, DRC 0 Error, WNS +1.529 ns, WHS +0.153 ns를
-확인했다. 이 Top의 JD7/U14는 KY-008 전원이 아니라 외부 High-side switch Enable이다.
+확인했다. 2026-08-26 수령품에서는 JD7/U14를 1 kOhm 직렬 보호 뒤 KY-008 S
+제어입력에 연결해 100 ms 단발을 확인했다. JD7은 5 V 전원선이 아니며, 다른
+KY-008 변형은 핀과 입력전류를 다시 확인해야 한다.

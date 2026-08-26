@@ -15,5 +15,6 @@ Timeout과 수동 재무장 Interlock을 적용한다.
 ./sim/run_xsim.sh tb_ky008_laser_board_io
 ```
 
-실제 광원 연결은 `docs/KY008_PREARRIVAL_CHECKLIST_C.md`의 dummy load와 안전 승인 이후에만
-수행한다. 시뮬레이션 PASS와 실물 PASS를 구분해 Handoff에 기록한다.
+수령품 KY-008의 C 독립 100 ms 단발은 완료했다. 실제 자동 광원 경로는
+`docs/KY008_PREARRIVAL_CHECKLIST_C.md`의 남은 광학·물리 안전 승인 이후에만 수행한다.
+시뮬레이션 PASS와 실물 PASS를 구분해 Handoff에 기록한다.

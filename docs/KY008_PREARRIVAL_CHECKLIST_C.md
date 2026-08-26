@@ -1,63 +1,64 @@
-# KY-008 실제 광원 사전 준비 및 도착 후 브링업 체크리스트
+# KY-008 실제 광원 브링업 체크리스트 및 결과
 
-> 기준일: 2026-08-25
+> 기준일: 2026-08-26
 >
-> 상태: **RTL/XDC/자동판정 사전 준비 완료. 실제 광원·외부 전원 스위치 미연결.**
+> 상태: **수령품 핀 확인 및 C 독립 100 ms 단발 발광 완료. 최종 광학/물리 안전 승인과 A 통합은 미완료.**
 >
 > 적용 Top: `rtl/control/ky008_laser_board_io.v`
 
-## 1. 구매품 확정 정보
+## 1. 수령품 확인 결과
 
 | 항목 | 값 | 상태 |
 |---|---:|---|
-| 모듈 | KY-008 점형 Red Laser | 확정 |
-| 동작 전압 | DC 5 V | 확정 |
-| 동작 전류 | 30 mA | 확정 |
-| 파장 | 650 nm | 확정 |
-| 동작 온도 | -10~+40 ℃ | 확정 |
-| 핀 | `S=+5 V`, middle=`NC`, `-=GND` | 판매처 자료 기준 확정 |
-| 광출력/등급 | mW / IEC Class | **미확인 — 실제 발광 전 필수** |
+| 모듈 | KY-008 계열 점형 Red Laser | 실물 도착 |
+| 동작 전압 | DC 5 V | 수령품 배선에서 동작 확인 |
+| 파장 | 650 nm 표기 | 판매 정보 기준, 실측 안 함 |
+| 핀 | `S=control`, middle=`+5 V`, `-=GND` | 100 ms 단발로 기능 확인 |
+| S 연결 | JD7/U14에서 외부 1 kΩ 직렬 보호 후 연결 | 수령품 브링업 전용 |
+| 소비전류 | 판매 정보 약 30 mA | **실측값 미기록** |
+| 광출력/등급 | mW / IEC Class | **미확인 — 자동 시연 전 필수** |
 
-`S`는 고임피던스 TTL 입력이 아니라 광원 전류가 흐르는 5 V 전원 입력이다.
-JD7/U14 또는 다른 FPGA GPIO에 직접 연결하지 않는다. middle 핀은 NC로 절연한다.
+KY-008이라는 이름으로 서로 다른 내부회로와 핀 용도의 제품이 유통된다. 이 문서의
+배선은 2026-08-26 수령품에만 적용한다. `S`라는 글자만 보고 다른 제품을 FPGA에
+직결하지 않으며, JD7은 5 V 전원이나 레이저 전류 공급선으로 사용하지 않는다.
 
-## 2. 전기 연결 기준
+## 2. 수령품 브링업 배선
 
 ```text
 regulated/current-limited 5 V
   -> fuse/current limit
   -> physical Key Arm
   -> normally-closed E-stop
-  -> default-OFF High-side load switch
+  -> KY-008 middle (+5 V)
+
+JD7/U14 laser_gate_cmd
+  -> external 1 kOhm series protection
   -> KY-008 S
 
-KY-008 middle -> NC
 KY-008 -      -> external 5 V GND
 Zybo GND      -> external 5 V GND
-
-JD7/U14 laser_gate_cmd -> load switch Enable only
+Servo current -> separate external power path; do not route through Zybo/Nucleo 5 V
 ```
 
-### High-side switch 요구 조건
+### 전기 경계
 
-- 5 V 입력 지원
-- 3.3 V Enable 호환
-- 100 mA 이상 연속 전류
-- Enable floating/Power-on 상태에서 기본 OFF
-- 가능하면 Quick Output Discharge 지원
-- 실제 PCB 장착 후 case/bracket 접촉으로 우회 경로가 생기지 않을 것
+- JD7/U14는 3.3 V active-HIGH 논리 출력이다.
+- 수령품 S에는 1 kΩ 직렬 보호를 유지한다. 저항을 제거한 FPGA 직결은 승인하지 않는다.
+- FPGA 미프로그램/재프로그램 중 S 기본-OFF를 보장하는 외부 회로는 최종 승인 전에 확인한다.
+- Key와 NC E-stop은 논리 신호가 아니라 광원 5 V를 물리적으로 차단해야 한다.
+- 독립 전원 차단이 더 필요하면 3.3 V Enable 호환 default-OFF High-side load switch를
+  5 V 경로에 추가한다.
+- Servo와 광원은 동일한 보드 5 V 핀에서 전원을 공급하지 않는다. GND 기준만 공통으로 둔다.
 
-Low-side 스위치는 절연된 벤치 dummy 시험에만 허용한다. 금속 레이저 헤드나 브래킷이
-GND와 접촉할 수 있는 최종 장착에는 High-side 방식만 사용한다.
-
-## 3. 준비 부품
+## 3. 최종 시연 전 필요한 부품/환경
 
 - [ ] 전류 제한 가능한 정전압 5 V 전원
-- [ ] 위 조건을 만족하는 High-side load switch/driver
+- [x] JD7-S 외부 1 kΩ 직렬 보호
 - [ ] 물리 Key Arm 스위치
 - [ ] NC 방식 E-stop
 - [ ] 실제 측정 전류에 맞춘 소형 퓨즈 또는 독립 전류 제한
-- [ ] 5 V/GND/Enable 분리 커넥터와 절연 하네스
+- [ ] FPGA 미프로그램 상태의 S default-OFF 보장 회로
+- [ ] 5 V/GND/Signal 분리 커넥터와 절연 하네스
 - [ ] 실제 광출력에 맞는 650 nm 보호안경
 - [ ] 전체 Servo 안전 범위를 수용하는 비반사 빔 스톱
 - [ ] 출입을 통제할 수 있는 실내 시험 공간
@@ -65,9 +66,9 @@ GND와 접촉할 수 있는 최종 장착에는 High-side 방식만 사용한다
 보호안경의 OD는 파장만으로 결정하지 않는다. 판매처의 최대 광출력 또는 실측 광출력과
 레이저 등급을 확인한 뒤 선정한다.
 
-## 4. 구현된 사전 안전 동작
+## 4. 구현된 안전 동작
 
-공통 `laser_interlock.v`에 다음 조건을 추가했다.
+공통 `laser_interlock.v`는 다음을 강제한다.
 
 - Power-on 때 Laser Arm이 이미 HIGH면 출력 금지
 - Reset 해제 후 Laser Arm LOW를 한 clock 이상 관측해야 최초 재무장 가능
@@ -121,10 +122,11 @@ vivado -mode batch -source sim/create_ky008_laser_gate_project.tcl
 ```text
 Top        rtl/control/ky008_laser_board_io.v
 Constraint constraints/c_ky008_laser_gate_test.xdc
-Gate pin   JD7 / U14 / LVCMOS33
+Gate pin   JD7 / U14 / LVCMOS33 / DRIVE 4 / SLEW SLOW
 ```
 
-2026-08-25 Zybo Z7-20 배치배선/Bitstream 결과:
+2026-08-26 XDC의 JD7 `DRIVE 4`/`SLEW SLOW`를 반영한 Zybo Z7-20
+배치배선/Bitstream 재검증 결과:
 
 | 항목 | 결과 |
 |---|---:|
@@ -137,37 +139,39 @@ Gate pin   JD7 / U14 / LVCMOS33
 | Timing failing endpoint | 0 |
 | DRC Error | 0 |
 
-Vivado의 PL-only Zynq PS7 권고와 비파이프라인 DSP 권고 Warning은 남지만 실제 Error,
-unrouted net, setup/hold violation은 없다.
-
-JD7에는 최초에 KY-008이 아니라 dummy LED/load와 High-side switch Enable만 연결한다.
 생성 가능한 Vivado 프로젝트와 Bitstream은 Git에 커밋하지 않는다.
 
-## 7. 모듈 도착 후 순서
+## 7. 2026-08-26 실물 브링업 결과
 
-1. 실제 수령품 앞/뒤 패턴과 `S/NC/-` 실크 확인
-2. 판매처에서 최대 광출력 mW 또는 Laser Class 확인
-3. KY-008 미연결 상태에서 High-side 출력에 dummy load 연결
-4. Boot/E-stop/Arm/timeout 표를 오실로스코프 또는 로직 분석기로 실측
-5. KY-008을 고정하고 Servo 전원을 끈 상태에서 전류 제한 5 V 연결
-6. 빔 스톱/보호구/통제구역 준비 후 100 ms 이하 최초 단발 점등
-7. 소비전류가 30 mA 기준에서 크게 벗어나면 즉시 차단
-8. 물리 E-stop이 FPGA 상태와 무관하게 5 V를 차단하는지 확인
-9. PT#2 112~144 좁은 범위에서 방향 확인
-10. 2 m 거리 중앙+네 모서리 5점에서 `LASER_CAL` 측정
-11. LED로 전체 Event→NPU→Target→Servo 폐루프를 먼저 재검증
-12. 최종 승인 후에만 실제 광원을 자동 Target 경로에 연결
+| 단계 | 결과 |
+|---|---|
+| Vivado Hardware Manager에서 `xc7z020_1` 프로그램 | PASS |
+| `SW=0000`에서 LED0 heartbeat, LED1~3 OFF | PASS |
+| Servo Enable/Target Valid 상태 LED1/LED2 | PASS |
+| Arm LOW→HIGH 뒤 LED3 약 100 ms 점등 | PASS |
+| 수령품 KY-008이 LED3과 함께 단발 발광 | PASS |
+| Timeout 뒤 Arm HIGH 유지 시 자동 재점등 없음 | PASS |
+| Arm LOW→HIGH 수동 재무장 뒤 단발 반복 | PASS |
 
-## 8. 실제 광원 연결 승인 조건
+시험 배선은 `S <- JD7/U14(1 kΩ 직렬)`, middle=`+5 V`, `-`=공통 GND이며
+Servo 전원은 끈 독립 브링업이었다. 이 결과는 수령품의 단발 동작과 C 인터록 경로를
+검증한 것이며, 소비전류·광출력 등급·물리 E-stop·자동 Target 경로 승인을 뜻하지 않는다.
 
-- [ ] 광출력 mW/등급 확인
+## 8. 남은 최종 승인 조건
+
+- [x] 수령품 `S/middle/-` 기능 확인
+- [x] JD7/LED3 active-HIGH Gate 동기 확인
+- [x] 약 100 ms 단발과 timeout latch 확인
+- [x] Arm LOW→HIGH 수동 재무장 확인
+- [ ] 소비전류 실측 및 기록
+- [ ] 광출력 mW/IEC Class 확인
 - [ ] 보호안경 OD 적합성 확인
-- [ ] High-side driver dummy load PASS
-- [ ] Power-on Arm HIGH Gate OFF 실측
-- [ ] E-stop release 자동 재점등 없음 실측
-- [ ] Max-on 100 ms와 수동 재무장 실측
+- [ ] FPGA 미프로그램/재프로그램 중 S default-OFF 실측
 - [ ] Key Arm/NC E-stop이 광원 5 V를 물리 차단
+- [ ] E-stop release 자동 재점등 없음을 실제 광원 전원 경로에서 실측
 - [ ] PT#2 전체 범위가 빔 스톱 내부
-- [ ] 사람이 없는 통제구역 확보
+- [ ] 2 m 중앙+네 모서리 `LASER_CAL` 실측
+- [ ] A NPU Target을 연결한 LED Closed-loop 선행 검증
+- [ ] 최종 승인 뒤 실제 광원 자동 Target 경로 검증
 
-하나라도 미충족이면 KY-008을 연결하지 않고 JD7 dummy LED 단계로 돌아간다.
+하나라도 미충족이면 C 독립 단발 브링업 결과까지만 인정하고 자동 광원 시연은 승인하지 않는다.

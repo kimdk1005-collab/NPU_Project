@@ -1,7 +1,7 @@
 # integration_manifest — 통합 전에 버전이 맞는지 보는 표
 
-> **근거:** 공통 지침 §27 · **소유:** A/C · **갱신:** 2026-08-25
-> (A Phase 4 제공 기록 + C `c_event_v04` / `c_control_v07` 조정)
+> **근거:** 공통 지침 §27 · **소유:** A/C · **갱신:** 2026-08-26
+> (A Phase 4 제공 기록 + C `c_event_v04` / `c_control_v08` 조정)
 >
 > **규칙:** 이 표의 버전이 서로 안 맞으면 통합 Debug 를 시작하지 않는다.
 > B/C 산출물이 도착하면 **먼저 여기를 고치고** 그 다음에 파일을 교체한다.
@@ -24,7 +24,7 @@ A_NPU            = a_npu_v01            RTL 6종 TB PASS
 A_SOC            = a_soc_v01            npu_axi + top_system + BD
 A_SW             = a_sw_v01             PS 드라이버 45 check PASS
 C_EVENT          = c_event_v04          전달 완료, A 실제 NPU 통합 대기
-C_CONTROL        = c_control_v07        KY-008 수동 재무장 포함, A 통합 대기
+C_CONTROL        = c_control_v08        KY-008 수령품 100 ms 단발 포함, A 통합 대기
 
 BITSTREAM        = build_v03_a_only     results/npu_soc.bit
 BOARD_VERIFIED   = a_soc_v01 @ 2026-08-24  <- Phase 4 보드 기능 판정 16/16 PASS
@@ -92,7 +92,7 @@ BOARD_VERIFIED   = a_soc_v01 @ 2026-08-24  <- Phase 4 보드 기능 판정 16/16
 | B 실물 weight/golden 도착 | `WEIGHT`, `GOLDEN`, `MODEL` → `_dummy` 제거 | `pack_weights.py` → `gen_test_tensor_c.py` → TB 6종 → `make test` → BD 재빌드 → `A_NPU = a_npu_v02` |
 | Phase 4 보드 시험 통과 | `BOARD_VERIFIED = a_soc_v01 @ 2026-08-24` **완료** | `PHASE4_VERIFICATION_LOG.md` §10 (16/16 PASS) |
 | C Event 모듈 도착 | **완료: `C_EVENT = c_event_v04`** | `INPUT_SRC=1` 경로 A NPU/실보드 확인 |
-| C Control 모듈 도착 | **완료: `C_CONTROL = c_control_v07`** | `c_module_stub.v` 제거 → 추가 포트 연결 → 타이밍 재측정 |
+| C Control 모듈 도착 | **완료: `C_CONTROL = c_control_v08`** | `c_module_stub.v` 제거 → 추가 포트 연결 → 타이밍 재측정 |
 | 레지스터 맵 변경 | `INTERFACE`, `PROJECT_SPEC` | **§22 CHANGE REQUEST 먼저.** 코드부터 고치지 않는다 |
 
 ---
@@ -109,7 +109,7 @@ Integration 2  C Event <-> A NPU     Event -> Tensor -> NPU
                          [ ] A 실제 NPU와 INPUT_SRC=1 결합  <- A/C 통합 대기
 
 Integration 3  A NPU <-> C Control   target_x/y -> Tracking -> Servo
-                         [x] C Control RTL/4축/Interlock/KY-008 사전 준비
+                         [x] C Control RTL/4축/Interlock/KY-008 독립 단발
                          [ ] A 실제 NPU/AXI/0x58·0x5C 결합  <- A/C 통합 대기
 
 Integration 4  전체 + 보드
