@@ -43,6 +43,9 @@
 | 2026-08-25 | interface_contract / C Handoff / KY-008 checklist | **v0.5 / c_control_v07** | 실제 광원 안전 확장. Power-on Arm HIGH, E-stop release, max-on timeout 뒤 Laser Arm LOW→HIGH 수동 재무장 필수. `CONTROL_STAT[16]=LASER_REARM_REQUIRED`, KY-008 100 ms Gate Top/XDC/TB 추가. C TB 12종 **287 PASS, errors=0** | `KY008_PREARRIVAL_CHECKLIST_C.md` | C 구현 완료 · A 상태 bit 연동 대기 |
 | 2026-08-25 | A Phase 4 문서 / integration manifest / C 회신 | — | A-only 보드 기능 판정 16/16과 Fmax 108.5 MHz 기록을 정본에 반영. 배포본의 C 미착수·잘못된 `docs/freeze` 경로는 현재 승인/구현 상태로 재조정. `C_TO_A_REPLY_004.md`에 stub→C actual 교체 포트와 START 단일 소유권 확정 | A 제공 Phase 4 문서 묶음 | C 완료 · A/C 실제 통합 대기 |
 | 2026-08-26 | C Handoff / KY-008 checklist / XDC | **c_control_v08** | 수령품 핀 계약을 `S=control`, middle=`+5 V`, `-=GND`로 정정. JD7/U14는 외부 1 kΩ 직렬 보호 뒤 S를 구동하고 DRIVE 4/SLEW SLOW를 명시. LED3 동기 100 ms 단발과 timeout 수동 재무장을 실물 확인. C TB 12종 287 PASS, XDC 재빌드 DRC 0 Error, WNS +1.529 ns / WHS +0.153 ns | 수령품 브링업 + 독립 재검증 | C 독립 브링업 완료 · 소비전류/광출력/물리 E-stop/A 통합 대기 |
+| 2026-08-26 | C 연결 부품 수동 점검 Top / XDC / TB | — | Zybo 물리 BTN0~BTN3와 조합 BTN4/BTN5를 이용한 4축 개별 이동·전체 Neutral·KY-008 100 ms 단발·논리 E-stop 점검 경로 추가. C TB 13종 **327 PASS**, DRC 0 Error, WNS +2.586 ns / WHS +0.155 ns | `C_COMPONENT_MANUAL_TEST.md` | 실물 순차 확인 대기 · 통합 인터페이스/`c_control_v08` 변경 없음 |
+| 2026-08-26 | C 연결 부품 수동 점검 Top | — | 사용자 수동 점검 요구에 따라 BTN3을 단발 요청에서 hold-to-fire로 변경. 버튼을 놓으면 즉시 OFF, 계속 누르면 1초 상한 뒤 timeout·SW1 수동 재무장. 공통 C 통합 인터록의 100 ms 정책은 변경하지 않음. C TB 13종 **331 PASS**, DRC 0 Error, WNS +2.542 ns / WHS +0.066 ns | `C_COMPONENT_MANUAL_TEST.md` | 실물 재확인 대기 |
+| 2026-08-27 | A/C 실물 통합 요청 #001 / C Control | **c_control_v09 / ifc_v0.5 유지** | Runtime SAFE_LIMIT 8개 유효값을 원자 등록해 조합 critical cone을 분리하고 invalid AXI 전이 raw 값 차단 TB 추가. 좌표식·Event Source·Direct START·0x58/0x5C·33.333 ms·JD 핀/안전 회신 완료. C 자동판정 13 TB **341 PASS**, OOC LUT 902 / Register 650 / BRAM 4 / DSP 6, DRC 0 Error, WNS +1.394 ns / WHS +0.061 ns | `C_TO_A_REPLY_005.md` | C 작업 트리 완료 · A 전체 timing/실물 계측 대기 |
 
 ## 대기 중인 요청
 
@@ -51,5 +54,8 @@ D3_FREEZE_REQUEST_A_001   A -> B/C   C는 C_TO_A_REPLY_001에서 전 항목 수�
                           B 확인 및 공통 정본 승인 상태 갱신 대기
 
 D3_FREEZE_REQUEST_A_002   A -> C     C_TO_A_REPLY_002에서 좌표식·4축·SAFE_LIMIT2 수용
-                          C_TO_A_REPLY_003의 START/Event Source/RO 상태/XDC 결정을 A에 요청
+                          C_TO_A_APPROVAL_D3_A002_rev2에서 §2.13 공식 승인 완료
+
+A_TO_C_V01_REQUEST_001    A -> C     C_TO_A_REPLY_005에서 코드 수정·필수 회신 완료
+                          A top_system_c timing 재측정과 실물 계측값 대기
 ```

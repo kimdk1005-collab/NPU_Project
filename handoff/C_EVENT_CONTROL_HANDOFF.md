@@ -9,8 +9,8 @@
 > | | |
 > |---|---|
 > | 담당 | C (김도근) |
-> | 버전 | `c_control_v08` |
-> | 최종 갱신 | 2026-08-26 (KY-008 수령품 100 ms 단발 브링업) |
+> | 버전 | `c_control_v09` |
+> | 최종 갱신 | 2026-08-27 (Runtime SAFE_LIMIT 원자 등록 및 A 통합 회신) |
 > | 기준 SPEC | **v1.5** |
 > | 상태 | D6 — C 독립 RTL/4축/KY-008 단발 브링업 완료, A 실제 통합 대기 |
 >
@@ -44,12 +44,12 @@
 | `rtl/control/servo_pwm.v` | C | **구현 완료** | `tb_servo_pwm` 6/6 PASS (xsim) |
 | `rtl/control/board_io.v` | C | **구현 완료** (브링업 전용) | `tb_board_io` 19/19 PASS + PAN/TILT 실물 검증 |
 | `rtl/event/event_adapter.v` | C | **구현 완료** (D2) | `tb_event_adapter` 23/23 PASS (xsim) |
-| `rtl/event/event_accumulator.v` | C | **구현 완료** (D3) | `tb_event_accumulator` 15/15 PASS |
+| `rtl/event/event_accumulator.v` | C | **구현 완료** (D3) | `tb_event_accumulator` 14/14 PASS |
 | `rtl/control/tracking_controller.v` | C | **구현 완료** (D4) | `tb_tracking_controller` 30/30 PASS |
 | Adapter→Accumulator 연결 | C | **검증 완료** (D4) | `tb_event_pipeline` 15/15 PASS |
 | `rtl/control/laser_head_controller.v` | C | **런타임 LASER_CAL 포함** (D6) | `tb_laser_head_controller` 27/27 PASS |
 | `rtl/control/laser_interlock.v` | C | **Power-on/E-stop 수동 재무장 포함** | `tb_laser_interlock` 38/38 PASS |
-| `rtl/control/dual_head_control.v` | C | **4-Servo + Manual/동적 Limit/재무장** | `tb_dual_head_control` 33/33 PASS |
+| `rtl/control/dual_head_control.v` | C | **4-Servo + 등록형 동적 Limit/재무장** | `tb_dual_head_control` 43/43 PASS |
 | `rtl/control/c_event_control_top.v` | C | **A Phase 4 stub 호환 + 재무장 상태** | `tb_c_event_control_top` 27/27 PASS |
 | `rtl/control/ky008_laser_board_io.v` | C | **KY-008 100 ms 안전 게이트 Top** | `tb_ky008_laser_board_io` 19/19 PASS |
 
@@ -117,7 +117,7 @@ Tensor 누적은 하지 않는다. `event_accumulator.v` (D3) 담당이다.
 | `clk` / `rst_n` | In | 1 | Active-Low 비동기 Reset |
 | `src_valid` | In | 1 | 원본 이벤트 유효 |
 | `src_x` / `src_y` | In | `SRC_COORD_W` | **원본 센서 좌표** (64×64 아님) |
-| `src_pol` | In | 1 | 1 = Positive, 0 = Negative |
+| `src_pol` | In | 1 | 0 = Positive, 1 = Negative |
 | `src_window_end` | In | 1 | `WINDOW_SRC=1`일 때만. Level 입력 허용 (상승엣지 검출) |
 | `event_valid` | Out | 1 | SPEC §6.1 |
 | `event_x` / `event_y` | Out | 6 | SPEC §6.1 — 0~63 |
@@ -222,8 +222,8 @@ Python으로 64 / 128 / 240 / 260 / 346 / 480 / 640 / 720 / 1024 / 1280 / 1920 /
 | `SRC_COORD_W` | 11 | C 내부 |
 | `OOR_POLICY` | 0 (폐기) | C 내부 결정 |
 | `CLK_HZ` | 100,000,000 | **C 측 확정·반영** (CR C-003). A Block Design 공급 확인만 남음 |
-| `WINDOW_US` | 10,000 | **[TBD]** CR C-002 승인 대기. 확정 시 33,333 |
-| `WINDOW_SRC` | 0 (내부 타이머) | **[TBD]** CR C-002 승인 시 1 (프레임 경계) |
+| `WINDOW_US` | 10,000 | A 통합값 **33,333 승인**. legacy RTL 기본값은 wrapper에서 override |
+| `WINDOW_SRC` | 0 (내부 타이머) | A 통합값 **1(외부 Frame 경계) 승인**. wrapper에서 override |
 | `BIN_SHIFT` | 22 | C 내부. 센서 폭 2048까지 유효 |
 | `EVT_CNT_W` | 20 | C 내부. 포화 계수, Wrap 금지 |
 
@@ -284,7 +284,7 @@ BRAM에 반영되어 있어 한 단계면 충분하다.
 전원 인가 직후 BRAM은 미정의이므로 `S_INIT`에서 두 버퍼를 0으로 채운 뒤
 첫 Window를 받는다. `acc_ready`가 그 완료 신호다.
 
-### 검증 결과 (xsim, `tb/event/tb_event_accumulator.v`) — **15/15 PASS**
+### 검증 결과 (xsim, `tb/event/tb_event_accumulator.v`) — **14/14 PASS**
 
 TB 안에 참조 Tensor를 두고 같은 규칙으로 갱신한 뒤, DUT가 전송한
 **8192 byte를 전량 대조**한다. 셀 하나만 달라도 Golden 비교가 깨지므로
@@ -344,7 +344,7 @@ Channel 1 = Negative Event Count
 | ~~NPU Input Buffer Interface~~ | **확정 — `ext_we`/`ext_addr[12:0]`/`ext_data`/`start`/`busy`/`done`** | A (동상) | 완료 |
 | ~~C 모듈 구동 클럭~~ | **C 측 100 MHz 확정·코드 반영** — A Block Design 공급 확인만 남음 | A/C | 통합 시 확인 |
 | `event_polarity` 인코딩 | **CR C-004 회신 대기** — 0=Positive 로 C 측 반영 완료 | A+B | D3 |
-| Event Window 값 | **CR C-002 승인 대기** | 팀 확정 | D3 |
+| Event Window 값 | **33,333 us / 외부 Frame 경계 C 승인** | A 통합 적용 | D3 |
 | ~~원본 해상도 → 64×64 Binning 규칙~~ | **확정 — SPEC v1.2 §14.1** | ~~C~~ → A/B/C 공통 | ~~D2~~ 완료 |
 
 > **물리 전달 방식은 해결됐다.** A의 D3 Freeze A-001과 C 회신 #001에 따라
@@ -606,7 +606,7 @@ Servo Frame 20 ms 동안 물리적으로 갈 수 있는 거리는:
 ### Window와 Servo Frame의 주기가 다르다
 
 ```text
-Event Window  = 10 ms 기본값 / 33.3 ms C 제안 (CR C-002 승인 대기)
+Event Window  = 33.333 ms A 통합값 승인 (C RTL legacy 기본값은 wrapper가 override)
 Servo Frame   = 20 ms       (50 Hz 고정)
 ```
 
@@ -773,27 +773,30 @@ Servo Enable LOW는 Laser Arm LOW 이력을 대신하지 않는다.
    재점등 금지를 확인했다. 이는 C 독립 브링업 결과이며 광출력 등급, S 입력전류,
    물리 Key/NC E-stop, A/NPU Closed-loop 승인을 대신하지 않는다.
 3. **`event_accumulator.v`는 구현·단위 검증 완료했다.** Ping-Pong 버퍼와
-   Direct Handshake 전송을 포함하며 `tb_event_accumulator` 15/15 PASS,
+   Direct Handshake 전송을 포함하며 `tb_event_accumulator` 14/14 PASS,
    Window별 8192 byte 전수 비교를 통과했다. A `npu_core` 및 B Golden과의
-   통합 비교는 A/B 산출물 합류 후 수행한다.
+   통합 비교는 A 실제 RTL 합류 후 B v03 Golden과 함께 수행한다.
 4. **`event_adapter.v`는 실제 카메라 스트림으로 검증하지 않았다.** xsim 자극만 통과했다.
    `win_evt_count`로 실제 Event Rate를 재는 것은 입력 경로가 붙은 뒤(D6~D8)다.
 5. **Event Rate 수치는 합성 데이터다.** 실제 카메라 측정값이 아니다.
    다만 **웹캠의 최대 fps는 실측이다** (§2, `tools/probe_webcam.py`).
 6. **Slew Rate Limit은 구현 완료했지만 실제 하중 튜닝 전이다.** 기본값은
    `1 step/20 ms`이며 D5~D10 Closed-loop에서 1~4 범위를 확인한다.
-7. **`WINDOW_US` / `WINDOW_SRC`는 확정이 아니다.** CR C-002 승인 대기 중이며
-   승인 시 `33333` / `1`로 바뀐다. parameter 교체만으로 끝나고 로직 변경은 없다.
+7. **A 통합값 `WINDOW_US=33333` / `WINDOW_SRC=1`을 C가 승인했다.**
+   `C_TO_A_REPLY_005.md` 기준 640×480 YUYV 30 FPS의 외부 Frame 경계를 쓴다.
+   C RTL의 legacy 기본 parameter는 아직 `10000` / `0`이므로 A wrapper가 통합값을
+   명시적으로 override한다.
 8. `tools/gen_event_vector.py`의 출력은 **C의 로컬 개발용 자극**이다.
    팀 공식 Test Vector(`test_vectors/`, `golden_outputs/`)는 SPEC §5.2에 따라 **B 소유**다.
 9. **현재 브랜치에는 A Phase 3의 `top_system.v`, `npu_axi.v`, `c_module_stub.v`,
    PS 소프트웨어가 없다.** `c_event_control_top.v`는 A 문서의 포트 계약을 C RTL과
    연결해 xsim으로 검증한 상태이며, 실제 A NPU/AXI 결합은 A 브랜치 합류 후 다시 검증한다.
 10. A Phase 3 stub에는 실제 Event Source 입력과 NPU `start` 요청 포트가 없다.
-    C 래퍼는 두 포트를 명시적으로 제공한다. A는 §11.4의 START 방식 하나를 선택하고
-    `top_system`에 Event Source 입력을 추가해야 한다.
+    C 래퍼는 두 포트를 명시적으로 제공하며 C는 §11.4의 Direct START를 승인했다.
+    A는 `top_system`에 PS→PL Event Stream과 START MUX를 추가해야 한다.
 11. 동적 Safe Limit을 바꾸는 동안은 Laser Arm을 해제한다. 잘못된 범위는 적용하지 않고
     정적 parameter 범위로 Fail-Safe fallback하며 `CONTROL_STAT.LIMIT_FAULT`를 세운다.
+    2026-08-27부터 8개 유효값을 원자 등록해 invalid AXI 전이값도 차단한다.
 
 ---
 
@@ -952,20 +955,20 @@ Hardware E-stop Fail-Closed
 E-stop release 자동 재점등 금지 / CONTROL_STAT 재무장 상태
 ```
 
-KY-008 전용 TB를 포함한 C 자동판정 TB 12개를 재실행해 로그 기준
-**287 PASS, errors=0**을 확인했다.
+연결 부품 수동 점검 TB까지 포함한 C 자동판정 TB 13개를 재실행해 로그 기준
+**341 PASS, errors=0**을 확인했다. 별도의 `tb_servo_pwm_sweep`도 완료했다.
 
 Zybo Z7-20 (`xc7z020clg400-1`) 100 MHz 기준 `c_event_control_top` OOC
 implementation 결과는 다음과 같다.
 
 | 항목 | 결과 |
 |---|---:|
-| Slice LUT | 829 (1.56%) |
-| Register | 582 (0.55%) |
+| Slice LUT | 902 (1.70%) |
+| Register | 650 (0.61%) |
 | BRAM Tile | 4 (2.86%) |
 | DSP | 6 (2.73%) |
-| Setup WNS | +1.138 ns |
-| Hold WHS | +0.147 ns |
+| Setup WNS | +1.394 ns |
+| Hold WHS | +0.061 ns |
 | DRC Error | 0 |
 
 이는 C 래퍼 단독 OOC 결과다. A의 `top_system/npu_axi/npu_core`와 통합한 뒤에는
