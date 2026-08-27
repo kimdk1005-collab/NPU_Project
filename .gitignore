@@ -34,6 +34,12 @@ __pycache__/
 .venv/
 venv/
 
+# B local camera Dataset / private delivery archives
+ai/dataset_samples_target*/
+ai/no_target_samples*/
+results/b_deliver*.zip
+results/b_to_a_no_target*.zip
+
 # Digilent XDC 마스터 팩 (28개 보드)
 #   constraints/ 는 SPEC §5.4 공유 디렉토리다. C 가 보드 파일 28개를
 #   단독으로 올리지 않는다. 이 프로젝트가 쓰는 Zybo Z7 파일과 MIT
