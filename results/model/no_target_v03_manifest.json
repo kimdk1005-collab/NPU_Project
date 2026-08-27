@@ -1,0 +1,4304 @@
+{
+  "document_id": "B_TO_A_NO_TARGET_V03_MANIFEST_001",
+  "base_spec_version": "common_v1.5",
+  "model_version": "model_v03",
+  "dataset_version": "v03_reshoot_1",
+  "purpose": "A independent INT8 score reproduction and temporal-filter analysis",
+  "source_directory": "ai/no_target_samples_v03",
+  "tensor_contract": {
+    "storage_shape": [
+      64,
+      64,
+      2
+    ],
+    "storage_layout": "HWC_LOGICAL_ONLY",
+    "channel_order": "POSITIVE_NEGATIVE",
+    "dtype": "int8",
+    "consumer_conversion": "transpose HWC to CHW before NPU inference",
+    "frame_size_wh": [
+      640,
+      480
+    ],
+    "event_noise_threshold": 8
+  },
+  "sample_count": 450,
+  "split_counts": {
+    "test": 100,
+    "train": 250,
+    "validation": 100
+  },
+  "session_count": 6,
+  "session_summaries": {
+    "nt_train_quiet": {
+      "capture_split": "train",
+      "sample_count": 50,
+      "active_pixel_count": {
+        "minimum": 0,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "maximum": 0
+      },
+      "event_count": {
+        "minimum": 0,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "maximum": 0
+      },
+      "environment_notes": [
+        "train setup; no target; static scene"
+      ],
+      "captured_at_utc_first": "2026-08-25T05:37:09.867+00:00",
+      "captured_at_utc_last": "2026-08-25T05:37:34.275+00:00"
+    },
+    "nt_train_motion": {
+      "capture_split": "train",
+      "sample_count": 200,
+      "active_pixel_count": {
+        "minimum": 8,
+        "mean": 405.705,
+        "median": 380.5,
+        "p90": 711.5,
+        "maximum": 1226
+      },
+      "event_count": {
+        "minimum": 161,
+        "mean": 11846.6,
+        "median": 9411.0,
+        "p90": 24364.1,
+        "maximum": 53310
+      },
+      "environment_notes": [
+        "train setup; no target; varied hand cable stick and non-blue object motion"
+      ],
+      "captured_at_utc_first": "2026-08-25T05:38:11.477+00:00",
+      "captured_at_utc_last": "2026-08-25T05:38:46.902+00:00"
+    },
+    "nt_validation_quiet": {
+      "capture_split": "validation",
+      "sample_count": 25,
+      "active_pixel_count": {
+        "minimum": 0,
+        "mean": 6.04,
+        "median": 0.0,
+        "p90": 29.400000000000027,
+        "maximum": 40
+      },
+      "event_count": {
+        "minimum": 0,
+        "mean": 117.04,
+        "median": 0.0,
+        "p90": 391.2000000000003,
+        "maximum": 1515
+      },
+      "environment_notes": [
+        "validation reshoot attempt 2; no target; static scene"
+      ],
+      "captured_at_utc_first": "2026-08-25T05:33:39.728+00:00",
+      "captured_at_utc_last": "2026-08-25T05:34:23.276+00:00"
+    },
+    "nt_validation_motion": {
+      "capture_split": "validation",
+      "sample_count": 75,
+      "active_pixel_count": {
+        "minimum": 8,
+        "mean": 302.97333333333336,
+        "median": 274.0,
+        "p90": 527.6000000000004,
+        "maximum": 820
+      },
+      "event_count": {
+        "minimum": 256,
+        "mean": 6568.653333333334,
+        "median": 6103.0,
+        "p90": 12232.600000000004,
+        "maximum": 18971
+      },
+      "environment_notes": [
+        "validation reshoot attempt 2; no target; varied hand stick and non-blue object motion"
+      ],
+      "captured_at_utc_first": "2026-08-25T05:34:48.432+00:00",
+      "captured_at_utc_last": "2026-08-25T05:35:00.765+00:00"
+    },
+    "nt_test_quiet": {
+      "capture_split": "test",
+      "sample_count": 25,
+      "active_pixel_count": {
+        "minimum": 0,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "maximum": 0
+      },
+      "event_count": {
+        "minimum": 0,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "maximum": 0
+      },
+      "environment_notes": [
+        "independent test setup; no target; static scene"
+      ],
+      "captured_at_utc_first": "2026-08-25T05:29:07.747+00:00",
+      "captured_at_utc_last": "2026-08-25T05:29:19.647+00:00"
+    },
+    "nt_test_motion": {
+      "capture_split": "test",
+      "sample_count": 75,
+      "active_pixel_count": {
+        "minimum": 5,
+        "mean": 594.92,
+        "median": 578.0,
+        "p90": 958.6000000000003,
+        "maximum": 1340
+      },
+      "event_count": {
+        "minimum": 45,
+        "mean": 18368.44,
+        "median": 17686.0,
+        "p90": 31690.40000000001,
+        "maximum": 42470
+      },
+      "environment_notes": [
+        "independent test setup; no target; hand cable and non-blue object motion"
+      ],
+      "captured_at_utc_first": "2026-08-25T05:29:57.831+00:00",
+      "captured_at_utc_last": "2026-08-25T05:30:11.604+00:00"
+    }
+  },
+  "split_summaries": {
+    "train": {
+      "sample_count": 250,
+      "active_pixel_count": {
+        "mean": 324.564,
+        "median": 319.5,
+        "p90": 674.1
+      },
+      "event_count": {
+        "mean": 9477.28,
+        "median": 7468.5,
+        "p90": 20484.699999999986
+      }
+    },
+    "validation": {
+      "sample_count": 100,
+      "active_pixel_count": {
+        "mean": 228.74,
+        "median": 197.0,
+        "p90": 478.4000000000001
+      },
+      "event_count": {
+        "mean": 4955.75,
+        "median": 4210.5,
+        "p90": 11132.100000000004
+      }
+    },
+    "test": {
+      "sample_count": 100,
+      "active_pixel_count": {
+        "mean": 446.19,
+        "median": 509.5,
+        "p90": 889.4000000000002
+      },
+      "event_count": {
+        "mean": 13776.33,
+        "median": 12436.0,
+        "p90": 28580.8
+      }
+    }
+  },
+  "dataset_content_sha256": "058fd754bd554b52ecd01af47aae71b3ee3282aa35be5dcc8a95a1bcb6896a65",
+  "audit_images_included": false,
+  "session_metadata_file_count": 6,
+  "session_metadata_files": [
+    {
+      "path": "ai/no_target_samples_v03/session_nt_test_motion.json",
+      "size_bytes": 1220,
+      "sha256": "69d54b52def64c5a699fae9291254d545b4bbe3f8ae20207b69a1b57e0d7bc3d"
+    },
+    {
+      "path": "ai/no_target_samples_v03/session_nt_test_quiet.json",
+      "size_bytes": 1193,
+      "sha256": "c5ad37d4e051e1d7c073eec7fbb52a0a8a880145bb2385db7917e4da854431ff"
+    },
+    {
+      "path": "ai/no_target_samples_v03/session_nt_train_motion.json",
+      "size_bytes": 1225,
+      "sha256": "dc7ee45dc523075f2a97a82a113d14b442c0f41499e7a70d692ec77bce950789"
+    },
+    {
+      "path": "ai/no_target_samples_v03/session_nt_train_quiet.json",
+      "size_bytes": 1184,
+      "sha256": "e3069b9506f53414e8c25af85f28da213b67c1a51ca2051b8e0eb3f570a34fac"
+    },
+    {
+      "path": "ai/no_target_samples_v03/session_nt_validation_motion.json",
+      "size_bytes": 1245,
+      "sha256": "f7ad05806a5e0a057d84c57caf33b079b8ecf4b1213f72a2c74538faecae28ef"
+    },
+    {
+      "path": "ai/no_target_samples_v03/session_nt_validation_quiet.json",
+      "size_bytes": 1211,
+      "sha256": "185cfb62f7f07a35285a6970df08db87085b09f9aca9bc90538d79a20eeb8e41"
+    }
+  ],
+  "validation": {
+    "npz_format_errors": 0,
+    "active_pixel_count_mismatches": 0,
+    "session_or_split_mismatches": 0
+  },
+  "files": [
+    {
+      "path": "ai/no_target_samples_v03/sample_000001.npz",
+      "size_bytes": 4058,
+      "sha256": "23e633bab4797068aa90533737e5c1438f7257905d13d903d04c96bc2609ab2c",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000002.npz",
+      "size_bytes": 4060,
+      "sha256": "da4e0fec56b3941c5babeea760c6a1add979763da37ada00edce7a86b9aa3497",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000003.npz",
+      "size_bytes": 4058,
+      "sha256": "27fee94930f6323ae930bf5cba1795c7bf347b77b644a97d9abc8335f99a5595",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000004.npz",
+      "size_bytes": 4059,
+      "sha256": "9d999e3e9a408486e26f6559918645000649e40579a14447ff45c3fc7d1f0510",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000005.npz",
+      "size_bytes": 4057,
+      "sha256": "bc9ba03b3fdc81ce8839ab804c3496c9febb96e8ddbffad281878d930cfc733b",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000006.npz",
+      "size_bytes": 4057,
+      "sha256": "d9ec3eb18b6db014d6f5e81b5fa5cc202eb75d4fd17bad2a418297f2ffa875eb",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000007.npz",
+      "size_bytes": 4059,
+      "sha256": "2b30894afbb7e05bf4e8915a87d17434b0100cabc09cedadb07ba9f057246fd7",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000008.npz",
+      "size_bytes": 4056,
+      "sha256": "17b30708df38e8f64d246580b8466e5bf13ce88a2a0691230a5787c4575090a5",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000009.npz",
+      "size_bytes": 4059,
+      "sha256": "faf488506f043ec5a4ebac669fccafb755c8d90f372a57c6ed54aebe9c575dde",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000010.npz",
+      "size_bytes": 4057,
+      "sha256": "a36dc3d3638753e3703cae8b7139b41c3a489b931a73578afb23ea31ed7dab89",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000011.npz",
+      "size_bytes": 4057,
+      "sha256": "e84c530bb5d509b0a54cb5231dcb394f90fbfc648a270ced1f54ffa5afada15c",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000012.npz",
+      "size_bytes": 4063,
+      "sha256": "1aae23fe8e721cb58f552073693f80586da47a47967ec7556f207ef9ea1c46ae",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000013.npz",
+      "size_bytes": 4061,
+      "sha256": "0cd0350698825ee00832b45ec8b2c609c454a340ffeea800793a94305f003726",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000014.npz",
+      "size_bytes": 4061,
+      "sha256": "7795d788ef8f290d5b46e3c93628b8d46374a159187225c6291babe7cc2cb339",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000015.npz",
+      "size_bytes": 4062,
+      "sha256": "a8bb013c9d9b6b13c10fb823145fb8b3f8bcb1ff10041e6c1374a420d7aea893",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000016.npz",
+      "size_bytes": 4061,
+      "sha256": "1910c1be2fd7de6c033942ad5fb74efa2eb2974f05db30e27f3c945992fc4b53",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000017.npz",
+      "size_bytes": 4059,
+      "sha256": "b130c9076c03302658b3ec465912968244c288b7d856b9bd65fe7f8fa702c3b4",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000018.npz",
+      "size_bytes": 4059,
+      "sha256": "f13b58cc3ab79e13e0da96baf39ce513edb1db70c896bfb9936ee222d1ebb933",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000019.npz",
+      "size_bytes": 4061,
+      "sha256": "2e8f807dc9aa4eec3752c0ae0c61d673fd345d799a1467c09a247b784b1af481",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000020.npz",
+      "size_bytes": 4060,
+      "sha256": "2242a129416bcc4397a2d414630d3660da2a0dc4b7a4067681d77804691f35dc",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000021.npz",
+      "size_bytes": 4062,
+      "sha256": "f125ff8c8397b9f48187e0b87444eb9087ea66dea7c7e9568b711bdb6235db17",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000022.npz",
+      "size_bytes": 4059,
+      "sha256": "4a11d025deaf376091cb10a2c0750b46358e9b15b4c59af6fe90ad37f9a846d4",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000023.npz",
+      "size_bytes": 4061,
+      "sha256": "8a83e752610405b429827a63086f0b7b188f1cc4e289277e56c0b01be2be1240",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000024.npz",
+      "size_bytes": 4059,
+      "sha256": "b5721c7c8a72b39c5d6a2fec087b78511699b330227f251d1d3371e30c5383b0",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000025.npz",
+      "size_bytes": 4062,
+      "sha256": "3143a769a3f866d4b712098e7a6910cbe7d75f63b74943d297f40de0d055a4cc",
+      "capture_session_id": "nt_test_quiet",
+      "capture_split": "test",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000026.npz",
+      "size_bytes": 4109,
+      "sha256": "85661d27c487b7b3a18d71fc3ae440d97e0269b1d889a0a1378260c3ed326959",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 5,
+      "event_count": 45
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000027.npz",
+      "size_bytes": 4407,
+      "sha256": "bf8b571259d9e4faba64f811d2ea92be1adf23e8c0e0b16f7d669dbe55cc385b",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 188,
+      "event_count": 5371
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000028.npz",
+      "size_bytes": 4700,
+      "sha256": "cf63921f73cb070a926cbb6bacf42ae72e20779748eb11a150fc167177c22a4c",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 394,
+      "event_count": 9914
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000029.npz",
+      "size_bytes": 5269,
+      "sha256": "67df6cd23b1c2bd30f3a883ce7f9e78d8c0b7b2cb72ea89951540c96d042687a",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 867,
+      "event_count": 23696
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000030.npz",
+      "size_bytes": 5442,
+      "sha256": "fbd895214192319270ead42aa4dcfe82f6953f902df80842e780f9f6df607cd8",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 989,
+      "event_count": 26731
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000031.npz",
+      "size_bytes": 5312,
+      "sha256": "7da48b5721f98afb9d1332cf3377f2604f4e04edb7c4f845f5cdd3c82b6320db",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 802,
+      "event_count": 20461
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000032.npz",
+      "size_bytes": 5621,
+      "sha256": "ccb4aed280d05c6a92967d23b6c84cad30b66b7f979ed8913a55d639d79bb69e",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 1062,
+      "event_count": 39427
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000033.npz",
+      "size_bytes": 5643,
+      "sha256": "89b95163cb466c70b17e8677065b7e35e8a8050d45fe2dbdc9efcd1f3242f09d",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 1340,
+      "event_count": 39612
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000034.npz",
+      "size_bytes": 5250,
+      "sha256": "b8eadca729b78a49730a2bf4cf34c8ad4b086b497b3674a8c22824f24ab3d94d",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 768,
+      "event_count": 22583
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000035.npz",
+      "size_bytes": 4828,
+      "sha256": "d462de43cbdf39a9bc591655b66261829cc326ef9a464c3fa3b4d694f4650e0f",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 403,
+      "event_count": 8022
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000036.npz",
+      "size_bytes": 4881,
+      "sha256": "07b89dfb93eca2c7f61ad1da596e927b3c15e2d8a09f5f16007db619e5f87af5",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 445,
+      "event_count": 11024
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000037.npz",
+      "size_bytes": 5075,
+      "sha256": "9c0611bb09aec6efa05019c631771206227f0c14eb7437fdfad56e32bb41c376",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 539,
+      "event_count": 17550
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000038.npz",
+      "size_bytes": 5418,
+      "sha256": "e0d55c31b9e359a074d6abb708182da5a7ac988711781c44c0230c905bbf9cdb",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 821,
+      "event_count": 31145
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000039.npz",
+      "size_bytes": 5022,
+      "sha256": "f3eecc729c9b042dcd3ff0ec2f6995806c9400943bde19ecc9d340e97379898e",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 616,
+      "event_count": 26180
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000040.npz",
+      "size_bytes": 4132,
+      "sha256": "bb5cc611cc7c27dab349172338a70342f6fbebe746fb2aa548079a7a68b36568",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 32,
+      "event_count": 312
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000041.npz",
+      "size_bytes": 4292,
+      "sha256": "a08254cbff0bf4c15b81f08498805470c21ed5fc4192cab1e7687e0eee68e955",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 111,
+      "event_count": 8101
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000042.npz",
+      "size_bytes": 4760,
+      "sha256": "4eedad902d285053c2f7cf3872ba4953e855a457789cf0eab661e4724983be33",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 433,
+      "event_count": 24596
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000043.npz",
+      "size_bytes": 5036,
+      "sha256": "45c022709b461dd68f799aa6946a4af29096cb88a7acabfd70080812a9bdc322",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 573,
+      "event_count": 22476
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000044.npz",
+      "size_bytes": 5080,
+      "sha256": "f9562ceaf59695789554a3f1915dce04184a45d42a9400145f71ad1626a6e236",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 606,
+      "event_count": 17382
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000045.npz",
+      "size_bytes": 5389,
+      "sha256": "e7c2e6aa4ce2ab20d5458e3ed0daf2ba8a4c505311f46c7cb9a56f90ded7fc3b",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 911,
+      "event_count": 35956
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000046.npz",
+      "size_bytes": 5718,
+      "sha256": "293efdbc0f77f5bb478034847cd7b0798864756b0c6d34a47559dd960270a0be",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 1097,
+      "event_count": 42470
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000047.npz",
+      "size_bytes": 5306,
+      "sha256": "fd47266aeafbdaea40e8ff760f4ff7a2192c9311f81f9c5e49bbaeb2869118af",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 730,
+      "event_count": 26650
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000048.npz",
+      "size_bytes": 5508,
+      "sha256": "35e8743b806a40f590d629bb629310011b1814367771b29db7803c3d1cc7de49",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 969,
+      "event_count": 32054
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000049.npz",
+      "size_bytes": 5241,
+      "sha256": "bbd9447db2414b803de579ed346bf274fcdf60fe70fd7571afc56d1c54869d66",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 723,
+      "event_count": 23151
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000050.npz",
+      "size_bytes": 5115,
+      "sha256": "27e8c095e693da9f4722ff61bc60c450c19c0713db3022d95bb1228b183a5415",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 607,
+      "event_count": 15878
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000051.npz",
+      "size_bytes": 5413,
+      "sha256": "b4dc1a3c911cb7ac158a8a3e40f5167f58b96b9e71ea81ce3cdb33b47ba445a4",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 845,
+      "event_count": 22190
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000052.npz",
+      "size_bytes": 5158,
+      "sha256": "0b97a9100b12e360f9b866f5a05a0c4c39b7bb1557e44a4f9e1786035c0440d3",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 644,
+      "event_count": 18671
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000053.npz",
+      "size_bytes": 4855,
+      "sha256": "5dbe88bf69bef6a0964a18190f6f23dc90bb0fc9fa0a778b671ccffc01651605",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 408,
+      "event_count": 8146
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000054.npz",
+      "size_bytes": 5371,
+      "sha256": "0ed3f5c8daad6cca6a2370d8c08ca699896d5d33bc87fba38e731dc43fa47b80",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 846,
+      "event_count": 24137
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000055.npz",
+      "size_bytes": 5465,
+      "sha256": "2174aa57293f9cd558dd6497b923b52462055088ac865ecb5e4c2a4878b0d4df",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 943,
+      "event_count": 25701
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000056.npz",
+      "size_bytes": 5132,
+      "sha256": "020f62ea57ded87f2e5a540c41753ca67a4a9243602f55cedc0b7aeaca443e59",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 667,
+      "event_count": 17686
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000057.npz",
+      "size_bytes": 4272,
+      "sha256": "247206a606f9bf1a40232f4e652f92497123d364b67313c0e9e8f17fb8af6b52",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 67,
+      "event_count": 986
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000058.npz",
+      "size_bytes": 5012,
+      "sha256": "57d8e1bf5a83f51a01099eca35019d992634c83b385f1c30c110d46543b1cb29",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 535,
+      "event_count": 13785
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000059.npz",
+      "size_bytes": 4840,
+      "sha256": "8f93cda90328e55e1c5328d233fdec94734031a0b658bdffe31a209cc0488b87",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 414,
+      "event_count": 9145
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000060.npz",
+      "size_bytes": 5033,
+      "sha256": "2712ef1468cbf5bd9d6feac5b0b67895c202cb9e1b40bac378aa1265c93d1524",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 552,
+      "event_count": 12720
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000061.npz",
+      "size_bytes": 4983,
+      "sha256": "f2439015470924487ad0e7c189908be505253fdfaefae09eee8968c7b224ec44",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 514,
+      "event_count": 12555
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000062.npz",
+      "size_bytes": 4877,
+      "sha256": "7b73ab856b5690a5fc7f835072b57489d80aa637cdec6573fbfae6a80e861392",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 464,
+      "event_count": 10265
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000063.npz",
+      "size_bytes": 5263,
+      "sha256": "ae40e2727241a4370726b89ad6f7295b1ba19f89815134cb3d0b037625a0fd7b",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 781,
+      "event_count": 33564
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000064.npz",
+      "size_bytes": 5176,
+      "sha256": "c50a7c7204612e8e2bbb6b5e8ffc0ba7bab9a76c54addeb5ab3f303ef8869cc5",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 664,
+      "event_count": 24189
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000065.npz",
+      "size_bytes": 5077,
+      "sha256": "60803b564c10e16dbba869df6c0fcd48b625e892d2690c940f1a894a4cdf316f",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 578,
+      "event_count": 19217
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000066.npz",
+      "size_bytes": 5243,
+      "sha256": "bd0210198368a4f84cd35a244b400ed5ff733679e70a1c145398aaddc8fab626",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 745,
+      "event_count": 25370
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000067.npz",
+      "size_bytes": 5295,
+      "sha256": "b5ab2516c97cadef7a4de0769e4d413bfe0642510dc868cf6f536e38931dccd5",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 804,
+      "event_count": 28097
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000068.npz",
+      "size_bytes": 4941,
+      "sha256": "c102b7b8cca3fbd6d19bcbfcc6009c69895d60b629523ec393fc24d9976b2d07",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 514,
+      "event_count": 16510
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000069.npz",
+      "size_bytes": 4918,
+      "sha256": "b19fc7763a70afdf830d401aa5aec76a682d2bed61decbe21f179c35d907e8de",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 543,
+      "event_count": 11109
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000070.npz",
+      "size_bytes": 4909,
+      "sha256": "d75c3f3831db992ccef80d5828b5027c3b071deccbdb65b7932681c3cde2fa73",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 517,
+      "event_count": 13000
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000071.npz",
+      "size_bytes": 4655,
+      "sha256": "bdb9bbc4c8db95e8303d1cec39c18cfbdae174a641a442395dedbfbef7190935",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 320,
+      "event_count": 5007
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000072.npz",
+      "size_bytes": 4564,
+      "sha256": "c9926e1c39c02ce73e3b77d733186985d55de64a78ab0a0977011fe51cc596bb",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 259,
+      "event_count": 4114
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000073.npz",
+      "size_bytes": 5189,
+      "sha256": "976d480aed2efdc1a69f49c7c94149f1e2ddfb9c3b94cf960cfb935d2e74ce3c",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 711,
+      "event_count": 23352
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000074.npz",
+      "size_bytes": 4891,
+      "sha256": "f4ef39414487cd1020f6f9f67439e03413736412e430d0332253f3a1e90cf5fd",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 455,
+      "event_count": 11337
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000075.npz",
+      "size_bytes": 5027,
+      "sha256": "ffdc49f5c06a840f7c5f87ca306550d137dfdfbcffb9ea21a0c4ce0ac5c3bd6e",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 515,
+      "event_count": 12317
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000076.npz",
+      "size_bytes": 5049,
+      "sha256": "27444046bdd21769f2eb5c202b8d09c37689f65d6da337e3019cf601e43efd6d",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 543,
+      "event_count": 15501
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000077.npz",
+      "size_bytes": 4798,
+      "sha256": "27dfddbd6953b5f028a63217a416fb8809886afe7a127e1d947b7525d8a3868f",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 364,
+      "event_count": 8139
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000078.npz",
+      "size_bytes": 5402,
+      "sha256": "bbfe55ece0c21ac32a42bce15c01a6e5b60cb2781d140a43ebf449681390b5fd",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 829,
+      "event_count": 28624
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000079.npz",
+      "size_bytes": 5285,
+      "sha256": "66a9bfb6173244f89525697ff5f520165b024ede6a9d7f1727f3ca077a509ad8",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 763,
+      "event_count": 27036
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000080.npz",
+      "size_bytes": 4741,
+      "sha256": "f7aba8d504ba37427257bd309b404f09e80383a1fba798fa45df29ed2530b37c",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 372,
+      "event_count": 10965
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000081.npz",
+      "size_bytes": 4969,
+      "sha256": "cbe6c178e519221448a41f3bc7cc171504584e9c51f369ef91ffba21be65d91f",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 599,
+      "event_count": 17617
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000082.npz",
+      "size_bytes": 4894,
+      "sha256": "4dbf825b38855ac5d593800839154bdfec2453bceceb97113c7027dc8eea252c",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 505,
+      "event_count": 11567
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000083.npz",
+      "size_bytes": 5266,
+      "sha256": "835e2fa077f380fb5f5a7afa41835e0340e29de6312a02ba65fa6dbe1573b9ca",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 699,
+      "event_count": 26029
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000084.npz",
+      "size_bytes": 5012,
+      "sha256": "ba1cf42b7cd3de8d6bde7b697bf34d9ba410fd5684bf440cb2c7fb4246b56624",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 491,
+      "event_count": 15603
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000085.npz",
+      "size_bytes": 5499,
+      "sha256": "5b305bbe3886670736862acef760e288bd0a0266700ab119403d49e9e1ebb26b",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 887,
+      "event_count": 28576
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000086.npz",
+      "size_bytes": 5663,
+      "sha256": "3f530b4c638a5ee6dc9e0050f91d7941198ebfb496fc64e799c5cc4205290ef1",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 996,
+      "event_count": 33176
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000087.npz",
+      "size_bytes": 5252,
+      "sha256": "f7744b9b48faa76c5021f1022ffbb5612bab06c7e715a4a9f3bc65d47fdef12e",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 678,
+      "event_count": 20012
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000088.npz",
+      "size_bytes": 5474,
+      "sha256": "72e4b3cf3aa71ccca5092a3f69357a6add8933fff190731747ac6f131ed1bedc",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 1002,
+      "event_count": 21784
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000089.npz",
+      "size_bytes": 5626,
+      "sha256": "6e11b6c14ccc59b9eb34873ac3c8b923473e6f64d3bfa566aa2819b50c1a0f60",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 1106,
+      "event_count": 39219
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000090.npz",
+      "size_bytes": 4930,
+      "sha256": "7543f2c1900cd8dbd8e1da555e3a9d83ba9d68b9e0274804ac29e9baa10062fb",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 545,
+      "event_count": 22175
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000091.npz",
+      "size_bytes": 4319,
+      "sha256": "b4ac3877bb83470b55ce4217b17d0ee051adda25f40b398a17ecfef68f6bfc2e",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 117,
+      "event_count": 3015
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000092.npz",
+      "size_bytes": 4338,
+      "sha256": "187bc96abd8c3080683aa730c68ca248dac6240e8813c2585f0328a6fc49526d",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 147,
+      "event_count": 2266
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000093.npz",
+      "size_bytes": 4490,
+      "sha256": "e48db6071a2d5f498eed32a3326ccac9d1eb6b4909d3a657225a56620b957806",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 211,
+      "event_count": 5034
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000094.npz",
+      "size_bytes": 4645,
+      "sha256": "79408b0ae24e47191d01de6ce4777e9c0cacc46e1c5987c6219be3cbb9752231",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 321,
+      "event_count": 8677
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000095.npz",
+      "size_bytes": 4734,
+      "sha256": "147640d4685d3ad304f0994c9ff6f24c899831e86d060755870a0da084377845",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 348,
+      "event_count": 10350
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000096.npz",
+      "size_bytes": 4992,
+      "sha256": "9364348d747cea5ec9a17c8bdee6f05db2a8f698cb5b04ab74535cf906108a90",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 533,
+      "event_count": 15772
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000097.npz",
+      "size_bytes": 5092,
+      "sha256": "c530b9cf39450f793fba11fa3f4c20dfab63efc1767ec23886455808f8fdc752",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 605,
+      "event_count": 19425
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000098.npz",
+      "size_bytes": 4511,
+      "sha256": "7150c5731faddbe788031d75cdb0d56e56e4f92583c84aa375b35910f308758a",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 188,
+      "event_count": 3703
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000099.npz",
+      "size_bytes": 5314,
+      "sha256": "fb7e51669babf95caa00aa158f750e3a56e48809c133567a344490bda7b2e473",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 734,
+      "event_count": 22601
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000100.npz",
+      "size_bytes": 5291,
+      "sha256": "54c7ff74980003c95cbad8d4f387ba2a216d896060697cdb62abdc03f64b04cd",
+      "capture_session_id": "nt_test_motion",
+      "capture_split": "test",
+      "active_pixel_count": 700,
+      "event_count": 26810
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000101.npz",
+      "size_bytes": 4098,
+      "sha256": "b6127f0637172e2aca021b6386fc74b3d5a76a3d3c7dff03a3046cc9b5d071bb",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000102.npz",
+      "size_bytes": 4100,
+      "sha256": "bb3cc132975e73af3725208a3cfcb725babbe46fdfea933398362d26c2a3baf1",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000103.npz",
+      "size_bytes": 4100,
+      "sha256": "50a116c76c3df7e7e8f641393614083ee043651cb05a06cf2412f28845e2152b",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000104.npz",
+      "size_bytes": 4100,
+      "sha256": "dcb08744cc0078c51b67c2c51abf5ee48660306dc5d16dd4d79baa6fd054e637",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000105.npz",
+      "size_bytes": 4101,
+      "sha256": "416b91a3fc40c9060fba4b3e0de5d737b99d881909569931bcf0ca7a23e65c6c",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000106.npz",
+      "size_bytes": 4150,
+      "sha256": "d3c853abc7e0fb33a0e9b4120e995e35a74164e7f5554cf409a4d64185e36cd7",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 17,
+      "event_count": 171
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000107.npz",
+      "size_bytes": 4100,
+      "sha256": "844ab88c4f822bfbbb7c3c5718a07b72696d96344d255c5a0c37f63c90073e27",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000108.npz",
+      "size_bytes": 4202,
+      "sha256": "de404e0d94590446139e087d6af41c337f308a6ac5335536039c6f1cc001bce8",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 37,
+      "event_count": 496
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000109.npz",
+      "size_bytes": 4195,
+      "sha256": "b5c2bb74725a6f430d27e70406a67202f0757279e96d5e6a229d07fb3c49a093",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 39,
+      "event_count": 468
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000110.npz",
+      "size_bytes": 4153,
+      "sha256": "4d869a94d9d936b42ea628b69c296fa8497ae2282cbfe2fd18de136d1a325217",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 18,
+      "event_count": 276
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000111.npz",
+      "size_bytes": 4189,
+      "sha256": "334dbb7fbb375b8a358a8616ce36e32ddb891c3d60e597775b9a90dd653cb773",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 40,
+      "event_count": 1515
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000112.npz",
+      "size_bytes": 4101,
+      "sha256": "5c36a6316cda8f125cb8c6e6c123f5b73878e8543856840db307b0ec6b03384c",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000113.npz",
+      "size_bytes": 4101,
+      "sha256": "73f4aaf16ad8535da3049aef31bdf2c91a491cefeedb63c707924874071504f6",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000114.npz",
+      "size_bytes": 4101,
+      "sha256": "56b1cb47ec2de08b2feb051ee29e68593206b77603bcc2df167d7b85102e5b97",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000115.npz",
+      "size_bytes": 4100,
+      "sha256": "65737d7cb7f8e35f7da471bc1b14378d917dc7a16d60abd275dd1ddbd7cd9c05",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000116.npz",
+      "size_bytes": 4101,
+      "sha256": "d480e519b512c6ad724b7f9074b52e252279824108065b19fb5a1b37ef14ae85",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000117.npz",
+      "size_bytes": 4102,
+      "sha256": "5ff23fa3e5a1c6e97e64af5cc8abd31020ba1ccbe6aa20512c8a590443c500dc",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000118.npz",
+      "size_bytes": 4103,
+      "sha256": "93441b370ae719f11568a65bd80e0618b4380cc56fd83c126d9250d6ac8e4e51",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000119.npz",
+      "size_bytes": 4099,
+      "sha256": "4deffe8843fc740a944cfc6343c8b66ccc04e11c17c9675bc33f9fdb53ed3f70",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000120.npz",
+      "size_bytes": 4100,
+      "sha256": "c9df37db1204b15dd1c8089e281e79f5da81fbabd8274775fcbaa7d82034fe26",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000121.npz",
+      "size_bytes": 4101,
+      "sha256": "8488b5cc0e995f713ac4f1fdcafa8be2818a64dc12d3d1344c9a2dd3a09d342c",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000122.npz",
+      "size_bytes": 4102,
+      "sha256": "51c26f3a6ba4580bbb346adf2fc782200f3de8f6efa165253674d0c30a8654ca",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000123.npz",
+      "size_bytes": 4102,
+      "sha256": "e45de3ea06566a48ddf82a5b1556291d0ed8a96b18bc31e7aa2bd593d48d9089",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000124.npz",
+      "size_bytes": 4103,
+      "sha256": "21487cd5436f011f960e23b69a31b53164b4f5da8b88ff39b15a3b96e1d55ea3",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000125.npz",
+      "size_bytes": 4102,
+      "sha256": "84e95f689c20d2b9999c2e3cf326ee55001237b60959ac1bb5fc6e89998a019b",
+      "capture_session_id": "nt_validation_quiet",
+      "capture_split": "validation",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000126.npz",
+      "size_bytes": 4152,
+      "sha256": "80db758f0c48c7d4da6e1caf53e9016a5e675a9598d228d225396f45d14a341e",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 8,
+      "event_count": 256
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000127.npz",
+      "size_bytes": 4478,
+      "sha256": "f626dacbd2627f723cd3d4cad117b07158033655ff122f07f9fcd473beb96fd7",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 226,
+      "event_count": 6066
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000128.npz",
+      "size_bytes": 4516,
+      "sha256": "fa5e86f9aeab5510f3ff06ef912b407f0157fcffc1c39a44a961644d7806dcc3",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 251,
+      "event_count": 6624
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000129.npz",
+      "size_bytes": 4469,
+      "sha256": "70b4bd386201985ac3d9016e9ce02c616dcd2509a6e022b6d3e76b052c6cd44e",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 210,
+      "event_count": 4728
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000130.npz",
+      "size_bytes": 4569,
+      "sha256": "76ed5c7f329e20bb29533c2220f5b4141021ce7d1851bdf87fff4bec7f288b31",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 274,
+      "event_count": 6103
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000131.npz",
+      "size_bytes": 4611,
+      "sha256": "68ec5b22693cc6257b30a30b265414a38dc1f055126a10b7dffbed0adb14fae1",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 277,
+      "event_count": 6468
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000132.npz",
+      "size_bytes": 4784,
+      "sha256": "189a04dc3b85ad7012f404950db38571857b341bdc31c5a6de5154b392fcd6e1",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 371,
+      "event_count": 9237
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000133.npz",
+      "size_bytes": 4822,
+      "sha256": "ca111f5a5b515d53dbc8f09d14d19cb0d2049c67de44413b9927b6857b1a6606",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 408,
+      "event_count": 9301
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000134.npz",
+      "size_bytes": 5068,
+      "sha256": "51d03f5f9aaa834b3c04aba1c5d50b4cfad7cfca5b45f86a29ad37d9453ac873",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 581,
+      "event_count": 13972
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000135.npz",
+      "size_bytes": 5179,
+      "sha256": "7722c75283b1fd6eb20f464349189dffbe3d9162ea2779b76e9a0d4a6ec96c74",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 642,
+      "event_count": 14057
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000136.npz",
+      "size_bytes": 5274,
+      "sha256": "0bbacf21e90e32b6b09afb18c00fd06c27599afd94aad55131223fe7c1595af0",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 716,
+      "event_count": 17052
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000137.npz",
+      "size_bytes": 5394,
+      "sha256": "c12fbcf60dce58c7b01cbeacd6ab9ff5ea425a4dcc6508e4a72078d2d5a2fa67",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 820,
+      "event_count": 18971
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000138.npz",
+      "size_bytes": 4864,
+      "sha256": "49b7e746c4a33603d1d676b705ac90569279d4dafb68ad4f468fb8fce1ba7d82",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 414,
+      "event_count": 6895
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000139.npz",
+      "size_bytes": 4880,
+      "sha256": "1f994ef66d69de3d328aa2aff519091e39b2e40dde94e37427d9055b0baa643a",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 477,
+      "event_count": 7623
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000140.npz",
+      "size_bytes": 4960,
+      "sha256": "bfac361edf2fc91ede46093e5aeb9b34f5d0b436d98456f2dd0867469f97e0c0",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 544,
+      "event_count": 9185
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000141.npz",
+      "size_bytes": 4774,
+      "sha256": "40169bd302c8cb88ddfd2a6fbe9aba5df97757af9415cd44ddf8e7fa484ff803",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 386,
+      "event_count": 6028
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000142.npz",
+      "size_bytes": 4759,
+      "sha256": "17a6e6bf3fa163c48ff994c18071a426969632aa5d7934209b0510729226044c",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 330,
+      "event_count": 6788
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000143.npz",
+      "size_bytes": 4728,
+      "sha256": "a6af79c03fbd852611825c4f6b2794715d8d07c81101bc8aef1e1b9e065808d1",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 312,
+      "event_count": 7045
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000144.npz",
+      "size_bytes": 4474,
+      "sha256": "8bfda8f679010f177b031c803b2e95bc0e32fe3f6dcb4dd9fe8a0b8f7a64d95a",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 149,
+      "event_count": 2598
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000145.npz",
+      "size_bytes": 4877,
+      "sha256": "eb3ca3e6aea7738d9831491de5c65ae257220cb7b272910e529966fd922f9b64",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 399,
+      "event_count": 8682
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000146.npz",
+      "size_bytes": 5043,
+      "sha256": "9350f42ea4f723aff070c7fcdb3ccd2e30f474f94dfdbdfc0c853ee53ae75a0d",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 491,
+      "event_count": 11917
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000147.npz",
+      "size_bytes": 5103,
+      "sha256": "f88eda3ea73f5c02dc2d178c0af78abdacba037dde45532c91a81922c7e79a66",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 547,
+      "event_count": 14509
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000148.npz",
+      "size_bytes": 4836,
+      "sha256": "549c83f846ea26ca9c651d02c51f0b94604feb4946af91dd59d433930e0c012f",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 354,
+      "event_count": 7858
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000149.npz",
+      "size_bytes": 4675,
+      "sha256": "0cdf33d44d709a56fd4ef1ae5b645de82ba599a3122a146aaf3feb3995409b2c",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 243,
+      "event_count": 4516
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000150.npz",
+      "size_bytes": 4868,
+      "sha256": "716a5aa06c2a066b5095858589140deac0ea62d5a920a66a71fd41fb38f09fb5",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 366,
+      "event_count": 8090
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000151.npz",
+      "size_bytes": 5030,
+      "sha256": "dd550a3bd20e3878c84a96855e59ea84e2dafd95c624f652d97f02a3d8b42cba",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 472,
+      "event_count": 12443
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000152.npz",
+      "size_bytes": 4957,
+      "sha256": "cc5e3a7c3e86c76c34194c0860084473b7cb2ddfea0fb2f26d60efe2ce7abf03",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 435,
+      "event_count": 11081
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000153.npz",
+      "size_bytes": 4950,
+      "sha256": "71d2253d94d0eade54f65a9376c2dfe92178f39f452a3c49c3058842ceb8373b",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 425,
+      "event_count": 11592
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000154.npz",
+      "size_bytes": 4809,
+      "sha256": "1169d89236906ee29bf4a96dde3954bbe123588a3b4f0e77cc783585c1b4f530",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 352,
+      "event_count": 9939
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000155.npz",
+      "size_bytes": 4667,
+      "sha256": "d57d2f5955245a614665795ad3c46a179527b2a9601dcf3bf24dcc4010ecd834",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 252,
+      "event_count": 6959
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000156.npz",
+      "size_bytes": 4626,
+      "sha256": "c8304cbe86d54f5f8569d6ea4328b171b9938cde7c121dcb074594ffcc551c88",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 241,
+      "event_count": 7374
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000157.npz",
+      "size_bytes": 4432,
+      "sha256": "603a8d121a47fb184822fe267a5b23cec762d6ea583d38687fe85a8ec377bbcc",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 130,
+      "event_count": 3056
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000158.npz",
+      "size_bytes": 4296,
+      "sha256": "2b7511b8b76c39825ba561e3ce89af396ff9bb1bd10eeacfb9fae0d3f6c9b7fe",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 63,
+      "event_count": 1021
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000159.npz",
+      "size_bytes": 4269,
+      "sha256": "2349346ff65352a9c05a4c1dfbd5f34a6ac03487925696b02721a9ee26387dde",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 58,
+      "event_count": 945
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000160.npz",
+      "size_bytes": 4428,
+      "sha256": "b8654a50053a5d82a611360b1b6152c1e0aa663d073fba3d1896132474f26696",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 142,
+      "event_count": 2401
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000161.npz",
+      "size_bytes": 4437,
+      "sha256": "f8c6e069c779f9ceff9e7899e7b2002e085cd56da7021fe072d49a2823d9cf1d",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 146,
+      "event_count": 2082
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000162.npz",
+      "size_bytes": 4390,
+      "sha256": "a94ad14e66fa0b0ca9206e497daffffa9f68a81c8bec9bf2962888bd05a36575",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 104,
+      "event_count": 1524
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000163.npz",
+      "size_bytes": 4420,
+      "sha256": "447d735a2b874bcc981b8958d7352a50826b943c23e40cc23bf8444872113572",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 124,
+      "event_count": 2012
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000164.npz",
+      "size_bytes": 4584,
+      "sha256": "c9800ca7b9a96ab2ba377c74dfa41712fd1f875a7b9cc9aa49239664dc2f2cc4",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 211,
+      "event_count": 3384
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000165.npz",
+      "size_bytes": 4626,
+      "sha256": "ce0ba3321a0f04fc14f130aed169ec44f97cc5fecb72561d911d9e245f89b4e9",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 231,
+      "event_count": 4857
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000166.npz",
+      "size_bytes": 4813,
+      "sha256": "8e26188eb97ae99d37977fd2617a8a2f88694eabdcba2ac18b1b9569698dc3d7",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 350,
+      "event_count": 6553
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000167.npz",
+      "size_bytes": 4821,
+      "sha256": "bf756628c18fe5f6da58f2b1840ccbe22a25c15b020adba206a2cae57d0a3ef7",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 340,
+      "event_count": 7595
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000168.npz",
+      "size_bytes": 4823,
+      "sha256": "e2d341f0c51e4afcdd5350caf39c981d1c20a70daf3dbee2b30e16f544bd9e34",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 353,
+      "event_count": 7370
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000169.npz",
+      "size_bytes": 4909,
+      "sha256": "a6ca7d9df1ef7d7bf9f837b6099d3811587c8d72ff269656e3d5957029b074c9",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 420,
+      "event_count": 9531
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000170.npz",
+      "size_bytes": 5025,
+      "sha256": "858bb9c9454c33472ee41e88962e8e7a92dd40d9771c750a802be29a20ce0189",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 503,
+      "event_count": 10747
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000171.npz",
+      "size_bytes": 4967,
+      "sha256": "ed0d84c80bd9993afb0a71efe400716a8de7660553cae32c796e8ff521ac324c",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 468,
+      "event_count": 9357
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000172.npz",
+      "size_bytes": 5270,
+      "sha256": "cd83c9b02c8a146157c4289aeb43329dc0ec0c4354c6d306cb741f1a43e322e4",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 711,
+      "event_count": 15083
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000173.npz",
+      "size_bytes": 5237,
+      "sha256": "61e241db4ca5f2bac883ccd5d3112ef6d5872b973631e3e16712d9066e2e6fa3",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 710,
+      "event_count": 14424
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000174.npz",
+      "size_bytes": 4832,
+      "sha256": "43d1b648c939f2c863c779d498c60d999de15f597a683fc0baed799a292e1f6f",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 399,
+      "event_count": 6572
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000175.npz",
+      "size_bytes": 4727,
+      "sha256": "9d7dc6c137f5c53c98bcc2d5275b550aa56a73c3af8e0a0219e1b250e1899e9d",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 328,
+      "event_count": 5386
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000176.npz",
+      "size_bytes": 4858,
+      "sha256": "fbf4c1806e097000c132ec7fcb7c2b926b29996b99ee2c50fddc2683e62f3137",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 412,
+      "event_count": 7609
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000177.npz",
+      "size_bytes": 4622,
+      "sha256": "9eeb22236466e7a08faad12800a555328aed2d23de6b305def5d3a26b195b0a8",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 250,
+      "event_count": 4246
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000178.npz",
+      "size_bytes": 4511,
+      "sha256": "3de68c98fe285ea3426621b9d89e1b74a34e1fd6725cad688d24de7792b69b8d",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 178,
+      "event_count": 3334
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000179.npz",
+      "size_bytes": 4509,
+      "sha256": "425178b8dbc456be8711a1d91c4078e7b7ef6d9621397822902f8a402ea5f855",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 170,
+      "event_count": 2894
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000180.npz",
+      "size_bytes": 4691,
+      "sha256": "be1d84bf8fe949a9dbcb7405a49ce357c792664a8954db39de6c35d4428e684d",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 280,
+      "event_count": 5059
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000181.npz",
+      "size_bytes": 4948,
+      "sha256": "21ff2dbe8bf51de6fd67ea038a014f48597d30b67b509cf344d2df40203d8feb",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 461,
+      "event_count": 10845
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000182.npz",
+      "size_bytes": 4867,
+      "sha256": "60a450bea1bd56cb22d5088b887b236a86cdd2dc7181487e86e4406bff9c1aa2",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 410,
+      "event_count": 9826
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000183.npz",
+      "size_bytes": 4727,
+      "sha256": "019e8c706b7419bac0cdad017ea2d1946ad3da972525da67b1edf67bfe6ef0df",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 340,
+      "event_count": 7312
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000184.npz",
+      "size_bytes": 4607,
+      "sha256": "131fed88e18466800f881ff3212822db7f58b8c8f5ced64067b91f52e153d81e",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 254,
+      "event_count": 5365
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000185.npz",
+      "size_bytes": 4459,
+      "sha256": "ca4582c3f015f7ded061464f20ac30affc0d7870faba26ba170e35960f4f8860",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 163,
+      "event_count": 3023
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000186.npz",
+      "size_bytes": 4377,
+      "sha256": "6c88a437bd3ecdc91ac047f42e9016d6e272b58fcbf06774d5d99c61e1726757",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 107,
+      "event_count": 1935
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000187.npz",
+      "size_bytes": 4349,
+      "sha256": "4433c12846e2351a532029135a28489ade359d211c21f3d398d913532e9ef2ab",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 97,
+      "event_count": 1726
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000188.npz",
+      "size_bytes": 4341,
+      "sha256": "3c4a98a50bcae6341fb71c12300f49374cb8d30627e37cdccdbb8e44f6191a42",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 91,
+      "event_count": 1735
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000189.npz",
+      "size_bytes": 4343,
+      "sha256": "092cb97bca332d47ed5180f77643eb2e30bf1110c6ae7337a811db705975018f",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 88,
+      "event_count": 1696
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000190.npz",
+      "size_bytes": 4394,
+      "sha256": "1084f7c656acebea904e797f8b2493a8f2cb776248935c7acd3dde67405a9110",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 130,
+      "event_count": 2721
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000191.npz",
+      "size_bytes": 4266,
+      "sha256": "5f2b233e5104d7194bb05fab62dcb0e5ec75fe9f37e53344f886e5b5dadae80b",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 55,
+      "event_count": 1457
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000192.npz",
+      "size_bytes": 4333,
+      "sha256": "0b1ac5f285e14cc15369ad0cbd698ec479705c15d121bd81e66c916911a06710",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 103,
+      "event_count": 2049
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000193.npz",
+      "size_bytes": 4379,
+      "sha256": "5980969ae54749fa7f64f12f7cf8b79b84fec882d1b3b051169988113b6c4590",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 135,
+      "event_count": 3074
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000194.npz",
+      "size_bytes": 4372,
+      "sha256": "7b2c913a0be701512f6f1cb5c3971e1704de92982f16dc2eb00b3eae635c0a97",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 130,
+      "event_count": 2925
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000195.npz",
+      "size_bytes": 4384,
+      "sha256": "ff55555edaa686ddc7cef0b7b7c16a1c3837ff61ef7905de8bd94b8e227c0c92",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 141,
+      "event_count": 2769
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000196.npz",
+      "size_bytes": 4440,
+      "sha256": "73947c3746a56609234e78c06fa43ada1c3731c316ab5e44c83c359057c26487",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 192,
+      "event_count": 4467
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000197.npz",
+      "size_bytes": 4470,
+      "sha256": "07d8b13eb67e2818f31fd3f2dd9ee15cc48db64843d8894060d22064efed5a88",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 225,
+      "event_count": 5239
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000198.npz",
+      "size_bytes": 4438,
+      "sha256": "166e5d121d066b8c57f16b81ec6507ab70f1817fa268423969df5258f5f45daf",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 180,
+      "event_count": 4175
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000199.npz",
+      "size_bytes": 4425,
+      "sha256": "dbaff7c5952f2c11899ba9ae70afc7277956bc25ed6dd4ea24d479c8ab94c0d3",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 165,
+      "event_count": 4127
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000200.npz",
+      "size_bytes": 4498,
+      "sha256": "b463f5f5b895ea4d141789ca682bf604d1fbe903f8f41e39e03ef3c240856f8f",
+      "capture_session_id": "nt_validation_motion",
+      "capture_split": "validation",
+      "active_pixel_count": 202,
+      "event_count": 5184
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000201.npz",
+      "size_bytes": 4061,
+      "sha256": "ea94a444ee63effbee068ecb0e6c05fd827f8de3daf0725aab27d2086177e63b",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000202.npz",
+      "size_bytes": 4057,
+      "sha256": "3b4281cffa60a1c84565d2cdebb900299a704952b1bed5dab1db79fc4fdc5fd0",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000203.npz",
+      "size_bytes": 4059,
+      "sha256": "c794e466d8163fb90d4ad8e1acbc763168749d015a6ff7aba6f24f5f463f426e",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000204.npz",
+      "size_bytes": 4059,
+      "sha256": "aacddc976e1031842fd31788d10f6a35b04748b2509ce987fd75c86871127258",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000205.npz",
+      "size_bytes": 4059,
+      "sha256": "c53157798fab6cf4b5f9229e25cfaada4cba4734ef952e3240c65833895ba430",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000206.npz",
+      "size_bytes": 4061,
+      "sha256": "634304eb1ad4e117fdcae77463fbe2cd3d22b315872b44061e6df48d4e6d59b5",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000207.npz",
+      "size_bytes": 4062,
+      "sha256": "522fe89fa5b7b95ca7e2ef25c4e4f133e3c0c61f8d42072d1c894d3bf7bf27b2",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000208.npz",
+      "size_bytes": 4062,
+      "sha256": "af3fe82c69b68f04fcecd9fe10418984715e876e79de5b6f7e7b33ce98ad4007",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000209.npz",
+      "size_bytes": 4059,
+      "sha256": "da138dfab9326f0db7649fc23cc33c0ec73113e4d6fe1d4e52e517ff42d2be58",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000210.npz",
+      "size_bytes": 4062,
+      "sha256": "0e858bd9116c91aab8517dae604b0c9447a9d15b49da39f8033b99ab6d3d66ac",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000211.npz",
+      "size_bytes": 4062,
+      "sha256": "b03b5c1ddaf8653a5644cda2debaf03b9849612432d24457f27d38a69e2bc503",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000212.npz",
+      "size_bytes": 4059,
+      "sha256": "ef1984d2d9c088efe6178d9dc9b59eadc1dd884e0b6d230072d3a12684705c99",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000213.npz",
+      "size_bytes": 4064,
+      "sha256": "90e7ed9106d78487b9ac0d26d89ebd2483af8324ea57e53dd96b4679e2bcd328",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000214.npz",
+      "size_bytes": 4062,
+      "sha256": "9ff28e1d8aa1b669ff485f8128715cd699828f9df083dc4ade6b0ef0f75b606a",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000215.npz",
+      "size_bytes": 4064,
+      "sha256": "e687eecf70cda03a79b956f06f9fbd9666f82b52b26c976cf42c478aa7084edf",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000216.npz",
+      "size_bytes": 4063,
+      "sha256": "8d421afa5a1de9b6f0379479f3f1b4e54ff5373c3d869723a8effed6e155646c",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000217.npz",
+      "size_bytes": 4063,
+      "sha256": "553bde26fdafe2e74406eb7c8cbfc581d9a135685e0a756851dccd2f953e6bd8",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000218.npz",
+      "size_bytes": 4062,
+      "sha256": "9848cd69a593e2abdb23f6d7a548495fd8cfd6b7a7d60fdd877bbdcef1176ce5",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000219.npz",
+      "size_bytes": 4063,
+      "sha256": "faa771d6153ebb09df52d80d372120349083c8d76150f544bcc67f1bb883b9b2",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000220.npz",
+      "size_bytes": 4061,
+      "sha256": "ba27f3a554932f6edf5810728d699c6b5fe686e42ea7120e61a0199c121bc948",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000221.npz",
+      "size_bytes": 4061,
+      "sha256": "cba5dd6ed324dac14ad4127a88805cac1fcd72b3b01e0942f8a8c27eef36d794",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000222.npz",
+      "size_bytes": 4057,
+      "sha256": "c4c5165a61287d05aba1d1567ee5b88bd8e409d30cd7d61d3f2dccb166ca1211",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000223.npz",
+      "size_bytes": 4059,
+      "sha256": "fa880ab082017f6713a8d94d4d6b8f78a62aae05f62a262ccd00cdefdba815ce",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000224.npz",
+      "size_bytes": 4061,
+      "sha256": "f9cdcbede131a273978e6f07b3a46750ba83ff7a6083321b53a5056c6e1bc657",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000225.npz",
+      "size_bytes": 4061,
+      "sha256": "96495332e9de647a76f778f2b755ea79ae0a0a9ba3f45e6ed050ce1642cc8eec",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000226.npz",
+      "size_bytes": 4060,
+      "sha256": "1a198e6090fdf2008f3adb73b1a60cd5d5159d0baaa5ff4c69a8c316f3980143",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000227.npz",
+      "size_bytes": 4059,
+      "sha256": "041ad8f35b967f7d21d8b5013db198d3da2eff612bf0c0bdc19af00467f2f717",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000228.npz",
+      "size_bytes": 4059,
+      "sha256": "25147477f8947679e417f1597abb15cb30f266aa1bc81f35c3bf307749436f1f",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000229.npz",
+      "size_bytes": 4059,
+      "sha256": "48a7e91b5fdb8642b4a094a16df79b07c93aff4ea210872755c1b0c19007381b",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000230.npz",
+      "size_bytes": 4061,
+      "sha256": "6a4810f82da626bfe83890b442738d797acfab368559fc270833bd75a982378f",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000231.npz",
+      "size_bytes": 4064,
+      "sha256": "c05c5b284e1ff35bb2ab739daaf75c697f344fe0ef00ce9bcdbdfc8fcd53041d",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000232.npz",
+      "size_bytes": 4058,
+      "sha256": "57e9d5f019c70198430d50c8636a722761f3c3fe1ea381c68b34d1d0f0db9653",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000233.npz",
+      "size_bytes": 4059,
+      "sha256": "58b1e081df332e533a7a850cd3a02439115cda864689d5407183e6b9b06286ad",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000234.npz",
+      "size_bytes": 4063,
+      "sha256": "a91e8158bb1dead1395df3228d15198d183eb3ec575855d0b4d15cff21076714",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000235.npz",
+      "size_bytes": 4063,
+      "sha256": "e3c90890e85204768b0235081be3cc3f41c21294d8333c683a634d9996d9df6c",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000236.npz",
+      "size_bytes": 4061,
+      "sha256": "3ccb4777ede41f851ac2169befe2ce7cd6598eca3a5be376f38b32cd3be77713",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000237.npz",
+      "size_bytes": 4062,
+      "sha256": "d633c16af2951f1477cb63ce15b90c5782f7d09f6394aec208b0263a19df60c0",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000238.npz",
+      "size_bytes": 4063,
+      "sha256": "51312b077d7a95d5f8b97d58f5354278bf09f6aa312a6b6fb6f40851f78b441a",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000239.npz",
+      "size_bytes": 4062,
+      "sha256": "78c99eeb6fffcf4b534786049335422ead898acae51db488d651e04545a117da",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000240.npz",
+      "size_bytes": 4061,
+      "sha256": "1f26a077636e73f95f8c8f41ed6d900582b0c5fd94ca06153c75ab9311e4dfad",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000241.npz",
+      "size_bytes": 4064,
+      "sha256": "7ffd6c7a146eb9b1d2e15aacbfd5595f400080277d691aef6c25724f74e1a278",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000242.npz",
+      "size_bytes": 4059,
+      "sha256": "8797dddd5c076d97502b9c273a6ec4ed75d9b9fe1af1b0908d27432f7ba58221",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000243.npz",
+      "size_bytes": 4062,
+      "sha256": "7b68c3c8163ecfdeaa36b6876c2d8a8bed092bf2e463f7099e5bd0ec0825614f",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000244.npz",
+      "size_bytes": 4059,
+      "sha256": "02b69800425b40fcd434aa9549f941da1eb02e40449cc078eab5cbd10abb6b7e",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000245.npz",
+      "size_bytes": 4062,
+      "sha256": "5d7bdac7efdce45be7438883f03bc1687590d1789d9d10b6767d0c9ec55323b0",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000246.npz",
+      "size_bytes": 4061,
+      "sha256": "28a448a4eef5f3d7f3f3b07c6edee1dcaa9eb394da3e2c8c706ae0a8bc698d1a",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000247.npz",
+      "size_bytes": 4062,
+      "sha256": "a75ce9557796cb1585daa9ec564f4903382ec38b78b4316c99adc1b99d002e3b",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000248.npz",
+      "size_bytes": 4061,
+      "sha256": "6721bf63519848abc9d1e3a6bf54fb91cfe39ad107919cf93eb9ce3d01846d68",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000249.npz",
+      "size_bytes": 4061,
+      "sha256": "97e75d88b6251cd39ba542188ce5305adf7e7976365ac88a05192d720c0bd239",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000250.npz",
+      "size_bytes": 4059,
+      "sha256": "32c8e509345df626341ee870de5c8380a107e055dae57a6750017dd39283092f",
+      "capture_session_id": "nt_train_quiet",
+      "capture_split": "train",
+      "active_pixel_count": 0,
+      "event_count": 0
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000251.npz",
+      "size_bytes": 4139,
+      "sha256": "f3ed01158e42d2924b91ac239b9205c7b39ef706dc8bbb65597a02714234b0ad",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 11,
+      "event_count": 212
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000252.npz",
+      "size_bytes": 4197,
+      "sha256": "5cc8ba462ecce6783847731e220adce0b46b549f5bc26119ba6e7254a06795b2",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 40,
+      "event_count": 950
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000253.npz",
+      "size_bytes": 4325,
+      "sha256": "5605d1c6266834bb7bd480629c665b831e2b79f8cb7385dab6b9af80632c4440",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 103,
+      "event_count": 1969
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000254.npz",
+      "size_bytes": 4422,
+      "sha256": "edb02be84ff5b5db39abf12b9878953e8e55a2ddf1b86628417a02f4b1c97c03",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 165,
+      "event_count": 3749
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000255.npz",
+      "size_bytes": 4466,
+      "sha256": "9e89848e1145237ffe1cb728977720f3da0015c08a861bfd6ccd3f8a89de82a3",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 195,
+      "event_count": 5413
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000256.npz",
+      "size_bytes": 4499,
+      "sha256": "421858a1e23183469ed2a27fd81a4cd7b11cf8620768ea5672ddecd1e9b6d162",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 221,
+      "event_count": 5982
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000257.npz",
+      "size_bytes": 4514,
+      "sha256": "8692e6df48bc495c1f3ca9b3a09a05185ee41851f49cebc93408ab7ef55db2de",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 216,
+      "event_count": 5491
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000258.npz",
+      "size_bytes": 4344,
+      "sha256": "dbeef384530afa723ffca7128792da10637eee0c551425df7ff3b5eb424edc50",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 105,
+      "event_count": 1675
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000259.npz",
+      "size_bytes": 4307,
+      "sha256": "ead8602a097122f31f1e7859e7e1da96beebcc02abbbc2120adac83177fa2563",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 80,
+      "event_count": 1262
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000260.npz",
+      "size_bytes": 4419,
+      "sha256": "06dc8cd960de584aa54182da31fd11c12a26421c019bce5ad84943140cc672c9",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 154,
+      "event_count": 3285
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000261.npz",
+      "size_bytes": 4588,
+      "sha256": "1433451cffa84d28f01e62c7afa8395907e0ba968c626996bbc88aba859342b4",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 286,
+      "event_count": 6706
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000262.npz",
+      "size_bytes": 4572,
+      "sha256": "4bbeb194ccf272fb7b32c0876860d4fd44a52f02691913ef711671dd8c19f098",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 261,
+      "event_count": 5740
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000263.npz",
+      "size_bytes": 4348,
+      "sha256": "e0e31dcf5b969a738452ab0caeed280e92795d2ac0f5100b9aa9f0f7316caac7",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 106,
+      "event_count": 1882
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000264.npz",
+      "size_bytes": 4288,
+      "sha256": "7d5e1c6d9181e3bfc3b2ee9dd8478aaa34a6b6e40340586c9dd44e29d93c77bb",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 77,
+      "event_count": 1220
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000265.npz",
+      "size_bytes": 4398,
+      "sha256": "11fc689eb09958098803c18a7cd1d1c3a5e9c162b2759c5c23b44b012414e27e",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 132,
+      "event_count": 2156
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000266.npz",
+      "size_bytes": 4445,
+      "sha256": "9ee27315e1059b7eae7a6025e063a4ec487d7ff16f428c3e1450618e42048bc5",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 158,
+      "event_count": 2891
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000267.npz",
+      "size_bytes": 4450,
+      "sha256": "a2e867e6c42e886e34c226197206eb0060220966f506d355eb179ed16f53e952",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 163,
+      "event_count": 3270
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000268.npz",
+      "size_bytes": 4457,
+      "sha256": "097c5b534483160cf293536306a3dd43cbfe4c92efe570c35790309cf9f86c4f",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 163,
+      "event_count": 3189
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000269.npz",
+      "size_bytes": 4403,
+      "sha256": "26b13d82bd2c16d812662819de65bf82dcb2332cc0241188b40e3bc20185bf93",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 121,
+      "event_count": 2223
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000270.npz",
+      "size_bytes": 4532,
+      "sha256": "cb22f324375800a1723fa9a82ba53bce4de37a4c89191bcefd813eaf204c1b92",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 211,
+      "event_count": 4420
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000271.npz",
+      "size_bytes": 4576,
+      "sha256": "3efb669a6ff28025df6d72baa0a93342a82aaa679f2e2a5648c1ad794c4585fd",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 254,
+      "event_count": 5212
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000272.npz",
+      "size_bytes": 4492,
+      "sha256": "d14411bfa4f76d7e36acfac34378945770124078bfd8490dda3a676c12139ab5",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 187,
+      "event_count": 3386
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000273.npz",
+      "size_bytes": 4676,
+      "sha256": "807c2c3a808341d5bc0b721574cb42375ac8a14ee1cc795b6965c12ad09edb41",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 318,
+      "event_count": 6946
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000274.npz",
+      "size_bytes": 4611,
+      "sha256": "323960ca73c8faa8db3fe6e0496af2249c5a331a1c809dae4ff0bed4d6ebc04d",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 261,
+      "event_count": 5253
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000275.npz",
+      "size_bytes": 4738,
+      "sha256": "b937e0c9533b291cef8b6ae9b2f0155980bf3d245d16a3dbd4e533e7de196042",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 329,
+      "event_count": 6717
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000276.npz",
+      "size_bytes": 4910,
+      "sha256": "f1c286b62143eacf03b022c72b8e7bac45ce61bf07620e86d88f238e2c94cf30",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 449,
+      "event_count": 9961
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000277.npz",
+      "size_bytes": 4742,
+      "sha256": "9712234e9c80b9bbcabdba4b1c7749549395747927c7db726edaa12ce5c2621f",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 290,
+      "event_count": 5369
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000278.npz",
+      "size_bytes": 4642,
+      "sha256": "eaa8cb2b27e6314bb7c191a20a79e57bfb71db50fd61105fe0a1e4e8f445ff63",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 257,
+      "event_count": 5229
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000279.npz",
+      "size_bytes": 4789,
+      "sha256": "4da4055ec6e360180e62eee6b01f41b6c8d17c7b8fff5a57410e1c70f18e2123",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 396,
+      "event_count": 8319
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000280.npz",
+      "size_bytes": 4775,
+      "sha256": "2fa6bf1c125f39820766aa16df077539875d9cb30082be94776ab7016bf9a9f4",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 395,
+      "event_count": 8870
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000281.npz",
+      "size_bytes": 4736,
+      "sha256": "d78f9d60240332ec3ff5d78aa942a6a7a5df83136aae7193e289ab5f04ca1bf9",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 373,
+      "event_count": 8195
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000282.npz",
+      "size_bytes": 4637,
+      "sha256": "17a95b45a04f07e1f7b53879a8b2280abc526aa0a941f4ca5f0184c0c88ed0ae",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 324,
+      "event_count": 6934
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000283.npz",
+      "size_bytes": 4515,
+      "sha256": "abbc8bb81d2e8c3c5c0fcc06dd888ddb04f39a62afcfd7ef8955e79edc16fe44",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 253,
+      "event_count": 5298
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000284.npz",
+      "size_bytes": 4413,
+      "sha256": "a78b8a3273e7b7e85b5e9b6d601b8b2d3cfc87edf899fabd6da1c56f5cf68c0b",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 193,
+      "event_count": 3965
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000285.npz",
+      "size_bytes": 4373,
+      "sha256": "cbe7b3045205c6876c30aefb44a4223f786ec7c7794dfaa9203d4a80bbe02580",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 157,
+      "event_count": 2593
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000286.npz",
+      "size_bytes": 4227,
+      "sha256": "8e8321f93d3bdcfdde17e72a327a2c5a12a51a564fca0270218e6ba5ba26cb64",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 55,
+      "event_count": 721
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000287.npz",
+      "size_bytes": 4565,
+      "sha256": "5fd1341f2a8e1ee4c3efab8c80ef1336458a56e53658bdddf2a8eb1165f8f306",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 261,
+      "event_count": 4598
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000288.npz",
+      "size_bytes": 5038,
+      "sha256": "5e07d86cba684c9a3ed0a231511fd6644154e113337246a8f5e43c90d452f2e9",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 697,
+      "event_count": 15986
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000289.npz",
+      "size_bytes": 4960,
+      "sha256": "948ad1d817e04c8e87d134fe4900e958c2c319a5ab816b07b67f588226597c62",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 595,
+      "event_count": 18568
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000290.npz",
+      "size_bytes": 4697,
+      "sha256": "ab3103595d1a0f0a27c27809675fb66e620c7e2482afaf293779e4311cb26711",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 374,
+      "event_count": 9050
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000291.npz",
+      "size_bytes": 4712,
+      "sha256": "d64378a2030a77d5002feaf98dd0dfda1d093247e7fddbbde0f7d2abde4d174c",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 399,
+      "event_count": 9685
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000292.npz",
+      "size_bytes": 4646,
+      "sha256": "4ebdde5dfde661b46e3ff3ea7a20e2b8530cc358f28a78fcab54c54e079da1a5",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 365,
+      "event_count": 8799
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000293.npz",
+      "size_bytes": 4443,
+      "sha256": "661c362e5ece22f21687915e88b691a07ab6610baed0e4b949c8d5bde352aee7",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 206,
+      "event_count": 4176
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000294.npz",
+      "size_bytes": 4422,
+      "sha256": "4a60a89b5b80ac56f7700ab9e9c570a3a430a839f377baa6e072fe667d9325f1",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 172,
+      "event_count": 3494
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000295.npz",
+      "size_bytes": 4516,
+      "sha256": "0c4f9721fbbd9e40033f3ec9b50c51072dce95a06a969c266c1fe56e1558ace9",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 222,
+      "event_count": 4712
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000296.npz",
+      "size_bytes": 4535,
+      "sha256": "bf827f329591a111dcbbfb9b00660854682f801fa5f6414ec4aaa714ae4a7a3d",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 215,
+      "event_count": 4287
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000297.npz",
+      "size_bytes": 4392,
+      "sha256": "2c8ec1a1234a5b0852216b4a7ac9e4c61f975aec265a2faafee3c48cbb244bfb",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 117,
+      "event_count": 2104
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000298.npz",
+      "size_bytes": 4605,
+      "sha256": "5dbb9af2b93bc6b7bb9557243bfa52921a3a159c0411f5b95e933c7fe717aae5",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 249,
+      "event_count": 5540
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000299.npz",
+      "size_bytes": 4761,
+      "sha256": "f24b762d48dc3019bdf39a48098064566fa63713c06bf2cdd2172638296d863b",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 352,
+      "event_count": 8927
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000300.npz",
+      "size_bytes": 4797,
+      "sha256": "047cfd78ff1640da911dd6c55eccc947237ebc99a478c7e93444a1b9db251b99",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 373,
+      "event_count": 9277
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000301.npz",
+      "size_bytes": 4842,
+      "sha256": "1810c042350552d0e0698baccbac0db080120cdcbaeb8b8c53e62e9c5e83a1a7",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 399,
+      "event_count": 8695
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000302.npz",
+      "size_bytes": 4889,
+      "sha256": "f990c482b2e0487e84a694bd0a152979a0211e45e2f0f35b6ca17e55fcbced14",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 421,
+      "event_count": 9839
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000303.npz",
+      "size_bytes": 5154,
+      "sha256": "a563f4deff51e5ae154c02da010242ccfadeba347feed972697a06dfaef95bc3",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 632,
+      "event_count": 18948
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000304.npz",
+      "size_bytes": 5128,
+      "sha256": "b03fda4efcad0fe2b163573bf7a17bd8bc972c6739e6fbe68379e3bfdc658171",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 637,
+      "event_count": 19583
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000305.npz",
+      "size_bytes": 4965,
+      "sha256": "35299ec86fef375075802e19b0c5ab79e144de348bd4756a668b2282cd35248b",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 596,
+      "event_count": 15449
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000306.npz",
+      "size_bytes": 4729,
+      "sha256": "105083949a49ccf60861bdf3a9f02b5e8d59ed1345540ae9869913e8a5f66891",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 371,
+      "event_count": 8374
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000307.npz",
+      "size_bytes": 4758,
+      "sha256": "267d82782fb403a3a418312c9d3050c2ea86ae23a2b446ddf864e30f0ba57b1c",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 366,
+      "event_count": 9907
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000308.npz",
+      "size_bytes": 4879,
+      "sha256": "e50d6252505d3153377a30462552e2c11c13c45c34ca1f869092b660927d505a",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 445,
+      "event_count": 12104
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000309.npz",
+      "size_bytes": 4871,
+      "sha256": "b17e43de5b686626924836052753e38ec48b100aa75d9c3e859a3a26308cf901",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 449,
+      "event_count": 11375
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000310.npz",
+      "size_bytes": 4891,
+      "sha256": "3ae25b12201cb275a25955b9fc6097af5c6341a32def03a872d567913040eac6",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 475,
+      "event_count": 11837
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000311.npz",
+      "size_bytes": 4896,
+      "sha256": "b48cdfd160a88473f1fd30dd20f69022a8b162b1815005b85d9b85ffcaf5b932",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 463,
+      "event_count": 11592
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000312.npz",
+      "size_bytes": 4719,
+      "sha256": "2d003272b594deedc982c4e0523a53e67fbd5fcfdbc16e662a75723209640552",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 326,
+      "event_count": 6655
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000313.npz",
+      "size_bytes": 4786,
+      "sha256": "249110712f153ab6477dd2290eaf38b95aa4c26b048be9a3cb5a53b893062a5b",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 385,
+      "event_count": 11422
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000314.npz",
+      "size_bytes": 5125,
+      "sha256": "34bd2cbf124bede59def73be8a911f4c9d4f1b8b5d1854c6eedfd7b8c9f0a464",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 604,
+      "event_count": 19895
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000315.npz",
+      "size_bytes": 5121,
+      "sha256": "24775a69e6720e7add178eb8cfd504429a4022c8f9566f65473b4e04086faca1",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 590,
+      "event_count": 20240
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000316.npz",
+      "size_bytes": 4946,
+      "sha256": "964a2d86072e9b2414ca126b033055eb9436b73ebfef7479bff27368d5d2b861",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 475,
+      "event_count": 12637
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000317.npz",
+      "size_bytes": 4418,
+      "sha256": "78d4291d092fb8e2907d04f9e0a0bf1e29c0d6f751409667dbc483e89879755a",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 141,
+      "event_count": 3062
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000318.npz",
+      "size_bytes": 4755,
+      "sha256": "4f864acad3a5e56a9e7d28ae8714db76c9dfd5f3d9daf5c3d28ca03e81cf9fd8",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 356,
+      "event_count": 9426
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000319.npz",
+      "size_bytes": 4873,
+      "sha256": "959cde7384172a76a32a062d254c73f79aac7eab584738b5545aa3ec42c2505d",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 407,
+      "event_count": 10282
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000320.npz",
+      "size_bytes": 5064,
+      "sha256": "c6b7c36e837f292987ae75775ecbad2f5e670c9182201e1fc442d55caeabbdc1",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 563,
+      "event_count": 16626
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000321.npz",
+      "size_bytes": 4874,
+      "sha256": "6914678812beb7f89ed9aed5a524997944df35d6670652fd73c599b428ef7ccc",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 448,
+      "event_count": 12877
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000322.npz",
+      "size_bytes": 4707,
+      "sha256": "570079776025e26f9d778afc6cc6c194502e5aee6e2d3e227e3cf8ab8ae40113",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 352,
+      "event_count": 9747
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000323.npz",
+      "size_bytes": 4415,
+      "sha256": "b54e43f850768613a7637439ccf28b50d821d113e831c2d38e83d90c21daab07",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 150,
+      "event_count": 3128
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000324.npz",
+      "size_bytes": 4500,
+      "sha256": "73642295387034111e280168bf6503b66d41ae2eae394fbee984669c2880fd1a",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 183,
+      "event_count": 4745
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000325.npz",
+      "size_bytes": 4560,
+      "sha256": "32764dafcfaaed181d564319ecebda2db6812f2e7f65e2c974028c8d403715a9",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 213,
+      "event_count": 5921
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000326.npz",
+      "size_bytes": 4888,
+      "sha256": "14345f518460f6a8087e19d64d24821c0fcb7eadbde54184cb78614a51e360d0",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 443,
+      "event_count": 19296
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000327.npz",
+      "size_bytes": 4575,
+      "sha256": "ea0002632c85aaf38e9f8d28da1bb494bad0ae3269d45335947ff3bc93e50810",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 215,
+      "event_count": 7310
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000328.npz",
+      "size_bytes": 4582,
+      "sha256": "19d60da40a8d99cc5c01cfcb4c9b924bbc5975f18312bf7fd9c5300b30c20078",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 221,
+      "event_count": 7570
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000329.npz",
+      "size_bytes": 4795,
+      "sha256": "d58374d660420e5d0b02fe2f4e3cb5968c556680a17cff7b9679a3e6c69a7f7b",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 353,
+      "event_count": 12842
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000330.npz",
+      "size_bytes": 4956,
+      "sha256": "11813c07f2dd772192c08482e90f2e7cab725836616e10debd49daa5de94dc1f",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 445,
+      "event_count": 15322
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000331.npz",
+      "size_bytes": 4949,
+      "sha256": "cd99acc991fb1aa6115dd0fbc75e243ac1f34275f21ffcd9a38ece93e6b0091e",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 437,
+      "event_count": 12624
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000332.npz",
+      "size_bytes": 4978,
+      "sha256": "4760b0a4a71bef953f9865de3aa1c291d25303f69a8c73a8ebb39d7bc9e96559",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 450,
+      "event_count": 13383
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000333.npz",
+      "size_bytes": 4668,
+      "sha256": "f3e692ea7115254d66e4aae2db1afd3c01b972447ffe277d763053154b87af98",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 256,
+      "event_count": 5432
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000334.npz",
+      "size_bytes": 4754,
+      "sha256": "4ce76262a6d42982b15ceb39b59594e4e4e6b85cc22985209bae16a94ec7c40f",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 323,
+      "event_count": 7519
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000335.npz",
+      "size_bytes": 5104,
+      "sha256": "aecedde3d0975f6deada2c490b46026ee0ceb876e9ecde9bd24f60d258d76041",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 562,
+      "event_count": 16624
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000336.npz",
+      "size_bytes": 5558,
+      "sha256": "4e9c1932287a3fecf98a49363a984df69cf5e595fa0e546f52f94a07a18b2c7b",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 904,
+      "event_count": 25138
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000337.npz",
+      "size_bytes": 5555,
+      "sha256": "52932d6170da8c72bddcd3af91f85999b6c678fc085d6b1fe1618e6d4f60870e",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 910,
+      "event_count": 24572
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000338.npz",
+      "size_bytes": 5235,
+      "sha256": "99c827f2e4510335f3b6b1b6e88e760df72a6d58cadb85200c5ea25bdb5a2d42",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 650,
+      "event_count": 16106
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000339.npz",
+      "size_bytes": 5385,
+      "sha256": "40d1d4d44f0718c30ce943fbab94f952e178193f085366f2a402b3f595c0f0e8",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 798,
+      "event_count": 27278
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000340.npz",
+      "size_bytes": 5209,
+      "sha256": "4a95551e075b679386f30c41f19fab9500ba0a5a75141e057231b27cba60da4b",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 690,
+      "event_count": 24747
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000341.npz",
+      "size_bytes": 4701,
+      "sha256": "de6269bdb8ff0a16072ee88639594ebf70404ce316e60543b14e5a409ff2a935",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 302,
+      "event_count": 8164
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000342.npz",
+      "size_bytes": 4960,
+      "sha256": "deb80674624ee17a11bbe66d02c2c7b42cf3fbd724fd2b43e350c62b53036f7d",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 541,
+      "event_count": 16257
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000343.npz",
+      "size_bytes": 4886,
+      "sha256": "d6afb7bce00fd4528ae983371ae1b34a0db55cc43929c6c8379e363c6de656ac",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 453,
+      "event_count": 14627
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000344.npz",
+      "size_bytes": 4728,
+      "sha256": "e6ca92072a48b47fe2c77436138c21abd98199725023d5b57662ebcb294b4919",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 338,
+      "event_count": 9588
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000345.npz",
+      "size_bytes": 4737,
+      "sha256": "273ebb510f831fb447641e7fae6e28478f46cba2e2f6ba0c5df087d1f974f490",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 367,
+      "event_count": 8733
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000346.npz",
+      "size_bytes": 4783,
+      "sha256": "d82da1fe9b1faea46c60ed679f8e0a52f96c6c7f5bdd1ccddc592d5fdf1b8f33",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 387,
+      "event_count": 9245
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000347.npz",
+      "size_bytes": 4810,
+      "sha256": "fc3913d245e69b81452f2745d83980059db90f4081a6058323f166336d542bfd",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 393,
+      "event_count": 9399
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000348.npz",
+      "size_bytes": 4749,
+      "sha256": "1037199f89fc28f6ae601083c9eb99e5299f3709fec869bc63c5b439e9e683d4",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 362,
+      "event_count": 7904
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000349.npz",
+      "size_bytes": 4784,
+      "sha256": "4df66138decf4fe4ea26991406d1cdabe25a7a6c702b85913343655d6ec590d2",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 451,
+      "event_count": 9957
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000350.npz",
+      "size_bytes": 4744,
+      "sha256": "da6ce6763679e6b34ee4721dcf71cfb7746617a8a354269f8c90e88cd4f8ebe9",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 390,
+      "event_count": 9769
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000351.npz",
+      "size_bytes": 4812,
+      "sha256": "aaa90ed51e0df46770d34c1513ed350f3c2b2637b1a861e24279fad0cb5742e9",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 427,
+      "event_count": 9459
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000352.npz",
+      "size_bytes": 4755,
+      "sha256": "7b1823d3eab97920acf1bc4d84bdc8eed32bec73c170f11e3ad8cc0a9c94867f",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 413,
+      "event_count": 7625
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000353.npz",
+      "size_bytes": 4704,
+      "sha256": "a2ffab61da6e0b6443d188614dbc7b5ed6a7d35327ec4cf69cfbcb90aad692aa",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 369,
+      "event_count": 6756
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000354.npz",
+      "size_bytes": 5078,
+      "sha256": "7a50cc5a2f98b69ce1afd5ba5c6bf60d2e46058de040edfaa65685cdf48b772a",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 615,
+      "event_count": 14286
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000355.npz",
+      "size_bytes": 4941,
+      "sha256": "814f169f84c9143aa5a015121580aafa775760bd50ac9b70191f739a3dd46602",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 500,
+      "event_count": 10887
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000356.npz",
+      "size_bytes": 4927,
+      "sha256": "07e3b8f8a6344f65c8cde6893efdc8a59e4528631f706daf6a6d7dee8a2773a8",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 478,
+      "event_count": 9894
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000357.npz",
+      "size_bytes": 5004,
+      "sha256": "c75d80619074dfedd299ef85b5c1560c5cb1908f7b12d8af10d375677ccca06a",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 504,
+      "event_count": 9423
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000358.npz",
+      "size_bytes": 4839,
+      "sha256": "21b9c0697de60b0ed521f59986c6efa812dfc261f19031356908d00d1a427bbd",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 399,
+      "event_count": 7171
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000359.npz",
+      "size_bytes": 4426,
+      "sha256": "583b122f3377f67f1796fb0484697ee420ecc1211740019af21429d1226c6eae",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 146,
+      "event_count": 2362
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000360.npz",
+      "size_bytes": 5057,
+      "sha256": "3a58089d4e1e97ddc1667e7f2509d2439200f01118f4179e37a3e53ad72dd9a7",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 535,
+      "event_count": 12675
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000361.npz",
+      "size_bytes": 5246,
+      "sha256": "44096d8cbdfe1472e0809e6b4a793d55328a8911824ed0ae04f8db4f2647239d",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 674,
+      "event_count": 17589
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000362.npz",
+      "size_bytes": 5141,
+      "sha256": "03eb130669a9ca759789c5831943f4c6510438989fda1f2343768b620572fb58",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 582,
+      "event_count": 15233
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000363.npz",
+      "size_bytes": 5104,
+      "sha256": "d5fb3babe96c1fa2ce86d3a4a013c9de2bb3839cc9a490dc5164a3bba171fb50",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 573,
+      "event_count": 16010
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000364.npz",
+      "size_bytes": 4935,
+      "sha256": "e72f78f374bfad6b0e563e3ce7f2eac43ea4e8da646c03c1dae23d212854e0de",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 502,
+      "event_count": 13937
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000365.npz",
+      "size_bytes": 4716,
+      "sha256": "2fa204995bad63abb257b57663a8485e8dfa2d72f7ddc4e3bb14640759bad101",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 352,
+      "event_count": 9772
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000366.npz",
+      "size_bytes": 4596,
+      "sha256": "ddd69642922327c6886ba26f5ad83d3dc668d9343a24d3f9894289d72e227244",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 260,
+      "event_count": 6680
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000367.npz",
+      "size_bytes": 4511,
+      "sha256": "df119dfe5aa0654954e131019ea6c629cdaeb49deed8337174a98ea6c8dbff3f",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 240,
+      "event_count": 4748
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000368.npz",
+      "size_bytes": 4188,
+      "sha256": "b9818bebd6bf1764486c2c1260b9a87021d9a9e62da5b2501cdf606d62a84466",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 41,
+      "event_count": 401
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000369.npz",
+      "size_bytes": 4139,
+      "sha256": "885d7a96cc6d4cd234fc96f44dd083942569bb35d17a4ab67e1ef99e000da117",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 13,
+      "event_count": 923
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000370.npz",
+      "size_bytes": 4495,
+      "sha256": "dc13adf2797044e02f2f84dc579a3e3bb73914dbad57e86986b63bfcaa42ef59",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 232,
+      "event_count": 8916
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000371.npz",
+      "size_bytes": 4395,
+      "sha256": "47b6b81b71cf20f2f15bd74833526e1c318806553f356e5ccec02ee4f334fb37",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 180,
+      "event_count": 4623
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000372.npz",
+      "size_bytes": 4270,
+      "sha256": "3aa8e4dc17b095a0b69b2a0acc8f85bb72c6a4c45f01923e1c96444d3fe87b45",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 76,
+      "event_count": 2285
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000373.npz",
+      "size_bytes": 4602,
+      "sha256": "8b05dcebe4cda44de358e19fdb62919179e72da1e4505d195d5fa875bcc6cccb",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 294,
+      "event_count": 8597
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000374.npz",
+      "size_bytes": 4810,
+      "sha256": "e7890c8d57711a581a5cb19ed7d5d9b88689db4c283cfc21158f390b49b2e415",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 407,
+      "event_count": 14157
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000375.npz",
+      "size_bytes": 4804,
+      "sha256": "eb2c8d6ff75cc07122151e620d38fbcd8a87310c56e90f2982e0ffcbef46beb5",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 383,
+      "event_count": 14310
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000376.npz",
+      "size_bytes": 4804,
+      "sha256": "c498a372eb3d66af234adbc758effcac57280004bef471820e245ee8cd667a26",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 383,
+      "event_count": 13445
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000377.npz",
+      "size_bytes": 4919,
+      "sha256": "b0ab3e14883f73d2cdea90062e4afb727306b4484bbd486120ef73fe77189859",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 451,
+      "event_count": 18055
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000378.npz",
+      "size_bytes": 4977,
+      "sha256": "9a400d30bf17b1b2c51503084b92239faba456da64c3cd25f14399fd130872c7",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 488,
+      "event_count": 18260
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000379.npz",
+      "size_bytes": 4688,
+      "sha256": "990b9b711149284316fe105870fe2503a086aa815fe635ee2a24abeefd99c5fa",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 294,
+      "event_count": 7106
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000380.npz",
+      "size_bytes": 4913,
+      "sha256": "61479950d8e2bd0f24b65812770feb301e39f50e66afd290e1e27c8664f508c9",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 442,
+      "event_count": 12637
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000381.npz",
+      "size_bytes": 5355,
+      "sha256": "34c188e839032b36e444382164c0b02cf6218bf6515cf71948468b6ab35975e5",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 758,
+      "event_count": 30917
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000382.npz",
+      "size_bytes": 5536,
+      "sha256": "80957076e10a30eef3ee27e14d66ecb71c113f88711e6005dd131d13304d4478",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 906,
+      "event_count": 38685
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000383.npz",
+      "size_bytes": 5591,
+      "sha256": "639d5061153f1db678151ae789b0749d217843d38e7c55afcf1de545174a175c",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 937,
+      "event_count": 40035
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000384.npz",
+      "size_bytes": 5229,
+      "sha256": "ba9d72783894fe1266d6f0e4692b4b2f188baa571c254b26ed0b96b9fa22b579",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 675,
+      "event_count": 23175
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000385.npz",
+      "size_bytes": 4709,
+      "sha256": "4d04ce81bb429cde29316ae73eab8d742f6303c124551cd9b29884e4ee0613ca",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 292,
+      "event_count": 6357
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000386.npz",
+      "size_bytes": 5459,
+      "sha256": "c49df2ff1238cf0d5e3ed30ed6b205e151f11a70886872f5d735eab9241aefdf",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 825,
+      "event_count": 29234
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000387.npz",
+      "size_bytes": 5543,
+      "sha256": "944d901cd2f9c0ef4ba1f529173c704fd7d4347d6b4e8a085a6f5b2715951fc4",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 909,
+      "event_count": 39252
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000388.npz",
+      "size_bytes": 5439,
+      "sha256": "52f5ba88180fa38471cac1ae807e6fa185bbf838074c1d2d31b056b9cd9f349e",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 850,
+      "event_count": 42583
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000389.npz",
+      "size_bytes": 5529,
+      "sha256": "5eb337d9bae046fe1b0a157f45e45db3ff720460f4e3dad112500aaddd72c29e",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 876,
+      "event_count": 39810
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000390.npz",
+      "size_bytes": 4655,
+      "sha256": "5b9c7af84fd2b3c96211c8e70e81bb166eef478e02d69c20a91e2555e4184676",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 271,
+      "event_count": 6049
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000391.npz",
+      "size_bytes": 5839,
+      "sha256": "8dc02de81842ea41d0501a1443eceec85a86895bcca897aef00e2061529d4937",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 1138,
+      "event_count": 53310
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000392.npz",
+      "size_bytes": 5922,
+      "sha256": "f9e7e271ae85404011cebdef40f3695de81308d8465268a00c89e8229f6d3b59",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 1226,
+      "event_count": 53297
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000393.npz",
+      "size_bytes": 5471,
+      "sha256": "efca4ee758ce0a533091db6afd158d1ac8fb516c7e4f75ad920822f794db0fa2",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 841,
+      "event_count": 34233
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000394.npz",
+      "size_bytes": 5011,
+      "sha256": "13cb135bf46ebbb4cf909f6350cb3ad960e03057f5e52e3d609b797031e347d8",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 484,
+      "event_count": 17213
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000395.npz",
+      "size_bytes": 4754,
+      "sha256": "43f47e702b99ac6e8ff9eaf978abb890108408c4c5b8f0a64d30b843bd6c1d2e",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 330,
+      "event_count": 10249
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000396.npz",
+      "size_bytes": 4821,
+      "sha256": "692068d608c6c6d4a75f206f4fa7e82f1654396da613a7634511b118123b82e5",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 350,
+      "event_count": 9960
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000397.npz",
+      "size_bytes": 4753,
+      "sha256": "604c4948e77cb27c8f18f4b85aca4e8c4e1a7867543e360b3962c6cf22d996ff",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 317,
+      "event_count": 7418
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000398.npz",
+      "size_bytes": 4742,
+      "sha256": "7c598368d92c54b5e0991d6a7414a2d4975610e689a95f046de46db26332d7b1",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 305,
+      "event_count": 6515
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000399.npz",
+      "size_bytes": 4870,
+      "sha256": "0cc8be4dce2ed3320eeada2d7fcaece5aeb9db7e36426f50978291f43d77adfd",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 417,
+      "event_count": 13496
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000400.npz",
+      "size_bytes": 4682,
+      "sha256": "5f26077b63b7e934c660af489d52fa0f7b180d37b86b4c1ecab9b7e2dbab6090",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 267,
+      "event_count": 7199
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000401.npz",
+      "size_bytes": 4726,
+      "sha256": "ca9feebbaad0e945f16157997c8ab73e10a49d061d68f64ade470aeba40de4fb",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 314,
+      "event_count": 6885
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000402.npz",
+      "size_bytes": 4767,
+      "sha256": "5406239dc444055f622f183a678d73bc07acfa5026705c6fbf14c5c0c94af26e",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 339,
+      "event_count": 7931
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000403.npz",
+      "size_bytes": 4463,
+      "sha256": "9048bf8449d8af9021428f6540381a92d2e0c8a5b098ab4a77f63bfd82020e67",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 183,
+      "event_count": 5895
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000404.npz",
+      "size_bytes": 4368,
+      "sha256": "5b5ac8ff6de5b9070d62db54b6708d39f1e8f379fd41540ed9b9f045edbf2afd",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 123,
+      "event_count": 4409
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000405.npz",
+      "size_bytes": 4949,
+      "sha256": "24212fb667105a43474a0e89b2dddb4a76972a3acbe0d026d7dc0e03bcb898ff",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 470,
+      "event_count": 15473
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000406.npz",
+      "size_bytes": 4867,
+      "sha256": "b69687c3cce60b539cf4cbfbe0dcebf7db54eea62776397c4906328ba676bbd1",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 438,
+      "event_count": 11655
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000407.npz",
+      "size_bytes": 5267,
+      "sha256": "6b9372716de56a37f31561864201975651d08d05b85bf362fb3a50d055643e0d",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 630,
+      "event_count": 16989
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000408.npz",
+      "size_bytes": 5222,
+      "sha256": "bcb5e7417fdc20390150042424c62a6512064ca530ea3ed7fa1b48ed2c72ced7",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 620,
+      "event_count": 18410
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000409.npz",
+      "size_bytes": 5267,
+      "sha256": "ed9cda5fcd11952eed82b7744b90c3083034168f19b7f512702b0b264cfc695f",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 650,
+      "event_count": 18786
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000410.npz",
+      "size_bytes": 5327,
+      "sha256": "28358091c77bb4e244cd5769a7ff57e2829cc8c93a42dcd39da5d0841055925f",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 711,
+      "event_count": 26343
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000411.npz",
+      "size_bytes": 5383,
+      "sha256": "90fdb37178f6fcbbe8e9b16fd71057bfec57340c1597f8df7815e646744bef72",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 770,
+      "event_count": 22687
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000412.npz",
+      "size_bytes": 5303,
+      "sha256": "8437c7ef636e0c8d2a14e8a027bbe1a5e93fb49a65fd61741f6a44d6479d492e",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 686,
+      "event_count": 23302
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000413.npz",
+      "size_bytes": 5423,
+      "sha256": "70ecd5d804ac520ba719929011db40b801ee64f8c639a22fdb77a276c14b2a5c",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 812,
+      "event_count": 25484
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000414.npz",
+      "size_bytes": 5299,
+      "sha256": "3b0ec16cfd7ea8f28269e183089bb1c80e81cf267f8b07fb24ae20e1bbdf1a3b",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 674,
+      "event_count": 15353
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000415.npz",
+      "size_bytes": 5558,
+      "sha256": "0c91c14ffc6fb44618d6f53eb806a64330978e0268824dc880deef373c87030a",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 903,
+      "event_count": 27647
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000416.npz",
+      "size_bytes": 5234,
+      "sha256": "7a51fe5d1e938630fc348ffbdd3fd776624c271561632fabd1e6c938fa6c7845",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 644,
+      "event_count": 19247
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000417.npz",
+      "size_bytes": 5016,
+      "sha256": "59bae80829d278a19f0c32e9a515de4596015345b0bfe5f38fa8b54d3c39ebc8",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 482,
+      "event_count": 11393
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000418.npz",
+      "size_bytes": 4774,
+      "sha256": "e9f068212a4b749c91eddb071245bb53854da4d59e9d8a51ba532a150ac7691d",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 321,
+      "event_count": 6914
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000419.npz",
+      "size_bytes": 4709,
+      "sha256": "53bf9a28d0c1f146f784cbc0d29048ea00dc793a26ada2f914f096096ce51c04",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 292,
+      "event_count": 7796
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000420.npz",
+      "size_bytes": 5340,
+      "sha256": "bdfc129e0e144bf2ebf4045b7c70a3b83522d39f63359f2f8915eeb287fbddd8",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 760,
+      "event_count": 24341
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000421.npz",
+      "size_bytes": 5291,
+      "sha256": "1d9c7c6f8ec2c51bf6da6d2858a756d132036445804353a1b99bf2460af7eef9",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 716,
+      "event_count": 23189
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000422.npz",
+      "size_bytes": 5161,
+      "sha256": "40380e77db6d8de6df96ef236075627c59a04c049ef801d0bb153d53c4d8e736",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 751,
+      "event_count": 41472
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000423.npz",
+      "size_bytes": 4826,
+      "sha256": "62af3a4ce882de450499d9da75a43783c116774d46fa4e9b86dc9a65d25e0b19",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 531,
+      "event_count": 38589
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000424.npz",
+      "size_bytes": 4453,
+      "sha256": "db56ea5b1d75f7080ee5d2ce9857fa649fb0614d8cc921ae5adae7f31c5a58fa",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 209,
+      "event_count": 15160
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000425.npz",
+      "size_bytes": 4257,
+      "sha256": "9a78b1c2948a3e9c6c301dc3f6bcbc0161243073ce51f2a7d4d5789001956102",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 64,
+      "event_count": 2146
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000426.npz",
+      "size_bytes": 4351,
+      "sha256": "1892e9c71c619f5a35be4d2d8dcf9067418e59da11fa8ea09b5b79cdc7e3bda3",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 117,
+      "event_count": 2875
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000427.npz",
+      "size_bytes": 4784,
+      "sha256": "be1fad51b395ae77d303bdc8e9c6ac81358d1a6b5981e9a9b06fb70f7f74c767",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 396,
+      "event_count": 12978
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000428.npz",
+      "size_bytes": 5437,
+      "sha256": "457557afff3b1290bb7f715642cc97e8231997f1db92c73c98323f42b68b8f4d",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 947,
+      "event_count": 27216
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000429.npz",
+      "size_bytes": 5222,
+      "sha256": "52a69bfc95e5a2188b73afaecfebe2809184cb0c80b2e8bec2cb4560869a38e6",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 670,
+      "event_count": 19689
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000430.npz",
+      "size_bytes": 5125,
+      "sha256": "64f0e65a2e7ec47699ce3570bf6615cf359874d07ff296211b5ec649ca5b9525",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 607,
+      "event_count": 15909
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000431.npz",
+      "size_bytes": 5028,
+      "sha256": "fea2b5e194e0198c0733d2be6a2aa98b095ac9c784eecdcc9a446225b87dcef9",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 517,
+      "event_count": 12161
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000432.npz",
+      "size_bytes": 4622,
+      "sha256": "f166015b025fe71fd67cf307418293e54e0c9bbeec9984459b4142ce58583b87",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 239,
+      "event_count": 4515
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000433.npz",
+      "size_bytes": 4469,
+      "sha256": "56fa352089760123b153e92098bbce724e5bd99321ec66c4e56b855368c4104a",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 189,
+      "event_count": 3532
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000434.npz",
+      "size_bytes": 4926,
+      "sha256": "976530843965e15232a0c10d596660b3ef6ee3a28403e6223c93ead0ddbee48b",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 507,
+      "event_count": 10655
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000435.npz",
+      "size_bytes": 4750,
+      "sha256": "beeab2bfb0647c06b459257d9a4dc065000c307fcbf311804a014b54fc735deb",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 378,
+      "event_count": 7635
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000436.npz",
+      "size_bytes": 4763,
+      "sha256": "baca8400774eabe53869ce322c074a72e894ac16e8a8f32ae325f6efbcae70a0",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 452,
+      "event_count": 8400
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000437.npz",
+      "size_bytes": 4659,
+      "sha256": "48b332dd8281112f653443f8e589ad35f8aa3642bddec62b0410bc68bab1a092",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 406,
+      "event_count": 7775
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000438.npz",
+      "size_bytes": 4533,
+      "sha256": "c90c2fbb89a06fcb762789b480d130ed2940a3bef0c1e3b70c65af2424e93be5",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 311,
+      "event_count": 5881
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000439.npz",
+      "size_bytes": 4311,
+      "sha256": "2790c416b13370df2ae960059bbec50ce1031bde5109f7c2f44550a8e9333a13",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 90,
+      "event_count": 1440
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000440.npz",
+      "size_bytes": 4873,
+      "sha256": "40b2149c985506488a839fb67c1d1db62b2302c4d67706979eb614dda5715bd0",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 542,
+      "event_count": 14059
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000441.npz",
+      "size_bytes": 4924,
+      "sha256": "0b8ad3d8726c997aac9d17ee2c309068f55f7a0a70badea591c5cc11dcd9815c",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 568,
+      "event_count": 14118
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000442.npz",
+      "size_bytes": 4887,
+      "sha256": "17d357f09d30b15a68e976ea36360953e72c2407988ad77f8c70ceb75bced827",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 534,
+      "event_count": 12440
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000443.npz",
+      "size_bytes": 4876,
+      "sha256": "2c08b7aa030cba388f6f045aced9f10028b6851996fdcacb8bad6b9a533256dc",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 495,
+      "event_count": 11959
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000444.npz",
+      "size_bytes": 4788,
+      "sha256": "63bec0eda317f1fb02b76b2633b56e740e1bc7b7df85550b66a3e2acf5cec176",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 418,
+      "event_count": 9492
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000445.npz",
+      "size_bytes": 4793,
+      "sha256": "9c794dd5df360fc8714c0de95657bdbdb6da1942dccd9409ef6d82f4a647be62",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 414,
+      "event_count": 9945
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000446.npz",
+      "size_bytes": 4721,
+      "sha256": "d8140a3904d21e3fcd854315a00900a3a4920baa2f2722db2295809c26f29eb8",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 339,
+      "event_count": 8359
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000447.npz",
+      "size_bytes": 4600,
+      "sha256": "1c99401a0c70f63853c3a6c16fe20a1876ac067b4ffa303811d73f833180974d",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 260,
+      "event_count": 6530
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000448.npz",
+      "size_bytes": 4479,
+      "sha256": "236eeb91ef4a7664b35fcbf96c2eb3c3587c1bf137e95c9da51d536310642fd9",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 212,
+      "event_count": 5962
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000449.npz",
+      "size_bytes": 4233,
+      "sha256": "13b6ae8bf9642d83dcbfe3e859ef3387fd1058cff75f10e03a174bd9e7703253",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 61,
+      "event_count": 1301
+    },
+    {
+      "path": "ai/no_target_samples_v03/sample_000450.npz",
+      "size_bytes": 4133,
+      "sha256": "f5fbd43a38cbac53824c35c0a2eb63b41888068c109fc7c9f66d86799e71cd10",
+      "capture_session_id": "nt_train_motion",
+      "capture_split": "train",
+      "active_pixel_count": 8,
+      "event_count": 161
+    }
+  ]
+}

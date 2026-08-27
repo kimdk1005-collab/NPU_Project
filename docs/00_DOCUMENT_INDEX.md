@@ -1,7 +1,7 @@
 # 문서 인덱스 — 최신 정본 기준
 
-> 갱신: 2026-08-26
-> 기준 상태: A Phase 4 제공 기록 + C 실제 통합 래퍼/KY-008 수령품 단발 브링업 완료
+> 갱신: 2026-08-27
+> 기준 상태: B model_v03 최종 전달 + A Phase 4 기록 + C KY-008 단발 브링업
 
 `docs/`에는 각 규격의 **최신 정본 한 개만** 둔다. 이전 버전은 Git 이력에서
 확인하며 `_v1.x`, `_v0.x`, `(1)` 같은 사본은 저장소에 추가하지 않는다.
@@ -24,7 +24,7 @@
 | 파일 | 방향 | 내용 |
 |---|---|---|
 | `A_NPU_HANDOFF.md` | A → 팀 | NPU/SoC 포트, 타이밍, Known Limitation |
-| `../handoff/B_MODEL_HANDOFF.md` | B → 팀 | Model/Weight/Quantization/Golden 전달 템플릿 |
+| `../handoff/B_MODEL_HANDOFF.md` | B → 팀 | model_v03/weight_v03/golden_v03/testvec_v03 최종 인계 |
 | `B_TO_A_DELIVERY_SPEC.md` | A → B | B 산출물 전달 형식 |
 | `C_TO_A_DELIVERY_SPEC.md` | A → C | C RTL 전달 형식과 Phase 3 포트 계약 |
 | `C_TO_A_REPLY_003.md` | C → A | Phase 3 통합 설정·상태·START·Laser 재무장 계약 |

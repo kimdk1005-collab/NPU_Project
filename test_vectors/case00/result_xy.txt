@@ -1,0 +1,5 @@
+heatmap_x 4
+heatmap_y 3
+target_x 36
+target_y 28
+target_score 8
