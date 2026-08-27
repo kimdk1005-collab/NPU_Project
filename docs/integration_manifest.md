@@ -1,7 +1,7 @@
 # integration_manifest — 통합 전에 버전이 맞는지 보는 표
 
-> **근거:** 공통 지침 §27 · **소유:** A/C · **갱신:** 2026-08-26
-> (A Phase 4 제공 기록 + C `c_event_v04` / `c_control_v08` 조정)
+> **근거:** 공통 지침 §27 · **소유:** A/B/C · **갱신:** 2026-08-27
+> (B model_v03 최종 전달 + A Phase 4 기록 + C `c_event_v04` / `c_control_v08`)
 >
 > **규칙:** 이 표의 버전이 서로 안 맞으면 통합 Debug 를 시작하지 않는다.
 > B/C 산출물이 도착하면 **먼저 여기를 고치고** 그 다음에 파일을 교체한다.
@@ -16,9 +16,10 @@ ROLE_SPEC        = role_v1.6            docs/TEAM_ROLE_PLAN.md
 PLAN_SPEC        = plan_v1.4            docs/NPU_DEVELOPMENT_PLAN.md
 INTERFACE        = ifc_v0.5             docs/interface_contract.md
 
-MODEL            = model_v01_dummy      <- B 실물 오면 model_v01
-WEIGHT           = weight_v01_dummy     <- weights/*.mem 전부 더미
-GOLDEN           = golden_v01_dummy     <- test_vectors/*.hex 전부 더미
+MODEL            = model_v03            B 최종 checkpoint 전달
+WEIGHT           = weight_v03           OIHW INT8 + Q24 전달
+GOLDEN           = golden_v03           Conv1~4 Integer Golden 전달
+TEST_VECTOR      = testvec_v03          case00~02 전달
 
 A_NPU            = a_npu_v01            RTL 6종 TB PASS
 A_SOC            = a_soc_v01            npu_axi + top_system + BD
@@ -30,13 +31,29 @@ BITSTREAM        = build_v03_a_only     results/npu_soc.bit
 BOARD_VERIFIED   = a_soc_v01 @ 2026-08-24  <- Phase 4 보드 기능 판정 16/16 PASS
 ```
 
-현재 C 체크아웃에는 A의 `rtl/npu/`, `rtl/integration/`, `sw/`, `results/`가 없다.
-따라서 A 산출물 지문과 `BOARD_VERIFIED`는 전달 문서 기록이며, A/C 통합 브랜치에서
-실제 파일과 다시 대조해야 한다. C RTL/TB는 현재 저장소에서 직접 검증 가능하다.
+현재 공유 저장소에는 B의 `ai/`, `weights/`, `test_vectors/`, `golden_outputs/`,
+`results/model/` 실제 v03 산출물이 있다. A의 `rtl/npu/`, `rtl/integration/`, `sw/` 실제
+소스는 아직 없으므로 A 산출물 지문과 `BOARD_VERIFIED`는 전달 문서 기록이며, A 통합
+브랜치 합류 뒤 다시 대조해야 한다. C RTL/TB는 현재 저장소에서 직접 검증 가능하다.
 
 ---
 
-## 2. 산출물 지문 (2026-08-24 재빌드)
+## 2. B v03 산출물 지문 (2026-08-27)
+
+| 파일 | 크기 | SHA-256 | 판정 |
+|---|---:|---|---|
+| `weights/tiny_cnn_fp32_model_v03.pt` | 31,835 | `7592abb6ee06a3b41650e8013aefc4f4dcfbb556d1fc3cc66e7e185ab627ff53` | canonical FP32 |
+| `weights/scales.json` | 1,957 | `7b8c809decd6d36cadf17bd6b28c9c6d682740e8c79f693f3d2460de3e1d33a7` | v03 Version Lock |
+| `golden_outputs/model_v03_manifest.json` | 생성 Manifest | 파일 내부 기록 | 25개 전달 파일 SHA-256 |
+
+```text
+python ai/train.py --mode self-test                  PASS
+python ai/verify_b_delivery.py --root .              PASS
+case00~02 × Conv1~4 Integer Golden                   bit-exact PASS
+A 회신 RTL 회귀                                      3 case × 6 TB = 18/18 PASS
+```
+
+## 3. A 산출물 지문 (2026-08-24 재빌드 기록)
 
 | 파일 | 크기 | md5 | 만든 명령 |
 |---|---:|---|---|
@@ -49,7 +66,7 @@ BOARD_VERIFIED   = a_soc_v01 @ 2026-08-24  <- Phase 4 보드 기능 판정 16/16
 
 ---
 
-## 3. 규격 ↔ 구현 대조 (실측으로 확인된 것만)
+## 4. 규격 ↔ 구현 대조 (실측으로 확인된 것만)
 
 | 항목 | 규격 값 | 구현 실측 | 확인 방법 |
 |---|---|---|---|
@@ -68,7 +85,7 @@ BOARD_VERIFIED   = a_soc_v01 @ 2026-08-24  <- Phase 4 보드 기능 판정 16/16
 
 ---
 
-## 4. 리소스 / 타이밍 (전체 시스템 bitstream 실측)
+## 5. 리소스 / 타이밍 (전체 시스템 bitstream 실측)
 
 | 항목 | A 단독 | + C stub (자리표시자) |
 |---|---:|---:|
@@ -85,11 +102,11 @@ BOARD_VERIFIED   = a_soc_v01 @ 2026-08-24  <- Phase 4 보드 기능 판정 16/16
 
 ---
 
-## 5. 버전을 올려야 하는 시점
+## 6. 버전을 올려야 하는 시점
 
 | 트리거 | 올릴 항목 | 그 다음 할 일 |
 |---|---|---|
-| B 실물 weight/golden 도착 | `WEIGHT`, `GOLDEN`, `MODEL` → `_dummy` 제거 | `pack_weights.py` → `gen_test_tensor_c.py` → TB 6종 → `make test` → BD 재빌드 → `A_NPU = a_npu_v02` |
+| B 실물 weight/golden 도착 | **완료: model/weight/golden/testvec v03** | A 회신 RTL 회귀 18/18 PASS, 공유 저장소 A 소스 합류 뒤 재실행 |
 | Phase 4 보드 시험 통과 | `BOARD_VERIFIED = a_soc_v01 @ 2026-08-24` **완료** | `PHASE4_VERIFICATION_LOG.md` §10 (16/16 PASS) |
 | C Event 모듈 도착 | **완료: `C_EVENT = c_event_v04`** | `INPUT_SRC=1` 경로 A NPU/실보드 확인 |
 | C Control 모듈 도착 | **완료: `C_CONTROL = c_control_v08`** | `c_module_stub.v` 제거 → 추가 포트 연결 → 타이밍 재측정 |
@@ -97,12 +114,14 @@ BOARD_VERIFIED   = a_soc_v01 @ 2026-08-24  <- Phase 4 보드 기능 판정 16/16
 
 ---
 
-## 6. 통합 순서 (§28) 와 현재 위치
+## 7. 통합 순서 (§28) 와 현재 위치
 
 ```text
 Integration 1  B <-> A   Golden Input -> NPU RTL -> Layer 비교
                          [x] 더미 weight 로 bit-exact 통과
-                         [ ] 실물 weight 로 재확인          <- B 대기
+                         [x] B v03 실제 Weight/Golden 전달
+                         [x] A 회신 RTL 3 case × 6 TB = 18/18 PASS
+                         [ ] 공유 저장소 A RTL 합류 후 로컬 재실행
 
 Integration 2  C Event <-> A NPU     Event -> Tensor -> NPU
                          [x] C Event RTL/8192-byte CHW 단독·통합 TB
@@ -115,12 +134,12 @@ Integration 3  A NPU <-> C Control   target_x/y -> Tracking -> Servo
 Integration 4  전체 + 보드
                          [x] A-only bitstream / XSA / ELF 생성
                          [x] A-only 보드 STEP 1~5 PASS       2026-08-24
-                         [ ] B actual + A/C Closed-loop 보드 <- B 산출물·A/C 통합 대기
+                         [ ] B v03 + A/C Closed-loop 보드    <- A/C 통합 대기
 ```
 
 `[~]` = A 쪽 준비는 끝났고 상대 산출물만 기다리는 상태 (§23 준수).
 
-## 7. A Phase 4 stub → C 실제 모듈 교체 조건
+## 8. A Phase 4 stub → C 실제 모듈 교체 조건
 
 ```text
 stub 기본 포트       event_cfg/pan*/laser*/safe*/target*/evt*/servo_pwm/laser_en
