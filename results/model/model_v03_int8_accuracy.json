@@ -1,0 +1,20 @@
+{
+  "model_version": "model_v03",
+  "base_spec_version": "common_v1.5",
+  "split": "test",
+  "quantization_calibration_split": "train_target",
+  "quantization_calibration_manifest": "results/model_v03_split.json",
+  "quantization_calibration_sample_count": 1152,
+  "samples": 256,
+  "fp32_cell_accuracy": 0.984375,
+  "fp32_target_x_mae_px": 0.125,
+  "fp32_target_y_mae_px": 0.3125,
+  "fp32_target_mean_mae_px": 0.21875,
+  "int8_cell_accuracy": 0.9765625,
+  "int8_target_x_mae_px": 0.25,
+  "int8_target_y_mae_px": 0.46875,
+  "int8_target_mean_mae_px": 0.359375,
+  "fp32_int8_cell_agreement": 0.984375,
+  "checkpoint": "weights/tiny_cnn_fp32_model_v03.pt",
+  "test_policy": "ONE_TIME_AFTER_VALIDATION_SELECTION"
+}
