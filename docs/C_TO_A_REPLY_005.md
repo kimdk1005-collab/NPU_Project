@@ -32,8 +32,8 @@ disable                     -> 정적 parameter 한계, ACTIVE=0, FAULT=0
 ```
 
 Invalid raw 값이 이전 valid 판정과 섞여 한 cycle 출력되는 전이 조건을
-`tb/control/tb_dual_head_control.v`에 추가했다. 변경은 아직 작업 트리에 있으며
-전달용 C 커밋 해시는 커밋 생성 후 기입한다.
+`tb/control/tb_dual_head_control.v`에 추가했다. 전달용 C 커밋은
+`7ab88ce63d0ccee5a731a47d933a1f2d0bb536f7`이다.
 
 ## 2. `D3_FREEZE_REQUEST_A_002` rev.2 §2.13 — 승인
 
@@ -165,7 +165,7 @@ Gate를 열지 않으며 시간축 확인, 공간축 Lock/Safe Zone, freshness w
 | C 래퍼 OOC timing | WNS **+1.394 ns** / WHS **+0.061 ns**, failing endpoint 0 |
 | 등록된 Limit 이후 최악 경로 | Slack **+2.011 ns**, 7 logic levels; 전체 최악은 Servo PWM 경로 |
 | A `top_system_c` 100 MHz timing | C 커밋 반영 후 A 통합 저장소에서 재측정 필요 |
-| 전달 커밋 | 작업 트리 검토 및 커밋 후 해시 기입 |
+| 전달 커밋 | `7ab88ce63d0ccee5a731a47d933a1f2d0bb536f7` |
 
 100 MHz 완료 판정은 C 단독 TB가 아니라 A가 수정본을 가져가 `top_system_c` 전체
 implementation에서 기본 전략으로 재측정한 결과를 기준으로 한다.
