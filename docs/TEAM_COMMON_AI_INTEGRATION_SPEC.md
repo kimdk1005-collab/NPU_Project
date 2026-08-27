@@ -1981,7 +1981,7 @@ GOLDEN           = golden_v03
 
 A_NPU            = a_npu_v01
 C_EVENT          = c_event_v04
-C_CONTROL        = c_control_v08
+C_CONTROL        = c_control_v09
 
 BITSTREAM        = build_v02
 ```

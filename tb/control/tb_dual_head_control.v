@@ -20,6 +20,20 @@ module tb_dual_head_control;
     reg signed [7:0]  target_score = 8'sd10;
     reg               laser_arm = 1'b0;
     reg               emergency_stop = 1'b0;
+    reg               manual_override = 1'b0;
+    reg  [7:0]        manual_camera_pan_pos = 8'd0;
+    reg  [7:0]        manual_camera_tilt_pos = 8'd0;
+    reg  [7:0]        manual_laser_pan_pos = 8'd0;
+    reg  [7:0]        manual_laser_tilt_pos = 8'd0;
+    reg               runtime_limits_en = 1'b0;
+    reg  [7:0]        runtime_pan1_min = 8'd0;
+    reg  [7:0]        runtime_pan1_max = 8'd0;
+    reg  [7:0]        runtime_tilt1_min = 8'd0;
+    reg  [7:0]        runtime_tilt1_max = 8'd0;
+    reg  [7:0]        runtime_pan2_min = 8'd0;
+    reg  [7:0]        runtime_pan2_max = 8'd0;
+    reg  [7:0]        runtime_tilt2_min = 8'd0;
+    reg  [7:0]        runtime_tilt2_max = 8'd0;
 
     wire camera_pan_pwm, camera_tilt_pwm;
     wire laser_pan_pwm, laser_tilt_pwm;
@@ -29,6 +43,7 @@ module tb_dual_head_control;
     wire [7:0] laser_pan_target, laser_tilt_target;
     wire laser_aim_ready, laser_lock_qualified;
     wire laser_target_fresh, laser_timeout_fault, laser_rearm_required;
+    wire runtime_limits_active, runtime_limit_fault;
 
     integer errors = 0;
     integer m_cam_pan, m_cam_tilt, m_laser_pan, m_laser_tilt, m_total;
@@ -45,14 +60,16 @@ module tb_dual_head_control;
         .target_update(target_update), .target_valid(target_valid),
         .target_x(target_x), .target_y(target_y), .target_score(target_score),
         .laser_arm(laser_arm), .emergency_stop(emergency_stop),
-        .manual_override(1'b0), .manual_aim_ready(1'b0),
-        .manual_camera_pan_pos(8'd0), .manual_camera_tilt_pos(8'd0),
-        .manual_laser_pan_pos(8'd0), .manual_laser_tilt_pos(8'd0),
-        .runtime_limits_en(1'b0),
-        .runtime_pan1_min(8'd0), .runtime_pan1_max(8'd0),
-        .runtime_tilt1_min(8'd0), .runtime_tilt1_max(8'd0),
-        .runtime_pan2_min(8'd0), .runtime_pan2_max(8'd0),
-        .runtime_tilt2_min(8'd0), .runtime_tilt2_max(8'd0),
+        .manual_override(manual_override), .manual_aim_ready(1'b0),
+        .manual_camera_pan_pos(manual_camera_pan_pos),
+        .manual_camera_tilt_pos(manual_camera_tilt_pos),
+        .manual_laser_pan_pos(manual_laser_pan_pos),
+        .manual_laser_tilt_pos(manual_laser_tilt_pos),
+        .runtime_limits_en(runtime_limits_en),
+        .runtime_pan1_min(runtime_pan1_min), .runtime_pan1_max(runtime_pan1_max),
+        .runtime_tilt1_min(runtime_tilt1_min), .runtime_tilt1_max(runtime_tilt1_max),
+        .runtime_pan2_min(runtime_pan2_min), .runtime_pan2_max(runtime_pan2_max),
+        .runtime_tilt2_min(runtime_tilt2_min), .runtime_tilt2_max(runtime_tilt2_max),
         .runtime_cal_en(1'b0),
         .runtime_pan_offset_pos(16'sd0), .runtime_tilt_offset_pos(16'sd0),
         .camera_pan_pwm(camera_pan_pwm), .camera_tilt_pwm(camera_tilt_pwm),
@@ -67,7 +84,8 @@ module tb_dual_head_control;
         .laser_target_fresh(laser_target_fresh),
         .laser_timeout_fault(laser_timeout_fault),
         .laser_rearm_required(laser_rearm_required),
-        .runtime_limits_active(), .runtime_limit_fault()
+        .runtime_limits_active(runtime_limits_active),
+        .runtime_limit_fault(runtime_limit_fault)
     );
 
     function integer expect_us(input integer p);
@@ -222,6 +240,36 @@ module tb_dual_head_control;
         check_int("T7 target lost laser PAN hold", laser_pan_pos, 133);
         check_int("T7 target lost laser TILT hold", laser_tilt_pos, 123);
         check_int("T7 target lost LED OFF", laser_led, 0);
+
+        // Runtime Limit은 8개 값을 원자적으로 등록한다. 유효값 적용 뒤 raw 입력을
+        // invalid 범위로 바꿔도 그 값이 한 cycle이라도 Servo로 새면 안 된다.
+        manual_override = 1'b1;
+        manual_camera_pan_pos = 8'd255;
+        manual_camera_tilt_pos = 8'd255;
+        manual_laser_pan_pos = 8'd255;
+        manual_laser_tilt_pos = 8'd255;
+        runtime_pan1_min = 8'd120; runtime_pan1_max = 8'd136;
+        runtime_tilt1_min = 8'd121; runtime_tilt1_max = 8'd137;
+        runtime_pan2_min = 8'd122; runtime_pan2_max = 8'd138;
+        runtime_tilt2_min = 8'd123; runtime_tilt2_max = 8'd139;
+        runtime_limits_en = 1'b1;
+        repeat (2) @(negedge clk);
+        check_int("T8 valid runtime limits active", runtime_limits_active, 1);
+        check_int("T8 valid runtime fault clear", runtime_limit_fault, 0);
+        check_int("T8 PAN1 registered upper clamp", camera_pan_pos, 136);
+        check_int("T8 TILT1 registered upper clamp", camera_tilt_pos, 137);
+        check_int("T8 PAN2 registered upper clamp", laser_pan_pos, 138);
+        check_int("T8 TILT2 registered upper clamp", laser_tilt_pos, 139);
+
+        // 250~251은 정적 32~224 밖이다. 이전 판정과 새 raw 값이 섞이는 구현은
+        // 이 전이 clock에서 251을 출력하지만, 등록된 제한값 구현은 기존 136을 유지한다.
+        runtime_pan1_min = 8'd250; runtime_pan1_max = 8'd251;
+        @(negedge clk);
+        check_int("T9 invalid runtime rejected in one cycle", runtime_limits_active, 0);
+        check_int("T9 invalid runtime fault asserted", runtime_limit_fault, 1);
+        check_int("T9 invalid raw value never reaches PAN1", camera_pan_pos, 136);
+        @(negedge clk);
+        check_int("T9 fallback uses static PAN1 max", camera_pan_pos, 224);
 
         $display("=== 결과 : %0s (errors=%0d) ===",
                  (errors == 0) ? "ALL PASS" : "FAIL", errors);

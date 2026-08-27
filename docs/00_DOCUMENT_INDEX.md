@@ -1,7 +1,7 @@
 # 문서 인덱스 — 최신 정본 기준
 
 > 갱신: 2026-08-27
-> 기준 상태: B model_v03 최종 전달 + A Phase 4 기록 + C KY-008 단발 브링업
+> 기준 상태: B model_v03 최종 전달 + A Phase 4 기록 + C `c_control_v09` SAFE_LIMIT 수정·승인 회신 완료
 
 `docs/`에는 각 규격의 **최신 정본 한 개만** 둔다. 이전 버전은 Git 이력에서
 확인하며 `_v1.x`, `_v0.x`, `(1)` 같은 사본은 저장소에 추가하지 않는다.
@@ -29,9 +29,10 @@
 | `C_TO_A_DELIVERY_SPEC.md` | A → C | C RTL 전달 형식과 Phase 3 포트 계약 |
 | `C_TO_A_REPLY_003.md` | C → A | Phase 3 통합 설정·상태·START·Laser 재무장 계약 |
 | `C_TO_A_REPLY_004.md` | C → A | A Phase 4 stub를 C 실제 모듈로 교체하는 최종 연결 계약 |
+| `C_TO_A_REPLY_005.md` | C → A | A/C 실물 통합 요청 #001: SAFE_LIMIT 파이프라인, Event Source, CR·핀·안전 회신 |
 | `../handoff/C_EVENT_CONTROL_HANDOFF.md` | C → 팀 | Event/Control RTL 상세 인계 |
 
-`C_TO_A_REPLY_001~004`처럼 번호가 붙은 회신은 서로 다른 의사결정 시점의 기록이며
+`C_TO_A_REPLY_001~005`처럼 번호가 붙은 회신은 서로 다른 의사결정 시점의 기록이며
 구버전 사본이 아니므로 유지한다.
 
 ## 승인 및 변경 기록
@@ -40,6 +41,7 @@
 |---|---|
 | `D3_FREEZE_REQUEST_A_001.md` | A → B/C Freeze 요청 #001 |
 | `D3_FREEZE_REQUEST_A_002.md` | A → B/C Freeze 요청 #002 rev.2 |
+| `C_TO_A_APPROVAL_D3_A002_rev2.md` | C → A, 위 rev.2 §2.13 좌표변환식 공식 승인 |
 | `D3_B_to_A_CNN_Convolution_Freeze_Request.md` | B → A Conv 경계 규칙 요청 |
 | `D3_FREEZE_APPROVAL_A_TO_B_001.md` | 위 요청에 대한 A 승인 |
 | `CHANGE_REQUEST_C_001_servo_command_format.md` | Servo Command Format 변경 요청 |
@@ -55,6 +57,9 @@
 
 `KY008_PREARRIVAL_CHECKLIST_C.md`는 파일명은 유지하되, 현재는 KY-008 수령품 핀,
 100 ms 단발 결과와 남은 실제 광원 승인 조건을 기록한 작업 체크리스트다.
+
+`C_COMPONENT_MANUAL_TEST.md`는 Zybo의 SW0~SW3, 물리 BTN0~BTN3과 두 조합 입력을
+이용해 연결된 4축 Servo와 KY-008을 하나씩 확인하는 현재 수동 시험 절차다.
 
 ## 파일 관리 규칙
 

@@ -3,7 +3,7 @@
 > **작성:** A
 > **대상:** C
 > **기준:** `TEAM_COMMON_AI_INTEGRATION_SPEC.md` **v1.5** §5.3 / §6 / §7 / §14 / **§15.2** / **§20.1** / §26 / §39
-> **갱신:** 2026-08-26 — A Phase 4 문서와 C `c_control_v08` 상태 재조정. KY-008 수령품 단발 결과 반영.
+> **갱신:** 2026-08-27 — C `c_control_v09` Runtime SAFE_LIMIT 등록 경로와 A 통합 회신 반영.
 > **목적:** C의 RTL을 A가 **포트만 연결하면 되는** 형태로 고정
 
 A쪽 NPU Core는 완성·검증되어 있고 C가 붙일 포트를 이미 전부 노출하고 있다.
@@ -261,13 +261,13 @@ c_deliver_v01.zip
 ## 7. C 체크리스트
 
 - [x] `rtl/event/`, `rtl/control/` 실제 C RTL 전달
-- [x] 단위/통합/KY-008 TB 12종 존재 — 자동판정 **287 PASS, errors=0**
+- [x] 단위/통합/KY-008/수동점검 TB 13종 존재 — 자동판정 **341 PASS, errors=0**
 - [x] `ext_addr = (polarity<<12)|(y<<6)|x` 주소식 준수
 - [x] Event Count 0~127 saturation
 - [x] `npu_busy == 1`일 때 쓰기 안 함
 - [x] Dead Zone >= 4
 - [x] `target_valid = 0` 시 Hold + Laser OFF
-- [x] `handoff/C_EVENT_CONTROL_HANDOFF.md` (`c_control_v08`)
+- [x] `handoff/C_EVENT_CONTROL_HANDOFF.md` (`c_control_v09`)
 - [x] A 소유 `top_system.v` / 통합 XDC / Block Design 미수정
 
 ---

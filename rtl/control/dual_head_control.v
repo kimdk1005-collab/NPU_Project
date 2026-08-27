@@ -114,7 +114,10 @@ module dual_head_control #(
     localparam [7:0] TILT2_MIN_U = TILT2_POS_MIN;
     localparam [7:0] TILT2_MAX_U = TILT2_POS_MAX;
 
-    wire runtime_limit_values_ok =
+    // AXI에서 들어오는 8개 제한값을 한 묶음으로 검증한다. 판정만 등록한 뒤
+    // 원본 입력을 바로 MUX하면 AXI write 전이 중 이전 판정과 새 값이 섞일 수
+    // 있으므로, 검증된 유효 제한값 자체를 아래 Register에 원자적으로 잡는다.
+    wire runtime_limit_values_ok_c =
         (runtime_pan1_min  <= runtime_pan1_max)  &&
         (runtime_tilt1_min <= runtime_tilt1_max) &&
         (runtime_pan2_min  <= runtime_pan2_max)  &&
@@ -124,17 +127,59 @@ module dual_head_control #(
         (runtime_pan2_min  >= PAN2_MIN_U)  && (runtime_pan2_max  <= PAN2_MAX_U)  &&
         (runtime_tilt2_min >= TILT2_MIN_U) && (runtime_tilt2_max <= TILT2_MAX_U);
 
-    assign runtime_limits_active = runtime_limits_en && runtime_limit_values_ok;
-    assign runtime_limit_fault   = runtime_limits_en && !runtime_limit_values_ok;
+    reg       runtime_limits_active_q;
+    reg       runtime_limit_fault_q;
+    reg [7:0] pan1_min_eff;
+    reg [7:0] pan1_max_eff;
+    reg [7:0] tilt1_min_eff;
+    reg [7:0] tilt1_max_eff;
+    reg [7:0] pan2_min_eff;
+    reg [7:0] pan2_max_eff;
+    reg [7:0] tilt2_min_eff;
+    reg [7:0] tilt2_max_eff;
 
-    wire [7:0] pan1_min_eff  = runtime_limits_active ? runtime_pan1_min  : PAN1_MIN_U;
-    wire [7:0] pan1_max_eff  = runtime_limits_active ? runtime_pan1_max  : PAN1_MAX_U;
-    wire [7:0] tilt1_min_eff = runtime_limits_active ? runtime_tilt1_min : TILT1_MIN_U;
-    wire [7:0] tilt1_max_eff = runtime_limits_active ? runtime_tilt1_max : TILT1_MAX_U;
-    wire [7:0] pan2_min_eff  = runtime_limits_active ? runtime_pan2_min  : PAN2_MIN_U;
-    wire [7:0] pan2_max_eff  = runtime_limits_active ? runtime_pan2_max  : PAN2_MAX_U;
-    wire [7:0] tilt2_min_eff = runtime_limits_active ? runtime_tilt2_min : TILT2_MIN_U;
-    wire [7:0] tilt2_max_eff = runtime_limits_active ? runtime_tilt2_max : TILT2_MAX_U;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            runtime_limits_active_q <= 1'b0;
+            runtime_limit_fault_q   <= 1'b0;
+            pan1_min_eff  <= PAN1_MIN_U;
+            pan1_max_eff  <= PAN1_MAX_U;
+            tilt1_min_eff <= TILT1_MIN_U;
+            tilt1_max_eff <= TILT1_MAX_U;
+            pan2_min_eff  <= PAN2_MIN_U;
+            pan2_max_eff  <= PAN2_MAX_U;
+            tilt2_min_eff <= TILT2_MIN_U;
+            tilt2_max_eff <= TILT2_MAX_U;
+        end else if (runtime_limits_en && runtime_limit_values_ok_c) begin
+            runtime_limits_active_q <= 1'b1;
+            runtime_limit_fault_q   <= 1'b0;
+            pan1_min_eff  <= runtime_pan1_min;
+            pan1_max_eff  <= runtime_pan1_max;
+            tilt1_min_eff <= runtime_tilt1_min;
+            tilt1_max_eff <= runtime_tilt1_max;
+            pan2_min_eff  <= runtime_pan2_min;
+            pan2_max_eff  <= runtime_pan2_max;
+            tilt2_min_eff <= runtime_tilt2_min;
+            tilt2_max_eff <= runtime_tilt2_max;
+        end else begin
+            // Disable 또는 잘못된 조합은 정적 parameter 한계로 복귀한다.
+            // Invalid일 때 fault만 세우며, 원본 invalid 값은 어느 출력 경로에도
+            // 한 cycle조차 적용하지 않는다.
+            runtime_limits_active_q <= 1'b0;
+            runtime_limit_fault_q   <= runtime_limits_en;
+            pan1_min_eff  <= PAN1_MIN_U;
+            pan1_max_eff  <= PAN1_MAX_U;
+            tilt1_min_eff <= TILT1_MIN_U;
+            tilt1_max_eff <= TILT1_MAX_U;
+            pan2_min_eff  <= PAN2_MIN_U;
+            pan2_max_eff  <= PAN2_MAX_U;
+            tilt2_min_eff <= TILT2_MIN_U;
+            tilt2_max_eff <= TILT2_MAX_U;
+        end
+    end
+
+    assign runtime_limits_active = runtime_limits_active_q;
+    assign runtime_limit_fault   = runtime_limit_fault_q;
 
     function [7:0] clamp_u8;
         input [7:0] value;
