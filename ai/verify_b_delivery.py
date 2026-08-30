@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""공유 저장소의 B v03 산출물을 독립된 정수 연산으로 검증한다."""
+"""공유 저장소의 활성 B 산출물을 독립된 정수 연산으로 검증한다."""
 
 from __future__ import annotations
 
@@ -117,8 +117,28 @@ def verify(root: Path, archive: Path | None = None) -> None:
         scales["golden_version"],
         scales["test_vector_version"],
     )
-    if versions != ("model_v03", "weight_v03", "golden_v03", "testvec_v03"):
+    supported_versions = {
+        ("model_v03", "weight_v03", "golden_v03", "testvec_v03"),
+        (
+            "model_v04_demo_masked_radius1_x1",
+            "weight_v04",
+            "golden_v04",
+            "testvec_v04",
+        ),
+    }
+    if versions not in supported_versions:
         raise AssertionError(f"Version Lock 불일치: {versions}")
+
+    model_version = versions[0]
+    checkpoint_names = {
+        "model_v03": "tiny_cnn_fp32_model_v03.pt",
+        "model_v04_demo_masked_radius1_x1":
+            "tiny_cnn_fp32_model_v04_demo_masked_radius1_x1.pt",
+    }
+    manifest_names = {
+        "model_v03": "model_v03_manifest.json",
+        "model_v04_demo_masked_radius1_x1": "model_v04_demo_manifest.json",
+    }
 
     requant_lines = (root / "weights/requant_M.mem").read_text(encoding="ascii").splitlines()
     if len(requant_lines) != 4 or any(
@@ -128,11 +148,15 @@ def verify(root: Path, archive: Path | None = None) -> None:
     multipliers = dict(zip(LAYERS, (int(line, 16) for line in requant_lines)))
 
     checkpoint = torch.load(
-        root / "weights/tiny_cnn_fp32_model_v03.pt",
+        root / "weights" / checkpoint_names[model_version],
         map_location="cpu",
         weights_only=False,
     )
-    if checkpoint.get("model_version") != "model_v03":
+    checkpoint_model_version = checkpoint.get("model_version")
+    expected_checkpoint_version = (
+        "model_v04" if model_version.startswith("model_v04_demo_") else model_version
+    )
+    if checkpoint_model_version != expected_checkpoint_version:
         raise AssertionError("checkpoint model_version 불일치")
 
     weights: dict[str, np.ndarray] = {}
@@ -215,8 +239,21 @@ def verify(root: Path, archive: Path | None = None) -> None:
         case_results[case_name] = result
 
     manifest = json.loads(
-        (root / "golden_outputs/model_v03_manifest.json").read_text()
+        (root / "golden_outputs" / manifest_names[model_version]).read_text()
     )
+    manifest_versions = (
+        manifest["model_version"],
+        manifest["weight_version"],
+        manifest["golden_version"],
+        manifest["test_vector_version"],
+    )
+    if manifest_versions != versions:
+        raise AssertionError(f"Manifest Version Lock 불일치: {manifest_versions}")
+
+    checkpoint_path = root / manifest["checkpoint"]["path"]
+    if manifest["checkpoint"]["sha256"] != sha256(checkpoint_path):
+        raise AssertionError("Manifest checkpoint checksum 불일치")
+
     if manifest["case_results"] != case_results:
         raise AssertionError("Manifest case_results 불일치")
     manifest_hashes = {item["path"]: item["sha256"] for item in manifest["files"]}
@@ -248,7 +285,7 @@ def verify(root: Path, archive: Path | None = None) -> None:
     else:
         print("[SKIP] case00 원본 NPZ는 공개 저장소 제외 — 전달 HEX checksum 검증 사용")
 
-    print("[PASS] B repository format / Version Lock / checksum")
+    print(f"[PASS] B repository format / Version Lock / checksum ({model_version})")
     print("[PASS] checkpoint -> OIHW INT8 Weight / Q24 Multiplier")
     print("[PASS] case00~02 Conv1~4 Integer Golden bit-exact")
     print(f"[PASS] Argmax results: {case_results}")
@@ -257,7 +294,7 @@ def verify(root: Path, archive: Path | None = None) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="공유 저장소 B v03 산출물 독립 검증")
+    parser = argparse.ArgumentParser(description="공유 저장소 활성 B 산출물 독립 검증")
     parser.add_argument("--root", type=Path, default=Path("."))
     parser.add_argument(
         "--archive",

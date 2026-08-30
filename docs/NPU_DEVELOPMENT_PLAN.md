@@ -2,6 +2,11 @@
 
 **상세 개발 계획서 v1.4 — Pan/Tilt 2 헤드 구성 반영본**
 
+> **2026-08-30 구현 상태 주의:** 이 문서는 계획과 Gate 정의의 정본이다. 본문에 남은
+> `A 실제 RTL 합류 대기`, `model_v03`, 과거 타이밍 수치는 당시 계획 이력이며 현재 상태가
+> 아니다. A RTL/SoC/PS와 B v04 데모 후보의 최신 상태는 `PROJECT_STATUS.md`, 현재 Version
+> Lock과 측정값은 `integration_manifest.md`를 우선한다.
+
 > **문서 목적**  
 > 기존 v1.1의 핵심 구조인 `CNN 모델 → INT8 → RTL NPU 검증 → SoC 통합 → 팬틸트/레이저 추적`, `합성 Gate`, `폴백 전략`은 유지한다.  
 > 다만 현재 교육 진도가 **CNN 진행 중**, **RTL/SoC 학습 및 프로젝트 경험 완료**, **NPU 학습 예정**, **Sparse/Zero-Skip은 미학습**인 점을 반영하여,  

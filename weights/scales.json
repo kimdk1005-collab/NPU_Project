@@ -5,10 +5,10 @@
     "D3_FREEZE_REQUEST_A_001.md",
     "B_TO_A_DELIVERY_SPEC.md"
   ],
-  "model_version": "model_v03",
-  "weight_version": "weight_v03",
-  "golden_version": "golden_v03",
-  "test_vector_version": "testvec_v03",
+  "model_version": "model_v04_demo_masked_radius1_x1",
+  "weight_version": "weight_v04",
+  "golden_version": "golden_v04",
+  "test_vector_version": "testvec_v04",
   "tensor_order": "CHW",
   "rounding": "ties_away_from_zero",
   "shift": 24,
@@ -23,9 +23,9 @@
       "out_hw": 32,
       "relu": true,
       "input_scale": 0.007874015748031496,
-      "weight_scale": 0.00779367478813712,
-      "output_scale": 0.02693378831457904,
-      "multiplier": 38226,
+      "weight_scale": 0.005654846120068407,
+      "output_scale": 0.020739285026009628,
+      "multiplier": 36020,
       "shift": 24,
       "clamp": [
         0,
@@ -41,10 +41,10 @@
       "in_hw": 32,
       "out_hw": 16,
       "relu": true,
-      "input_scale": 0.02693378831457904,
-      "weight_scale": 0.007820195100438876,
-      "output_scale": 0.06007936432605653,
-      "multiplier": 58818,
+      "input_scale": 0.020739285026009628,
+      "weight_scale": 0.008311559834818202,
+      "output_scale": 0.030802112864697074,
+      "multiplier": 93889,
       "shift": 24,
       "clamp": [
         0,
@@ -60,10 +60,10 @@
       "in_hw": 16,
       "out_hw": 8,
       "relu": true,
-      "input_scale": 0.06007936432605653,
-      "weight_scale": 0.006448395139589084,
-      "output_scale": 0.23129015644704262,
-      "multiplier": 28102,
+      "input_scale": 0.030802112864697074,
+      "weight_scale": 0.006309769754334698,
+      "output_scale": 0.10154257045956108,
+      "multiplier": 32112,
       "shift": 24,
       "clamp": [
         0,
@@ -79,15 +79,19 @@
       "in_hw": 8,
       "out_hw": 8,
       "relu": false,
-      "input_scale": 0.23129015644704262,
-      "weight_scale": 0.015865156969686194,
-      "output_scale": 2.6783516951433315,
-      "multiplier": 22985,
+      "input_scale": 0.10154257045956108,
+      "weight_scale": 0.015492738701227143,
+      "output_scale": 0.9831767044668123,
+      "multiplier": 26845,
       "shift": 24,
       "clamp": [
         -128,
         127
       ]
     }
-  }
+  },
+  "profile_id": "DEMO_BLUE_01",
+  "demo_only": true,
+  "input_preprocess": "color_masked_event_v02_radius1",
+  "external_test_used_for_selection": false
 }

@@ -1,0 +1,171 @@
+{
+  "base_spec_version": "common_v1.5",
+  "model_version": "model_v04_demo_masked_radius1_x1",
+  "weight_version": "weight_v04",
+  "golden_version": "golden_v04",
+  "test_vector_version": "testvec_v04",
+  "profile_id": "DEMO_BLUE_01",
+  "demo_only": true,
+  "input_preprocess": "color_masked_event_v02_radius1",
+  "external_test_used_for_selection": false,
+  "checkpoint": {
+    "path": "weights/tiny_cnn_fp32_model_v04_demo_masked_radius1_x1.pt",
+    "bytes": 29635,
+    "sha256": "578d3aaa8ce20ff038c45d290e4b6d8cf6c2ab6ddfcfaed28a5f448754436a96"
+  },
+  "case_sources": {
+    "case00": "B final delivery: E4_E2_RADIUS1_X1 held-out target",
+    "case01": "synthetic_boundary_corner",
+    "case02": "synthetic_zero_input"
+  },
+  "case_results": {
+    "case00": {
+      "heatmap_x": 4,
+      "heatmap_y": 3,
+      "target_x": 36,
+      "target_y": 28,
+      "target_score": 43
+    },
+    "case01": {
+      "heatmap_x": 0,
+      "heatmap_y": 0,
+      "target_x": 4,
+      "target_y": 4,
+      "target_score": 101
+    },
+    "case02": {
+      "heatmap_x": 0,
+      "heatmap_y": 0,
+      "target_x": 4,
+      "target_y": 4,
+      "target_score": 0
+    }
+  },
+  "files": [
+    {
+      "path": "weights/conv1_weight_int8.mem",
+      "bytes": 432,
+      "sha256": "dc607e93a9a96093cfb0b45717359ea49aa515c1060ba3b487947eab666f5976"
+    },
+    {
+      "path": "weights/conv2_weight_int8.mem",
+      "bytes": 3456,
+      "sha256": "08972082cde8cde65126139e77ba161202e0262f5810807a24ffbba852c32bd5"
+    },
+    {
+      "path": "weights/conv3_weight_int8.mem",
+      "bytes": 13824,
+      "sha256": "ecd55cc27bc3a65ab702aea7ea869996d8f059792fb90f7f74a419c9bb60b1f8"
+    },
+    {
+      "path": "weights/conv4_weight_int8.mem",
+      "bytes": 96,
+      "sha256": "80175a34fcecea5989d5b99bfd9ac79b58ff61dd3556473f936a8483c13c056f"
+    },
+    {
+      "path": "weights/requant_M.mem",
+      "bytes": 36,
+      "sha256": "3a1917a90cbc73002a6ba1484d5a74f8513cb0fa45f27355b95352c7fb69b600"
+    },
+    {
+      "path": "weights/scales.json",
+      "bytes": 2139,
+      "sha256": "d895ac5b22e1ac13f7e02e9fd7af32de8459d91c4ee678f4d28770a39becb45c"
+    },
+    {
+      "path": "test_vectors/case00/input_event.hex",
+      "bytes": 24576,
+      "sha256": "dd4ee096b01e17d270ef21713862055872c527274a35b33a8ff6e70a0c5cdc5d"
+    },
+    {
+      "path": "test_vectors/case00/conv1_out.hex",
+      "bytes": 24576,
+      "sha256": "40ee265af00a26f5b20066b69889a742617ba0ba72d3fd79fd1284bca7345ee0"
+    },
+    {
+      "path": "test_vectors/case00/conv2_out.hex",
+      "bytes": 12288,
+      "sha256": "04da75ef8ed401f6dabc30bafaff10894ee10a4b6ed2baab47d86b6817843d13"
+    },
+    {
+      "path": "test_vectors/case00/conv3_out.hex",
+      "bytes": 6144,
+      "sha256": "ed7e74b004f487d932106bea806d14640f4253ef5e2358f077ebfd2a320a806b"
+    },
+    {
+      "path": "test_vectors/case00/conv4_out.hex",
+      "bytes": 192,
+      "sha256": "778ef2fc4acdf1925a1be59d3dc04f90a984aa0275d5018835a1cbcbae0799eb"
+    },
+    {
+      "path": "test_vectors/case00/result_xy.txt",
+      "bytes": 64,
+      "sha256": "b99acb145e04ccfb1f1f5706c27fdc6a7a56165e5ea5db9c5a3d9941d7045b27"
+    },
+    {
+      "path": "test_vectors/case01/input_event.hex",
+      "bytes": 24576,
+      "sha256": "4f5408a7c247678cd03f493217437c1968bb59bc608c17328079911faecaf8d1"
+    },
+    {
+      "path": "test_vectors/case01/conv1_out.hex",
+      "bytes": 24576,
+      "sha256": "fc256bd7b0a33466ff7f2bb9113cc50cd5f0e56617449b0ea0c3f1094ab7935d"
+    },
+    {
+      "path": "test_vectors/case01/conv2_out.hex",
+      "bytes": 12288,
+      "sha256": "1dc721bf592874c90be64442fe8abd1762d46226a9344ec51c59bc233155c83b"
+    },
+    {
+      "path": "test_vectors/case01/conv3_out.hex",
+      "bytes": 6144,
+      "sha256": "9b4c698036ad1942d6c392e5c69b57a1f1728f43964c6320b56d6871e1517663"
+    },
+    {
+      "path": "test_vectors/case01/conv4_out.hex",
+      "bytes": 192,
+      "sha256": "dbf5bc01949ca90db56ca4a9d3029cdc0d45ee0282e3d44ab680b953a6f8ac2d"
+    },
+    {
+      "path": "test_vectors/case01/result_xy.txt",
+      "bytes": 63,
+      "sha256": "42ca7551ebc1161f40d4e05d19f775477ef3b36f36f157b10d4ef8d947611273"
+    },
+    {
+      "path": "test_vectors/case02/input_event.hex",
+      "bytes": 24576,
+      "sha256": "05c6c9fbcd84d2088da6dda39a9c008b2b5db0d71fe0945fc10aee7a815b16df"
+    },
+    {
+      "path": "test_vectors/case02/conv1_out.hex",
+      "bytes": 24576,
+      "sha256": "05c6c9fbcd84d2088da6dda39a9c008b2b5db0d71fe0945fc10aee7a815b16df"
+    },
+    {
+      "path": "test_vectors/case02/conv2_out.hex",
+      "bytes": 12288,
+      "sha256": "9b5ee346b05d90d1d624ecfcfb8a45471128a2734fd684cadee0f03a33439cc5"
+    },
+    {
+      "path": "test_vectors/case02/conv3_out.hex",
+      "bytes": 6144,
+      "sha256": "66574729a2d31292bb89122c36f03893f93e797504cfea4f6d4616cd6e6fc402"
+    },
+    {
+      "path": "test_vectors/case02/conv4_out.hex",
+      "bytes": 192,
+      "sha256": "c50718f4f11455951654fa9f73972527baa9ab61e411a89e381185d116c4d6f0"
+    },
+    {
+      "path": "test_vectors/case02/result_xy.txt",
+      "bytes": 61,
+      "sha256": "0865f00e202fe7f4bf9e161beb7e32b007d9b8fb3254b9b5d9ce8c24cdb16f0b"
+    },
+    {
+      "path": "handoff/B_MODEL_HANDOFF.md",
+      "bytes": 4304,
+      "sha256": "bb8762ea9fabe3be22eecaf1c09e9522427d36a16eb92d3f38b1d624d2f1c714"
+    }
+  ]
+}

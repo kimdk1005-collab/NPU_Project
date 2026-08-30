@@ -1,154 +1,92 @@
-# integration_manifest — 통합 전에 버전이 맞는지 보는 표
+# integration_manifest — 현재 통합 Version과 지문
 
-> **근거:** 공통 지침 §27 · **소유:** A/B/C · **갱신:** 2026-08-27
-> (B model_v03 최종 전달 + A Phase 4 기록 + C `c_event_v04` / `c_control_v09` 조정)
+> 소유: A/B/C · 갱신: 2026-08-30
 >
-> **규칙:** 이 표의 버전이 서로 안 맞으면 통합 Debug 를 시작하지 않는다.
-> B/C 산출물이 도착하면 **먼저 여기를 고치고** 그 다음에 파일을 교체한다.
+> 아래 Version Lock이나 산출물 조합이 다르면 통합 Debug를 시작하지 않는다.
 
----
-
-## 1. 현재 버전 (§27 형식)
+## 1. Version Lock
 
 ```text
-PROJECT_SPEC     = common_v1.5          docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md
-ROLE_SPEC        = role_v1.6            docs/TEAM_ROLE_PLAN.md
-PLAN_SPEC        = plan_v1.4            docs/NPU_DEVELOPMENT_PLAN.md
-INTERFACE        = ifc_v0.5             docs/interface_contract.md
+PROJECT_SPEC     = common_v1.5-A1
+ROLE_SPEC        = role_v1.6
+PLAN_SPEC        = plan_v1.4
+INTERFACE        = ifc_v0.5
 
-MODEL            = model_v03            B 최종 checkpoint 전달
-WEIGHT           = weight_v03           OIHW INT8 + Q24 전달
-GOLDEN           = golden_v03           Conv1~4 Integer Golden 전달
-TEST_VECTOR      = testvec_v03          case00~02 전달
+MODEL            = model_v04_demo_masked_radius1_x1
+WEIGHT           = weight_v04
+GOLDEN           = golden_v04
+TEST_VECTOR      = testvec_v04
+B_PREPROCESS     = color_masked_event_v02_radius1
+B_PROFILE        = DEMO_BLUE_01 / DEMO-MASKED-PASS / DEMO_ONLY
 
-A_NPU            = a_npu_v01            RTL 6종 TB PASS
-A_SOC            = a_soc_v01            npu_axi + top_system + BD
-A_SW             = a_sw_v01             PS 드라이버 45 check PASS
-C_EVENT          = c_event_v04          전달 완료, A 실제 NPU 통합 대기
-C_CONTROL        = c_control_v09        SAFE_LIMIT 등록 + KY-008 단발 포함, A 재통합 대기
-
-BITSTREAM        = build_v03_a_only     results/npu_soc.bit
-BOARD_VERIFIED   = a_soc_v01 @ 2026-08-24  <- Phase 4 보드 기능 판정 16/16 PASS
+A_NPU            = a_npu_v01
+A_SOC            = a_soc_v02
+A_SOC_C          = a_soc_c_v03
+A_SW             = a_sw_v05
+A_LIVE           = a_live_v01
+C_EVENT          = c_event_v04
+C_CONTROL        = c_control_v09
 ```
 
-현재 공유 저장소에는 B의 `ai/`, `weights/`, `test_vectors/`, `golden_outputs/`,
-`results/model/` 실제 v03 산출물이 있다. A의 `rtl/npu/`, `rtl/integration/`, `sw/` 실제
-소스는 아직 없으므로 A 산출물 지문과 `BOARD_VERIFIED`는 전달 문서 기록이며, A 통합
-브랜치 합류 뒤 다시 대조해야 한다. C RTL/TB는 현재 저장소에서 직접 검증 가능하다.
+## 2. B 전달물
 
----
+| 항목 | 값 |
+|---|---|
+| B source approval commit | `487b2a02dcbfb77fb77a6b591b0d20215f1ae3fa` |
+| B payload commit | `1d4421b394e7d675a784ecebd246af718024e142` |
+| Final ZIP | `b_deliver_v04_demo_masked_radius1_x1_final.zip`, 77,374 B |
+| Final ZIP SHA-256 | `1f3034c16214b087798e945bff2c1ad157be496191524637dc159399e7a4b210` |
+| ZIP/Manifest/Payload 검사 | `unzip -t PASS`, `34/34 PASS`, `25/25 identical` |
+| Checkpoint SHA-256 | `578d3aaa8ce20ff038c45d290e4b6d8cf6c2ab6ddfcfaed28a5f448754436a96` |
+| Preprocess source SHA-256 | `c02d6993ce7ed92e1a8c86ecdb1cf60c6518780a6a66dd250af97efd0857f0f2` |
+| Preprocess config SHA-256 | `f6533bc7a8fe97e915ddd8dab7ff397086501a248eb142728c708ab222e47036` |
 
-## 2. B v03 산출물 지문 (2026-08-27)
+현재 추적 파일의 전수 지문은 `../golden_outputs/model_v04_demo_manifest.json`이 정본이다.
+ZIP과 비공개 Dataset은 Git에 넣지 않는다.
 
-| 파일 | 크기 | SHA-256 | 판정 |
+## 3. A/C 통합 측정
+
+| 대상 | LUT | FF | BRAM | DSP | WNS | WHS | 판정 |
+|---|---:|---:|---:|---:|---:|---:|:---:|
+| A-only BD | 1,465 | 1,393 | 8 | 12 | +1.203 ns | +0.044 ns | MET |
+| A+C full BD | 2,324 | 2,188 | 12 | 18 | +0.618 ns | +0.043 ns | MET |
+| A+C full no-runtime-limit | 2,164 | 2,055 | 12 | 18 | +0.929 ns | +0.044 ns | MET, debug only |
+| `top_system_c` OOC | 1,975 | 1,693 | 12 | 18 | +0.197 ns | +0.106 ns | MET |
+
+환경은 Zybo Z7-20 `xc7z020clg400-1`, Vivado 2024.2, 100 MHz다. 생성 리포트는
+정책상 커밋하지 않으며 `A_INTEGRATION_VERIFICATION.md`에 재현 명령을 기록한다.
+
+## 4. 로컬 생성 산출물 체크섬
+
+아래 파일은 **Git에 포함하지 않는다**. 보드에 올릴 때 로컬 산출물과 값이 일치하는지 확인한다.
+
+| 파일 | bytes | md5 | 용도 |
 |---|---:|---|---|
-| `weights/tiny_cnn_fp32_model_v03.pt` | 31,835 | `7592abb6ee06a3b41650e8013aefc4f4dcfbb556d1fc3cc66e7e185ab627ff53` | canonical FP32 |
-| `weights/scales.json` | 1,957 | `7b8c809decd6d36cadf17bd6b28c9c6d682740e8c79f693f3d2460de3e1d33a7` | v03 Version Lock |
-| `golden_outputs/model_v03_manifest.json` | 생성 Manifest | 파일 내부 기록 | 25개 전달 파일 SHA-256 |
+| `npu_soc.bit` | 4,045,674 | `a54587d681877b1e52ebb81f916f79a3` | A-only |
+| `npu_soc.xsa` | 424,652 | `f4dff11507d3be21741b4a4f6ab10006` | A-only Vitis input |
+| `npu_soc_cfull.bit` | 4,045,674 | `b6119c0402d77d615e59cc3333b03c7a` | A+C 정식, 100 MHz MET |
+| `npu_soc_cfull.xsa` | 460,714 | `5b62fa40100f356b5938270187360c4a` | A+C Vitis input |
+| `npu_test.elf` | 232,960 | `833eb0fbadd7e92b8536d161cd604a18` | 자체시험 STEP 1~7 |
+| `live_tracker.elf` | 144,308 | `cb23a4d4306c669d428663d4a8356ed7` | Live Runtime |
+
+Bitstream과 ELF는 Weight/Golden이 내장되므로 반드시 같은 Version Lock의 짝을 사용한다.
+
+## 5. 검증 상태
 
 ```text
-python ai/train.py --mode self-test                  PASS
-python ai/verify_b_delivery.py --root .              PASS
-case00~02 × Conv1~4 Integer Golden                   bit-exact PASS
-A 회신 RTL 회귀                                      3 case × 6 TB = 18/18 PASS
+RTL simulation      Case 3 × 16 TB = 48/48 PASS
+PS driver           76 check PASS
+CPU baseline        21 check PASS
+Live host/protocol  90 check PASS
+ARM cross compile   PASS
+Repository policy   PASS 목표, PR 전 재실행
+Latest board v04    NOT VERIFIED
+Live camera         NOT VERIFIED
 ```
 
-## 3. A 산출물 지문 (2026-08-24 재빌드 기록)
+## 6. 현재 결선과 보류 항목
 
-| 파일 | 크기 | md5 | 만든 명령 |
-|---|---:|---|---|
-| `results/npu_soc.bit` | 4,045,674 | `c853ac303d92183aa42b36993bfbcc91` | `run_bd.tcl` |
-| `results/npu_soc.xsa` | 429,780 | `76f0fbb414fd05c213e6f2cc7a7fefc3` | `run_bd.tcl` |
-| `results/npu_test.elf` | 146,140 | `09a1275f9dd5c0daf89b167af696ca79` | `build_vitis_unified.py` |
-
-> 아래 값은 A가 전달한 Phase 4 기록이다. **보드에 올리기 전에 A 통합 브랜치에서 md5를 대조해라.** 여러 번 빌드하다 보면 어느 게 최신인지
-> 헷갈린다. 위 3개는 서로 짝이다 (`.elf` 는 이 `.xsa` 에서 나왔다).
-
----
-
-## 4. 규격 ↔ 구현 대조 (실측으로 확인된 것만)
-
-| 항목 | 규격 값 | 구현 실측 | 확인 방법 |
-|---|---|---|---|
-| AXI Base | `0x4000_0000` | `0x40000000` | BD Address Editor 로그 + `XPAR_NPU_0_BASEADDR` |
-| AXI Range | 4 KB | `0x00001000` | 동일 |
-| VERSION | `0x4E50_0100` | 동일 | `tb_npu_axi` / `npu_mock` |
-| 클럭 | 100 MHz 단일 | `clk_fpga_0` 10.000 ns | `results/bd_timing.rpt` |
-| IRQ | 61 (`IRQ_F2P[0]`) | 배선 확인, **번호는 미검증** | XSA `npu_bd.hwh` (§ 아래 주의) |
-| Tensor | 64×64×2 CHW, 8192 B | 동일 | `tb_top_system` / `test_driver` |
-| Heatmap | 8×8 → `cell*8+4` | (52,28) ← cell(6,3) | `tb_npu_full` |
-| Latency | — | **125,845 cycle = 1.258 ms** | `tb_npu_full`, `test_driver` |
-
-> **IRQ 번호 주의:** 통합 Vitis(SDT) 는 `XPAR_FABRIC_NPU_0_IRQ_INTR` 을 만들지 않아
-> `npu_test.c` 의 컴파일타임 검사가 건너뛴다. Zynq-7000 표준 매핑상 `IRQ_F2P[0] = 61` 이고
-> 배선(`npu_0/irq → ps7/IRQ_F2P`)은 XSA 에서 확인했다. 인터럽트를 실제로 쓸 때 재확인한다.
-
----
-
-## 5. 리소스 / 타이밍 (전체 시스템 bitstream 실측)
-
-| 항목 | A 단독 | + C stub (자리표시자) |
-|---|---:|---:|
-| Slice LUT | 1441 (2.71%) | 1785 (3.36%) |
-| Slice Register | 1392 (1.31%) | 1565 (1.47%) |
-| Block RAM Tile | 8 (5.71%) | 8 (5.71%) |
-| DSP48 | 12 (5.45%) | 12 (5.45%) |
-| WNS | +0.782 ns | +1.121 ns |
-| WHS | +0.043 ns | +0.045 ns |
-
-근거: `results/bd_util.rpt` · `bd_timing.rpt` · `bd_util_cstub.rpt` · `bd_timing_cstub.rpt`
-
-**발표·보고에는 A 단독 열을 쓴다.** `+ C stub` 은 C 실물이 아니다 (§35).
-
----
-
-## 6. 버전을 올려야 하는 시점
-
-| 트리거 | 올릴 항목 | 그 다음 할 일 |
-|---|---|---|
-| B 실물 weight/golden 도착 | **완료: model/weight/golden/testvec v03** | A 회신 RTL 회귀 18/18 PASS, 공유 저장소 A 소스 합류 뒤 재실행 |
-| Phase 4 보드 시험 통과 | `BOARD_VERIFIED = a_soc_v01 @ 2026-08-24` **완료** | `PHASE4_VERIFICATION_LOG.md` §10 (16/16 PASS) |
-| C Event 모듈 도착 | **완료: `C_EVENT = c_event_v04`** | `INPUT_SRC=1` 경로 A NPU/실보드 확인 |
-| C Control 모듈 도착 | **갱신: `C_CONTROL = c_control_v09`** | 수정본 반영 → A 전체 타이밍 재측정 |
-| 레지스터 맵 변경 | `INTERFACE`, `PROJECT_SPEC` | **§22 CHANGE REQUEST 먼저.** 코드부터 고치지 않는다 |
-
----
-
-## 7. 통합 순서 (§28) 와 현재 위치
-
-```text
-Integration 1  B <-> A   Golden Input -> NPU RTL -> Layer 비교
-                         [x] 더미 weight 로 bit-exact 통과
-                         [x] B v03 실제 Weight/Golden 전달
-                         [x] A 회신 RTL 3 case × 6 TB = 18/18 PASS
-                         [ ] 공유 저장소 A RTL 합류 후 로컬 재실행
-
-Integration 2  C Event <-> A NPU     Event -> Tensor -> NPU
-                         [x] C Event RTL/8192-byte CHW 단독·통합 TB
-                         [ ] A 실제 NPU와 INPUT_SRC=1 결합  <- A/C 통합 대기
-
-Integration 3  A NPU <-> C Control   target_x/y -> Tracking -> Servo
-                         [x] C Control RTL/4축/Interlock/KY-008 독립 단발
-                         [ ] A 실제 NPU/AXI/0x58·0x5C 결합  <- A/C 통합 대기
-
-Integration 4  전체 + 보드
-                         [x] A-only bitstream / XSA / ELF 생성
-                         [x] A-only 보드 STEP 1~5 PASS       2026-08-24
-                         [ ] B v03 + A/C Closed-loop 보드    <- A/C 통합 대기
-```
-
-`[~]` = A 쪽 준비는 끝났고 상대 산출물만 기다리는 상태 (§23 준수).
-
-## 8. A Phase 4 stub → C 실제 모듈 교체 조건
-
-```text
-stub 기본 포트       event_cfg/pan*/laser*/safe*/target*/evt*/servo_pwm/laser_en
-C 필수 추가 입력     src_valid/src_x/src_y/src_pol/src_window_end
-                     laser_arm_hw/emergency_stop_hw
-C 필수 추가 출력     tensor_start/servo_pos_stat/control_stat
-신규 RO 제안         0x58 SERVO_POS_STAT / 0x5C CONTROL_STAT
-안전 상태            CONTROL_STAT[16] = LASER_REARM_REQUIRED
-START                Direct 또는 PS-managed 중 하나만 선택
-```
-
-세부 연결은 `C_TO_A_REPLY_004.md`와 `handoff/C_EVENT_CONTROL_HANDOFF.md` §11을 따른다.
+- Live는 `INPUT_SRC=0 + PS-managed START`를 사용하며 Register Map을 바꾸지 않는다.
+- C 하드웨어 Event 경로의 `src_*`는 실제 Event Source bridge가 없어 BD에서 0에 묶인다.
+- `WINDOW_SRC=1`과 PS→PL Event bridge는 별도 승인·구현 전까지 사용하지 않는다.
+- Servo/FOV/Offset과 실제 Laser 안전 수치는 실측 전까지 미확정이다.

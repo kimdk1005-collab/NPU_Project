@@ -1,24 +1,33 @@
-# A 역할 — NPU RTL
+# A 역할 — Dense INT8 NPU RTL
 
-> 소유: A · 정본: `docs/TEAM_COMMON_AI_INTEGRATION_SPEC.md` §5.1
+> 소유: A · 수치 계약: `../../docs/interface_contract.md`
 
-Dense INT8 NPU와 Argmax RTL의 정식 작업 경로다.
+`64×64×2` CHW signed INT8 Tensor를 4-Layer TinyCNN으로 계산하고, 8×8 Heatmap의
+FIRST_MAX 좌표를 출력한다.
 
-예상 소스:
+## 구성
 
-- `npu_pe.v`
-- `npu_conv_dense.v`
-- `npu_requant.v`
-- `npu_datapath.v`
-- `npu_controller.v`
-- `npu_core.v`
-- `argmax_decoder.v`
-- 선택 확장: `npu_conv1_sparse.v`
+| 파일 | 역할 |
+|---|---|
+| `npu_core.v` | NPU 최상위, 입력 쓰기·제어·결과 출력 |
+| `npu_controller.v` | Conv1~4 실행 순서와 cycle 제어 |
+| `npu_datapath.v` | Activation/Weight/Requant 데이터 경로 |
+| `npu_conv_dense.v` | Dense convolution engine |
+| `npu_pe.v` | 병렬 MAC PE, DSP 사용 지시 포함 |
+| `npu_requant.v` | Q24 ties-away-from-zero Requant |
+| `npu_act_buf.v` | Activation memory |
+| `npu_weight_rom.v` | 8-bank Weight ROM |
+| `argmax_decoder.v` | 8×8 YX raster FIRST_MAX 및 좌표 변환 |
+| `npu_defs.vh` | Layer 형상·주소·기본 경로 상수 |
 
-규칙:
+현재 Weight는 `model_v04_demo_masked_radius1_x1`용이며 `DEMO_ONLY`다. 모델 파일을
+바꿀 때는 `weights/`, `test_vectors/`, 생성 헤더와 bank 파일을 하나의 Version Lock으로
+함께 갱신한다.
 
-1. B의 `weights/`, `test_vectors/`, `golden_outputs/`를 수치 기준으로 사용한다.
-2. signed INT8, CHW 주소, Requant 규칙은 공통 SPEC과 `docs/interface_contract.md`를 따른다.
-3. 검증 코드는 `tb/npu/`에 둔다.
-4. C 연결 포트를 바꿀 때는 Change Request와 팀 승인 후 반영한다.
-5. Vivado 생성물과 Bitstream은 이 폴더에 커밋하지 않는다.
+```bash
+./sim/run_sim.sh
+TV_DIR=../test_vectors/case01/ ./sim/run_sim.sh
+TV_DIR=../test_vectors/case02/ ./sim/run_sim.sh
+```
+
+Vivado/Vitis 프로젝트와 Bitstream은 커밋하지 않는다.

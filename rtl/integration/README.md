@@ -1,21 +1,22 @@
-# A 역할 — SoC 통합 RTL
+# A 역할 — AXI/SoC 통합 RTL
 
-> 소유: A · `top_system.v`는 공유 파일이므로 단독 인터페이스 변경 금지
+> 소유: A · 공유 인터페이스 변경은 Change Request 승인 후 반영
 
-NPU AXI, PS 연결, C Event/Control 모듈을 묶는 최종 통합 경로다.
+| 파일 | 역할 |
+|---|---|
+| `npu_axi.v` | AXI4-Lite Register, 입력 RAM 접근, START/상태/IRQ |
+| `top_system.v` | NPU와 AXI wrapper의 A-only Top |
+| `top_system_c.v` | A NPU + C Event/Control 실제 RTL 통합 Top |
+| `c_module_stub.v` | C 실물 없이 합성할 때만 쓰는 자리표시자 |
 
-예상 소스:
+현재 계약은 `ifc_v0.5`, AXI Base `0x4000_0000/4 KiB`, VERSION
+`0x4E50_0101`이다. `0x58/0x5C` C 상태 RO와 `CTRL[5] HW_START_EN`을 포함한다.
+PS-managed START와 Direct START는 동시에 사용하지 않는다.
 
-- `npu_axi.v`
-- `top_system.v`
-- 통합 중 필요한 검증용 stub 또는 wrapper
+```bash
+./sim/run_sim.sh tb_npu_axi tb_top_system tb_top_system_c
+```
 
-통합 전 확인 순서:
-
-1. `docs/integration_manifest.md`의 버전·지문 확인
-2. `docs/C_TO_A_REPLY_004.md`의 stub → C actual 교체 절차 확인
-3. Direct START와 PS-managed START 중 하나만 선택
-4. Event Source, Arm/E-stop, `0x58`/`0x5C` 상태 포트 연결
-5. 전체 TB, implementation, DRC, timing 재측정
-
-Block Design과 Vivado 프로젝트 사본은 커밋하지 않는다.
+전체 구성과 검증 상태는 `../../docs/A_NPU_HANDOFF.md`와
+`../../docs/A_INTEGRATION_VERIFICATION.md`를 따른다. `top_system_c.v`에서 C 소유 RTL의
+동작이나 포트를 임의 변경하지 않는다.
