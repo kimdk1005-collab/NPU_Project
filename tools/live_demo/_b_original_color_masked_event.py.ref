@@ -1,0 +1,442 @@
+#!/usr/bin/env python3
+"""Color Gate Mask로 표적 영역 밖 Event를 0으로 만드는 V06 Same-Day 변환기.
+
+A_TO_B_V06_SAME_DAY_FINAL_DECISION_001 §6 구현.
+
+Mask는 오직 Current Color Frame과 촬영 시점에 고정된 HSV Color Gate 설정에서만
+만든다. Ground Truth(``heatmap_xy``/``tensor_xy``/``target_xy``/``label_*``)는
+Mask 생성에 절대 쓰지 않는다. Tensor Channel 의미(0=Positive, 1=Negative)와
+shape ``(64, 64, 2)``, dtype은 그대로 유지한다.
+
+기존 Dataset은 읽기 전용으로 다루고 결과는 새 Output Root에만 쓴다.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import shutil
+import sys
+from pathlib import Path
+
+import cv2
+import numpy as np
+
+_AI_DIRECTORY = Path(__file__).resolve().parent
+if str(_AI_DIRECTORY) not in sys.path:
+    sys.path.insert(0, str(_AI_DIRECTORY))
+
+from build_v06_dataset import safe_frame_path  # noqa: E402  (기존 경로 방어 로직 재사용)
+from color_presence_gate import (  # noqa: E402  (기존 Color Gate 로직 재사용)
+    ColorGateConfig,
+    detect_target_presence_detailed,
+    validate_config,
+)
+from dataset import (  # noqa: E402  (공통 NPZ 무결성 계산을 그대로 재사용)
+    measure_event_label_alignment,
+    positive_argmax_distance,
+)
+
+PROJECT_ROOT = _AI_DIRECTORY.parent
+
+# 외부 Test 경로는 어떤 이유로도 열지 않는다 (v04_retrain_contract.EXTERNAL_SEQUENCE_DIRECTORY).
+FORBIDDEN_EXTERNAL_DIRECTORY = (PROJECT_ROOT / "ai/temporal_sequences_v03_private").resolve()
+
+DEFAULT_CONFIG_ID = "color_masked_event_v01"
+TENSOR_SHAPE = (64, 64, 2)
+MASK_SHAPE = (64, 64)
+TENSOR_KEY = "input_tensor"
+FRAME_PATH_KEY = "raw_current_frame_relative_path"
+GROUND_TRUTH_KEYS_NOT_USED_TO_BUILD_MASK = (
+    "heatmap_xy",
+    "tensor_xy",
+    "target_xy",
+    "source_xy",
+    "label_heatmap",
+    "label_cell_xy",
+    "label_source",
+    "target_present_ground_truth",
+)
+
+
+def assert_outside_external_test(path: Path) -> Path:
+    """외부 Test Sequence 경로 접근을 차단한다."""
+    resolved = Path(path).resolve()
+    if resolved == FORBIDDEN_EXTERNAL_DIRECTORY or FORBIDDEN_EXTERNAL_DIRECTORY in resolved.parents:
+        raise PermissionError(f"외부 Test 경로 접근 금지: {resolved}")
+    return resolved
+
+
+# ---------------------------------------------------------------------------
+# 공개 API
+# ---------------------------------------------------------------------------
+def build_mask(frame_bgr: np.ndarray, gate: ColorGateConfig, radius: int) -> np.ndarray:
+    """Current Color Frame에서 64x64 bool Mask를 만든다. Ground Truth를 쓰지 않는다.
+
+    configs/color_masked_event_v01.json의 ``mask_pipeline`` 순서를 그대로 따른다.
+    표적을 찾지 못하면 예외 없이 전부 False인 Mask를 반환한다.
+    """
+    validate_config(gate)
+    if radius < 0:
+        raise ValueError("dilation radius는 0 이상이어야 합니다.")
+    if frame_bgr is None or frame_bgr.ndim != 3 or frame_bgr.shape[2] != 3:
+        raise ValueError("Mask 생성에는 BGR HxWx3 Frame이 필요합니다.")
+
+    empty = np.zeros(MASK_SHAPE, dtype=bool)
+
+    # step_1: 기존 Color Gate 로직 그대로 표적 Blob Mask(0/255)를 만든다.
+    detail, hsv_mask = detect_target_presence_detailed(frame_bgr, config=gate)
+    if not detail.present:
+        return empty
+    contours, _ = cv2.findContours(hsv_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    candidates = [
+        contour
+        for contour in contours
+        if gate.minimum_area <= float(cv2.contourArea(contour)) <= gate.maximum_area
+    ]
+    if not candidates:
+        return empty
+    best = max(candidates, key=cv2.contourArea)
+    blob_mask = np.zeros(hsv_mask.shape, dtype=np.uint8)
+    cv2.drawContours(blob_mask, [best], -1, 255, thickness=cv2.FILLED)
+
+    # step_2: 64x64 축소 후 >0 이면 True.
+    small = cv2.resize(blob_mask, (MASK_SHAPE[1], MASK_SHAPE[0]), interpolation=cv2.INTER_AREA)
+    mask = small > 0
+    if not mask.any():
+        return empty
+
+    # step_3: 64x64 좌표계에서 반경 radius로 팽창.
+    if radius > 0:
+        kernel = cv2.getStructuringElement(
+            cv2.MORPH_ELLIPSE, (2 * radius + 1, 2 * radius + 1)
+        )
+        mask = cv2.dilate(mask.astype(np.uint8), kernel, iterations=1) > 0
+
+    return mask.astype(bool)
+
+
+def apply_mask(tensor_hwc: np.ndarray, mask: np.ndarray) -> np.ndarray:
+    """64x64x2 Tensor에서 Mask 밖을 0으로 만든다. dtype과 shape은 그대로 유지."""
+    if tensor_hwc.shape != TENSOR_SHAPE:
+        raise ValueError(f"Tensor shape이 {TENSOR_SHAPE}이 아닙니다: {tensor_hwc.shape}")
+    mask_bool = np.asarray(mask).astype(bool)
+    if mask_bool.shape != MASK_SHAPE:
+        raise ValueError(f"Mask shape이 {MASK_SHAPE}이 아닙니다: {mask_bool.shape}")
+    masked = tensor_hwc.copy()
+    masked[~mask_bool] = 0
+    return masked
+
+
+# ---------------------------------------------------------------------------
+# CLI 구현
+# ---------------------------------------------------------------------------
+def load_masked_config(path: Path) -> dict:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    config_id = payload.get("config_id")
+    if not isinstance(config_id, str) or not config_id.startswith("color_masked_event_v"):
+        raise ValueError(f"유효하지 않은 color mask config_id입니다: {config_id}")
+    if not payload.get("frozen_before_any_result"):
+        raise ValueError("확정되지 않은 Config입니다.")
+    return payload
+
+
+def gate_from_session(session_json_path: Path) -> ColorGateConfig:
+    """Session 촬영 시점에 고정된 color_gate_candidate만 쓴다."""
+    session = json.loads(Path(session_json_path).read_text(encoding="utf-8"))
+    candidate = session.get("color_gate_candidate")
+    if not isinstance(candidate, dict):
+        raise ValueError(f"session.json에 color_gate_candidate가 없습니다: {session_json_path}")
+    gate = ColorGateConfig(
+        hue_low=int(candidate["hue_low"]),
+        hue_high=int(candidate["hue_high"]),
+        saturation_minimum=int(candidate["saturation_minimum"]),
+        value_minimum=int(candidate["value_minimum"]),
+        minimum_area=float(candidate["minimum_area"]),
+        maximum_area=float(candidate["maximum_area"]),
+        morphology_kernel_size=int(candidate["morphology_kernel_size"]),
+        morphology_open_iterations=int(candidate["morphology_open_iterations"]),
+        morphology_close_iterations=int(candidate["morphology_close_iterations"]),
+    )
+    validate_config(gate)
+    return gate
+
+
+def percentile_stats(values: list[int]) -> dict[str, float | None]:
+    if not values:
+        return {"median": None, "p10": None, "p90": None}
+    array = np.asarray(values, dtype=np.float64)
+    return {
+        "median": float(np.median(array)),
+        "p10": float(np.percentile(array, 10)),
+        "p90": float(np.percentile(array, 90)),
+    }
+
+
+def process_session(
+    *,
+    session_id: str,
+    dataset_root: Path,
+    raw_root: Path,
+    output_root: Path,
+    radius: int,
+    config_id: str = DEFAULT_CONFIG_ID,
+) -> dict:
+    dataset_session = assert_outside_external_test(dataset_root / session_id)
+    raw_session = assert_outside_external_test(raw_root / session_id)
+    output_session = assert_outside_external_test(output_root / session_id)
+    if not dataset_session.is_dir():
+        raise FileNotFoundError(f"Dataset Session이 없습니다: {dataset_session}")
+    if not raw_session.is_dir():
+        raise FileNotFoundError(f"Raw Session이 없습니다: {raw_session}")
+
+    gate = gate_from_session(raw_session / "session.json")
+    output_session.mkdir(parents=True, exist_ok=True)
+
+    sample_paths = sorted(dataset_session.glob("*.npz"))
+    if not sample_paths:
+        raise FileNotFoundError(f"NPZ Sample이 없습니다: {dataset_session}")
+
+    mask_cache: dict[str, np.ndarray] = {}
+    mask_pixel_counts: list[int] = []
+    masked_active_counts: list[int] = []
+    original_active_counts: list[int] = []
+    empty_mask_samples = 0
+    empty_masked_tensor_samples = 0
+
+    for index, sample_path in enumerate(sample_paths, start=1):
+        with np.load(sample_path, allow_pickle=False) as stored:
+            payload = {name: stored[name] for name in stored.files}
+        if TENSOR_KEY not in payload:
+            raise ValueError(f"{sample_path}에 {TENSOR_KEY}가 없습니다.")
+        if FRAME_PATH_KEY not in payload:
+            raise ValueError(f"{sample_path}에 {FRAME_PATH_KEY}가 없습니다.")
+
+        relative_text = str(payload[FRAME_PATH_KEY])
+        if relative_text not in mask_cache:
+            frame_path = safe_frame_path(raw_session, relative_text)
+            resolved_frame = frame_path.resolve()
+            if raw_session not in resolved_frame.parents:
+                raise ValueError(f"Session 디렉터리를 벗어난 Frame 경로: {resolved_frame}")
+            assert_outside_external_test(resolved_frame)
+            frame_bgr = cv2.imread(str(resolved_frame), cv2.IMREAD_COLOR)
+            if frame_bgr is None:
+                raise ValueError(f"Frame을 읽지 못했습니다: {resolved_frame}")
+            mask_cache[relative_text] = build_mask(frame_bgr, gate, radius)
+        mask = mask_cache[relative_text]
+
+        tensor = payload[TENSOR_KEY]
+        masked = apply_mask(tensor, mask)
+
+        mask_pixel_count = int(np.count_nonzero(mask))
+        masked_active_pixel_count = int(np.count_nonzero(masked))
+        original_active_pixel_count = int(np.count_nonzero(tensor))
+
+        mask_pixel_counts.append(mask_pixel_count)
+        masked_active_counts.append(masked_active_pixel_count)
+        original_active_counts.append(original_active_pixel_count)
+        if mask_pixel_count == 0:
+            empty_mask_samples += 1
+        if masked_active_pixel_count == 0:
+            empty_masked_tensor_samples += 1
+
+        payload[TENSOR_KEY] = masked
+        # dataset.py의 정합 검사와 학습기 필터는 이 공통 필드를 기준으로 한다.
+        # Mask 적용 후 값으로 반드시 다시 기록해야 원본 Tensor의 count가 남지 않는다.
+        payload["active_pixel_count"] = np.array(
+            masked_active_pixel_count, dtype=np.int32
+        )
+        # 아래 Label 참조는 Mask를 모두 만든 뒤 NPZ 무결성 진단 필드를 다시
+        # 계산하는 데만 쓴다. Mask의 모양/위치/크기에는 절대 관여하지 않는다.
+        if "heatmap_xy" in payload:
+            heatmap_x, heatmap_y = (int(value) for value in payload["heatmap_xy"])
+            alignment = measure_event_label_alignment(masked, heatmap_x, heatmap_y)
+            argmax_distance = positive_argmax_distance(
+                alignment, heatmap_x, heatmap_y
+            )
+            target_event_ratio = alignment.target_event_pixel_count / max(
+                1, masked_active_pixel_count
+            )
+            payload["gate_profile"] = np.array("v06_diagnostic")
+            payload["positive_argmax_cell_xy"] = np.array(
+                [
+                    alignment.positive_energy_argmax_x,
+                    alignment.positive_energy_argmax_y,
+                ],
+                dtype=np.int16,
+            )
+            payload["positive_argmax_distance"] = np.array(
+                argmax_distance, dtype=np.int16
+            )
+            payload["target_event_pixels"] = np.array(
+                alignment.target_event_pixel_count, dtype=np.int32
+            )
+            payload["target_event_ratio"] = np.array(
+                target_event_ratio, dtype=np.float32
+            )
+            # V06 원본 보존 Dataset의 병렬 진단 필드도 Masked Tensor 실측값과
+            # 맞춘다. Current exact Label 자체는 변경하지 않는다.
+            payload["target_positive_pixels"] = np.array(
+                alignment.target_positive_pixel_count, dtype=np.int32
+            )
+            payload["v06_active_pixel_count"] = np.array(
+                masked_active_pixel_count, dtype=np.int32
+            )
+            payload["v06_target_event_pixels"] = np.array(
+                alignment.target_event_pixel_count, dtype=np.int32
+            )
+            payload["v06_target_event_ratio"] = np.array(
+                target_event_ratio, dtype=np.float32
+            )
+            payload["v06_positive_argmax_cell"] = np.array(
+                [
+                    alignment.positive_energy_argmax_x,
+                    alignment.positive_energy_argmax_y,
+                ],
+                dtype=np.int16,
+            )
+            payload["v06_positive_argmax_distance"] = np.array(
+                argmax_distance, dtype=np.int16
+            )
+        payload["masked_active_pixel_count"] = np.array(masked_active_pixel_count, dtype=np.int32)
+        payload["mask_pixel_count"] = np.array(mask_pixel_count, dtype=np.int32)
+        payload["color_masked_config_id"] = np.array(config_id)
+
+        destination = output_session / sample_path.name
+        temporary = destination.with_name(f".{destination.name}.tmp")
+        with temporary.open("wb") as stream:
+            np.savez_compressed(stream, **payload)
+        temporary.replace(destination)
+
+        if index % 250 == 0 or index == len(sample_paths):
+            print(f"  [{session_id}] {index}/{len(sample_paths)} sample 처리", flush=True)
+
+    quality_source = dataset_session / "frame_quality.json"
+    if not quality_source.is_file():
+        raise FileNotFoundError(f"frame_quality.json이 없습니다: {quality_source}")
+    shutil.copy2(quality_source, output_session / "frame_quality.json")
+
+    # NPZ의 audit_image_relative_path는 원본 Session 내부 상대경로다. Masked
+    # Dataset도 같은 검증기를 통과해야 하므로 이미지 증빙을 함께 보존한다.
+    audit_source = dataset_session / "audit"
+    if not audit_source.is_dir():
+        raise FileNotFoundError(f"audit 디렉터리가 없습니다: {audit_source}")
+    shutil.copytree(audit_source, output_session / "audit", dirs_exist_ok=True)
+
+    # 원본 NPZ에 이미 있던 active_pixel_count(참고용 비교 대상)
+    stored_active_counts: list[int] = []
+    for sample_path in sample_paths:
+        with np.load(sample_path, allow_pickle=False) as stored:
+            if "active_pixel_count" in stored.files:
+                stored_active_counts.append(int(stored["active_pixel_count"]))
+
+    return {
+        "session_id": session_id,
+        "sample_count": len(sample_paths),
+        "unique_current_frames": len(mask_cache),
+        "empty_mask_sample_count": empty_mask_samples,
+        "empty_masked_tensor_sample_count": empty_masked_tensor_samples,
+        "color_gate": {
+            "hue_low": gate.hue_low,
+            "hue_high": gate.hue_high,
+            "saturation_minimum": gate.saturation_minimum,
+            "value_minimum": gate.value_minimum,
+            "minimum_area": gate.minimum_area,
+            "maximum_area": gate.maximum_area,
+            "morphology_kernel_size": gate.morphology_kernel_size,
+            "morphology_open_iterations": gate.morphology_open_iterations,
+            "morphology_close_iterations": gate.morphology_close_iterations,
+        },
+        "mask_pixel_count": percentile_stats(mask_pixel_counts),
+        "active_pixel_count_median_original_npz_field": (
+            float(np.median(stored_active_counts)) if stored_active_counts else None
+        ),
+        "active_pixel_count_median_recomputed": (
+            float(np.median(original_active_counts)) if original_active_counts else None
+        ),
+        "masked_active_pixel_count_median": (
+            float(np.median(masked_active_counts)) if masked_active_counts else None
+        ),
+        "masked_active_pixel_count": percentile_stats(masked_active_counts),
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Color Gate Mask 기반 Event Tensor 마스킹")
+    parser.add_argument("--config", type=Path, default=Path("configs/color_masked_event_v01.json"))
+    parser.add_argument("--dataset-root", type=Path, default=Path("ai/v06_dataset_private"))
+    parser.add_argument("--raw-root", type=Path, default=Path("ai/v06_raw_private"))
+    parser.add_argument("--output-root", type=Path, default=Path("ai/v06_masked_private"))
+    parser.add_argument("--session", action="append", required=True, help="처리할 Session ID")
+    parser.add_argument(
+        "--report",
+        type=Path,
+        default=Path("results/v06_same_day/e2_mask_build_report.json"),
+    )
+    arguments = parser.parse_args()
+
+    config = load_masked_config(arguments.config)
+    config_id = str(config["config_id"])
+    radius = int(config["mask_pipeline"]["dilation_radius_px"])
+
+    dataset_root = assert_outside_external_test(arguments.dataset_root)
+    raw_root = assert_outside_external_test(arguments.raw_root)
+    output_root = assert_outside_external_test(arguments.output_root)
+    output_root.mkdir(parents=True, exist_ok=True)
+
+    print(f"Config: {arguments.config} (dilation_radius_px={radius})", flush=True)
+    session_reports = []
+    for session_id in arguments.session:
+        print(f"[Session] {session_id}", flush=True)
+        session_reports.append(
+            process_session(
+                session_id=session_id,
+                dataset_root=dataset_root,
+                raw_root=raw_root,
+                output_root=output_root,
+                radius=radius,
+                config_id=config_id,
+            )
+        )
+
+    total_samples = sum(item["sample_count"] for item in session_reports)
+    total_empty_masks = sum(item["empty_mask_sample_count"] for item in session_reports)
+    total_empty_tensors = sum(item["empty_masked_tensor_sample_count"] for item in session_reports)
+
+    report = {
+        "config_id": config_id,
+        "document_reference": config.get("document_reference"),
+        "dilation_radius_px": radius,
+        "dataset_root": str(dataset_root.relative_to(PROJECT_ROOT)),
+        "raw_root": str(raw_root.relative_to(PROJECT_ROOT)),
+        "output_root": str(output_root.relative_to(PROJECT_ROOT)),
+        "mask_source": "current_color_frame_plus_session_color_gate_candidate",
+        "ground_truth_keys_not_used_to_build_mask": list(
+            GROUND_TRUTH_KEYS_NOT_USED_TO_BUILD_MASK
+        ),
+        "ground_truth_read_after_mask_only_for_integrity_metadata": [
+            "heatmap_xy"
+        ],
+        "ground_truth_used_for_mask": False,
+        "external_test_used": False,
+        "sessions": session_reports,
+        "totals": {
+            "session_count": len(session_reports),
+            "sample_count": total_samples,
+            "empty_mask_sample_count": total_empty_masks,
+            "empty_masked_tensor_sample_count": total_empty_tensors,
+        },
+    }
+
+    report_path = assert_outside_external_test(arguments.report)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    print(json.dumps(report, ensure_ascii=False, indent=2), flush=True)
+    print(f"Report 저장: {report_path}", flush=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

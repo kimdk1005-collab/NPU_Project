@@ -83,7 +83,17 @@ git switch integration
 - 수치 판정 기준: B의 `test_vectors/`, `golden_outputs/`
 - C 연결 계약: `docs/C_TO_A_REPLY_004.md`
 
-A 산출물이 합류하면 해당 폴더 README와 `docs/A_NPU_HANDOFF.md`의 재현 명령을 따른다.
+전체 RTL 회귀는 아래처럼 실행한다. 기본 Vector는 `case00`이다.
+
+```bash
+./sim/run_sim.sh
+TV_DIR=../test_vectors/case01/ ./sim/run_sim.sh
+TV_DIR=../test_vectors/case02/ ./sim/run_sim.sh
+cd sw && make all
+```
+
+계약과 실측값은 `docs/A_NPU_HANDOFF.md`, 현재 재현 결과는
+`docs/A_INTEGRATION_VERIFICATION.md`를 따른다.
 
 ### B — Model·Golden
 
@@ -92,6 +102,8 @@ A 산출물이 합류하면 해당 폴더 README와 `docs/A_NPU_HANDOFF.md`의 �
 - 출력: `weights/`, `test_vectors/`, `golden_outputs/`, `results/model/`
 
 공식 산출물에는 모델 버전, shape/dtype/order, 생성 명령, seed와 checksum을 기록한다.
+현재 활성 후보는 `model_v04_demo_masked_radius1_x1`이며 `DEMO_ONLY`다. PS Color Mask가
+필수이고 범용 최종 모델로 해석하지 않는다.
 
 ### C — Event·Control
 
