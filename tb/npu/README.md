@@ -1,14 +1,21 @@
 # A 역할 — NPU Testbench
 
-> 소유: A · 대상 RTL: `rtl/npu/`, `rtl/integration/`
+> 소유: A · Golden: `../../test_vectors/caseNN/`
 
-예상 Testbench:
+| Testbench | 검증 범위 |
+|---|---|
+| `tb_npu_requant.v` | Q24 반올림·Clamp 경계 |
+| `tb_npu_pe.v` | signed INT8 MAC |
+| `tb_npu_conv_dense.v` | Conv1 Dense 연산 |
+| `tb_npu_full.v` | Conv1~4 Layer bit-exact, Argmax, latency |
 
-- `tb_npu_pe.v`
-- `tb_npu_conv_dense.v`
-- `tb_npu_requant.v`
-- `tb_npu_full.v`
-- 필요 시 `tb_npu_axi.v`, `tb_top_system.v`
+AXI/Top Testbench는 `../integration/`에 있다. 기본 실행은 `case00`, 다른 Case는
+`TV_DIR`로 선택한다.
 
-판정은 B가 제공한 공식 `test_vectors/`와 `golden_outputs/`를 사용한다. 각 TB는 PASS 수,
-실패 위치, 재현 명령을 로그에 명확히 출력하고 변경 PR에 실행 결과를 기록한다.
+```bash
+./sim/run_sim.sh
+TV_DIR=../test_vectors/case01/ ./sim/run_sim.sh
+TV_DIR=../test_vectors/case02/ ./sim/run_sim.sh
+```
+
+각 실행은 A 6종, C 9종, A/C 통합 1종의 자동판정 결과를 출력한다.

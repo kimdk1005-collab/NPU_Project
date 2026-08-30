@@ -1,287 +1,118 @@
-# A — NPU Handoff  (a_npu_v01 / a_soc_v01)
+# A Handoff — Dense INT8 NPU / AXI / SoC / PS
 
-> 기준: `TEAM_COMMON_AI_INTEGRATION_SPEC.md` v1.5 §26
-> 상태: **NPU Core + AXI4-Lite + Block Design + Bitstream + PS 소프트웨어 + Phase 4 보드 검증 완료.**
->       A 제공 기록 기준 보드 기능 판정 16/16 PASS. C 모듈도 전달 완료됐으며,
->       남은 것은 **B 실제 weight/golden과 A/C 실제 전체 시스템 통합**이다.
-> 날짜: 2026-08-25 (A Phase 4 문서 + C 최신 상태 조정)
+> 상태: **A RTL·PS 소스 및 A/C 통합 Top 반영 완료**
 >
-> 산출물: `results/npu_soc.bit` , `npu_soc.xsa` , **`npu_test.elf`**
+> 버전: `a_npu_v01 / a_soc_v02 / a_soc_c_v03 / a_sw_v05 / a_live_v01`
 >
-> 상태 주의: 현재 C 체크아웃에는 위 A RTL/PS/결과물이 없다. 실제 파일 존재 여부와
-> 지문은 `integration_manifest.md`를 기준으로 A 브랜치에서 다시 확인한다.
+> 갱신: 2026-08-30
 
----
-
-## 1. NPU Port — `rtl/npu/npu_core.v`
-
-```verilog
-module npu_core #(parameter NPE = 8) (
-    // ---- Clock / Reset ----
-    input  wire        clk,            // 100 MHz
-    input  wire        rstn,           // active-low, 동기 해제 권장
-
-    // ---- 제어 ----
-    input  wire        start,          // 1 cycle pulse
-    output wire        busy,
-    output wire        done,           // 1 cycle pulse
-    output wire [31:0] cycle_cnt,      // start~done cycle 수
-
-    // ---- A -> C  Target Interface (spec §14) ----
-    input  wire signed  [7:0] score_th,      // target_valid 임계값, 기본 0
-    output wire        target_valid,
-    output wire  [5:0] target_x,             // 4,12,20,28,36,44,52,60
-    output wire  [5:0] target_y,
-    output wire signed  [7:0] target_score,  // Conv4 Heatmap max, signed INT8
-
-    // ---- C -> A  Event Tensor write (spec §7) ----
-    input  wire        ext_we,
-    input  wire [12:0] ext_addr,
-    input  wire signed  [7:0] ext_data
-);
-```
-
-## 2. Clock / Reset
+## 1. NPU 계약
 
 ```text
-CLK        = 100 MHz 단일 클럭 (전 모듈 posedge)
-RSTN       = active-low
-RESET 규칙 = rstn 해제 후 최소 2 cycle 뒤 start 인가
-Timing     = 100 MHz MET (xc7z020clg400-1, 배치배선 후 실측)
-             npu_core 단독 (OOC)     WNS +0.994 ns / WHS +0.054 ns / Fmax 111.0 MHz
-             top_system (+AXI, OOC)  WNS +0.302 ns  (OOC 인공물)
-             전체 시스템 bitstream   WNS +0.782 ns / WHS +0.043 ns / Fmax 108.5 MHz
-             실제 시스템 클럭 = PS7 FCLK_CLK0 = 100 MHz (clk_fpga_0)
+Clock          100 MHz single clock
+Reset          active-low
+Input          64×64×2 signed INT8, CHW
+Address        (polarity << 12) | (y << 6) | x
+Conv           2→8→16→32→1, Dense Cross-Correlation, bias 없음
+Requant        Q24, ties-away-from-zero
+Output         8×8 Heatmap → YX raster FIRST_MAX
+Coordinate     target_x/y = heatmap_x/y × 8 + 4
+Valid          signed target_score > signed SCORE_TH
+Latency        125,845 cycle = 1.258 ms @100 MHz
 ```
 
-## 3. Input Tensor 요구사항
+`npu_core`의 `target_*` 출력은 `done` 이후 다음 `start`까지 유지한다. 입력은 `busy=0`일
+때만 쓴다.
+
+## 2. AXI/통합 계약
 
 ```text
-Shape           = 64 x 64 x 2   (spec §7.1)
-Order           = CHW  (D3 FREEZE REQUEST #001 - 1번)
-Address         = (polarity << 12) | (event_y << 6) | event_x
-                  polarity 0 = Positive, 1 = Negative
-Data            = signed INT8, 실제 유효 범위 0~127 (Event Count saturation)
-전송            = ext_we / ext_addr / ext_data, 1 byte per cycle
-전송 조건       = busy == 0 일 때만
-전송 소요       = 8192 cycle = 82 us @100MHz
+Base/Range     0x4000_0000 / 4 KiB
+Interface      ifc_v0.5
+VERSION        0x4E50_0101
+START          PS-managed 또는 Direct 중 하나만 사용
+C Status       0x58 SERVO_POS_STAT / 0x5C CONTROL_STAT
 ```
 
-C 쪽 흐름:
+`CTRL[5] HW_START_EN=0`이 reset 기본값이다. Direct 모드에서는 `INPUT_SRC=1`과 함께
+C `tensor_start`를 사용하며 PS가 `CTRL.START`를 쓰지 않는다. PS-managed 모드는
+`TENSOR_READY`를 확인한 뒤 `CTRL.START`를 쓴다.
 
-```text
-event_window_end pulse
-  -> 8192 byte 전송
-  -> start pulse
-  -> done 대기 (1.258 ms)
-  -> target_* 읽기
-```
+Top 구성:
 
-## 4. Output Target Format
+- `rtl/integration/top_system.v`: A-only AXI+NPU
+- `rtl/integration/top_system_c.v`: A NPU + C `c_event_control_top`
+- `rtl/integration/c_module_stub.v`: 합성 비교용, 최종 C 대체물이 아님
 
-```text
-target_valid  = (heatmap_max_score > score_th)
-target_x[5:0] = heatmap_x * 8 + 4      (spec §14.1)
-target_y[5:0] = heatmap_y * 8 + 4
-target_score  = signed INT8, Conv4 Heatmap 최대값
+## 3. PS 소프트웨어
 
-유효 시점 = done 펄스 이후, 다음 start 까지 값 유지
-좌표계    = 64x64 입력 좌표계, X 좌->우 증가, Y 상->하 증가
-가능값    = 4, 12, 20, 28, 36, 44, 52, 60  (8개만)
-Dead Zone = C 는 abs(error) <= 4 를 최소 Center/Lock 범위로 사용 (spec §15)
-```
-
-## 5. AXI Register
-
-```text
-현재 상태: 구현 + 검증 완료.  rtl/integration/npu_axi.v
-Base     : 0x4000_0000 , Range 0x1000 (4 KB)
-경로     : PS7 M_AXI_GP0 -> AXI SmartConnect -> top_system.s_axi
-검증     : tb_npu_axi 84 check PASS / tb_top_system 17 check PASS
-bit field: 공통 지침 v1.5 §20.1  (C 기본 계약 수용·구현 완료, A 확장 회신 대기)
-Pan/Tilt : 2 헤드. PT#1 카메라 0x20/0x24/0x2C , PT#2 레이저 0x48/0x4C/0x50/0x54
-           PT#2 각도는 공통 지침 §15.2 좌표 변환식 필수 (C 담당)
-근거서   : docs/D3_FREEZE_REQUEST_A_002.md
-```
-
-**PS 가 반드시 지킬 것 하나:** `STATUS.DONE`(bit0, sticky) 을 폴링해라.
-`STATUS.BUSY` 를 폴링하면 START 직후 busy 가 아직 0 이라 오판한다.
-
-전체 Offset 표는 §20.1 을 보고, 여기서는 연결만 적는다:
-
-| Offset | Name | 연결 |
-|---:|---|---|
-| `0x00` | CTRL | bit0 START(W1P) → `start`, bit1 SOFT_RESET, **bit3 INPUT_SRC**, bit4 IRQ_EN |
-| `0x04` | STATUS | bit0 `done`(sticky/W1C) / bit1 `busy` / bit2 ERROR(sticky/W1C) / bit3 `target_valid` |
-| `0x10` | CYCLE_CNT | `cycle_cnt[31:0]` |
-| `0x14` | RESULT_X | `{26'b0, target_x}` |
-| `0x18` | RESULT_Y | `{26'b0, target_y}` |
-| `0x1C` | RESULT_SCORE | `[7:0] target_score`, `[23:16] score_th` (RW) |
-
-## 6. Version
-
-```text
-A_NPU                 = a_npu_v01
-PROJECT_SPEC          = common_v1.5
-ROLE_SPEC             = role_v1.6
-INTERFACE             = ifc_v0.5
-
-Current Model Version = model_v01_dummy      <- B 실물 미수령
-Weight Version        = weight_v01_dummy     <- A 가 tools/gen_dummy.py 로 생성
-Verified Golden       = golden_v01_dummy     <- 동일
-Test Vector           = testvec_v01_dummy
-```
-
-> **주의:** 현재 검증은 A 가 만든 랜덤 INT8 weight 기준이다.
-> 이것은 "RTL 이 Python 정수 연산과 bit-exact 하다"는 것을 증명하지만
-> "모델이 표적을 잘 찾는다"는 것은 증명하지 않는다.
-> B 의 실제 weight/golden 이 오면 파일만 교체하고 동일 TB 를 재실행한다.
-> 그때 버전을 `a_npu_v02 / model_v01 / weight_v01 / golden_v01` 로 올린다.
-
-## 7. Known Limitation
-
-```text
-L1. 입력 버퍼가 내부 ping-pong 버퍼를 공유
-    -> NPU 추론 중 다음 Window Tensor 를 미리 쓸 수 없다.
-    -> 현재 Latency 1.258 ms << Window 5~10 ms 라 MVP 문제 없음.
-    -> 필요 시 입력 전용 8KB 버퍼 추가 (BRAM 4개, 현재 사용률 5.71%)
-
-L2. [해소] AXI-Lite / Block Design / Bitstream 완료 (Phase 2),
-    A 제공 기록 기준 Phase 4 실보드 기능 판정 16/16 PASS.
-
-L3. Conv4 는 cout=1 이라 PE 8개 중 1개만 사용
-    -> 전체 cycle 의 2.5% 라 무시. 구조 변경 안 함.
-
-L4. Weight / Requant 파라미터는 합성 시 .mem 삽입 방식 (spec §12.1)
-    -> Runtime Upload 없음. weight 바뀌면 재합성 필요.
-
-L5. [해소] $readmemh 상대경로 문제. sim/run_bd.tcl 이 fileset verilog_define 으로
-    NPU_WEIGHT_DIR 절대경로를 주입한다. xsim 은 기존대로 -d 로 넘긴다.
-
-L6. Sparse / Zero-Skip 미구현 (spec §19 선택 확장)
-
-L7. [해소] 100 MHz Timing 여유 2.7% 문제.
-    원인은 Vivado 가 PE 8개의 8x8 곱셈기를 LUT/CARRY4 로 합성한 것이었다.
-    npu_pe 에 (* use_dsp = "yes" *) 적용 -> 여유 2.7% -> 7.1%.
-    Fallback(PS FCLK 50 MHz, Latency 2.52 ms)은 그대로 남겨 둔다.
-
-L8. A-only BD 안에서 C 인터페이스가 0 으로 묶여 있다.
-    evt_we/evt_addr/evt_data/input_stat -> xlconstant 0
-    event_cfg/pan_cmd/tilt_cmd/laser_ctrl/safe_limit/track_err_* -> 미연결(합성 제거)
-    -> C `c_event_control_top.v`는 전달 완료. A가 tie/stub를 실제 모듈로 교체하고
-       추가 Event/안전/상태 포트를 연결한 뒤 리소스/타이밍 재측정 필수.
-
-L9. PS 인터럽트 핸들러 미작성.
-    IRQ_F2P 배선과 CTRL.IRQ_EN 은 검증했지만 Vitis 쪽 핸들러는 없다.
-    폴링만으로도 충분하다 (Latency 1.26 ms).
-```
-
-## 8. Timing / Resource Result
-
-xc7z020clg400-1 (Zybo Z7-20), 100 MHz 제약. **전부 배치배선 후 실측.**
-
-| 항목 | `npu_core` | `top_system` (+AXI) | **전체 시스템 (bitstream)** | 전체 | 비율 |
-|---|---:|---:|---:|---:|---:|
-| Slice LUT | 573 | 1060 | **1441** | 53200 | 2.71% |
-| Slice Register | 279 | 849 | **1392** | 106400 | 1.31% |
-| Block RAM Tile | 8 | 8 | **8** | 140 | 5.71% |
-| DSP48E1 | 12 | 12 | **12** | 220 | 5.45% |
-
-```text
-npu_core 단독 (OOC)      WNS = +0.994 ns , WHS = +0.054 ns , Fmax 111.0 MHz
-top_system (+AXI, OOC)   WNS = +0.302 ns , WHS = +0.100 ns   (OOC 리셋트리 부재 인공물)
-전체 시스템 (bitstream)  WNS = +0.782 ns , WHS = +0.043 ns , Fmax 108.5 MHz
--> 전부 TIMING MET
-
-산출물: results/npu_soc.bit , results/npu_soc.xsa
-```
-
-> a_npu_v01 초판(Phase 1)은 LUT 1373 / WNS +0.266 ns / Fmax 102.7 MHz 로 보고했다.
-> `npu_pe` 에 `use_dsp="yes"` 를 적용해 재측정한 위 값이 유효하다.
-
-**Latency**
-
-| Layer | 누적 cycle |
-|---|---:|
-| Conv1 | 35,843 |
-| Conv2 | 81,415 |
-| Conv3 | 122,635 |
-| Conv4 | 125,775 |
-| Argmax + 종료 | **125,845** |
-
-```text
-125,845 cycle @ 100 MHz = 1.258 ms
-```
-
-cycle 수는 데이터에 의존하지 않는 고정 구조라 실제 weight 로 바꿔도 동일하다.
-
-## 9. 검증 결과
-
-| Testbench | 대상 | 결과 |
-|---|---|---|
-| `tb_npu_requant` | Requantize 3150 case (경계·tie·M 최대값 포함) | PASS, bit-exact |
-| `tb_npu_pe` | INT8 MAC 300회 + clr/en | PASS |
-| `tb_npu_conv_dense` | Conv1 단독, 8192 byte 전수 비교 | PASS |
-| `tb_npu_full` | Conv1/2/3/4 + Argmax 전체 | PASS |
-
-`tb_npu_full` 레이어별 전수 비교:
-
-```text
-Conv1  8192 byte  일치
-Conv2  4096 byte  일치
-Conv3  2048 byte  일치
-Conv4    64 byte  일치
-Argmax  target=(52,28) score=127  일치
-```
-
-재현:
+`npu_driver`는 Xilinx BSP에 직접 의존하지 않아 동일 로직을 호스트 MMIO Mock과 보드에서
+검증한다. `STATUS.DONE` sticky bit를 폴링하며 START 직후 `BUSY`만 보고 종료를 판단하지
+않는다.
 
 ```bash
-python3 tools/gen_dummy.py && python3 tools/gen_requant_tv.py
+cd sw
+make test       # 76 check
+make cpu        # 21 check
+make live       # 90 check
+make arm        # Cortex-A9 cross compile
+```
+
+보드 프로그램은 두 개다.
+
+| 앱 | 목적 |
+|---|---|
+| `npu_test.elf` | 고정 Case00 자체시험 STEP 1~7 |
+| `live_tracker.elf` | PC UART Tensor 수신과 연속 추론 |
+
+ELF와 Bitstream은 저장소에 커밋하지 않고 `integration_manifest.md`의 체크섬으로 짝을
+확인한다.
+
+## 4. 활성 모델
+
+```text
+MODEL          model_v04_demo_masked_radius1_x1
+PROFILE        DEMO_BLUE_01
+DECISION       DEMO-MASKED-PASS
+SCOPE          DEMO_ONLY
+WEIGHT         weight_v04
+GOLDEN         golden_v04
+TEST_VECTOR    testvec_v04
+PREPROCESS     color_masked_event_v02_radius1
+```
+
+Case00 기대값은 `valid=1, x=36, y=28, score=43, cycle=125845`다. 이 모델은 PS Color
+Mask가 필수이며 일반 환경의 최종 `model_v04`가 아니다.
+
+## 5. 재현과 측정
+
+```bash
 ./sim/run_sim.sh
-cd build && vivado -mode batch -source ../sim/run_synth.tcl
+TV_DIR=../test_vectors/case01/ ./sim/run_sim.sh
+TV_DIR=../test_vectors/case02/ ./sim/run_sim.sh
+cd sw && make all
+./tools/check_repository_structure.sh
 ```
 
-## 10. B / C 에게 필요한 것
+2026-08-30 스냅샷에서 A 6종+C 9종+A/C 1종을 Case 3개로 실행해 48/48 TB가 통과했다.
+호스트 SW는 Driver 76, CPU 21, Live 90 check가 통과했다. 현재 저장소에서의 재실행 기록은
+`A_INTEGRATION_VERIFICATION.md`가 정본이다.
 
-| # | 상대 | 내용 |
-|---|---|---|
-| 1 | B | `nn.Conv2d(padding=?)` = 1 확인 |
-| 2 | B | 표적 없는 프레임의 Heatmap max score 분포 → `score_th` 확정 |
-| 3 | B | 실제 `conv{1..4}_weight_int8.mem`, `requant_M.mem`, layer별 golden hex |
-| 4 | C | `ext_we/ext_addr/ext_data` 수용·구현 완료 (`C_TO_A_REPLY_001.md`) |
-| 5 | B/C | C 승인 완료, B 확인 대기 (`docs/D3_FREEZE_REQUEST_A_001.md`) |
+Vivado 2024.2 원본 측정:
 
----
+| 대상 | LUT | FF | BRAM | DSP | WNS | WHS |
+|---|---:|---:|---:|---:|---:|---:|
+| A-only BD | 1,465 | 1,393 | 8 | 12 | +1.203 ns | +0.044 ns |
+| A+C full BD | 2,324 | 2,188 | 12 | 18 | +0.618 ns | +0.043 ns |
 
-## 11. PS 소프트웨어 및 Phase 4 보드 검증
+모든 값은 100 MHz implementation 결과이며 합성 추정치가 아니다. `.rpt`와 생성 바이너리는
+정책상 Git에서 제외하고 수치·명령·체크섬만 보존한다.
 
-```text
-sw/npu_regs.h      AXI 레지스터 맵 (이 문서 §5 와 동일 내용)
-sw/npu_driver.c    제어 드라이버. Xilinx BSP 의존 없음
-sw/npu_test.c      보드 자체시험 STEP 1~5
-results/npu_test.elf  Vitis 빌드 결과
-```
+## 6. Known Limitation
 
-검증: `cd sw && make test` — 호스트 목으로 **45 check PASS** (보드 불필요).
-목(`sw/sim/npu_mock.c`)은 `npu_axi.v` 와 같은 계약을 구현한 것이다.
-
-### Phase 4 실보드 결과 — A 제공 기록
-
-```text
-A-only Zybo Z7-20 STEP 1~5 기능 판정 16/16 PASS (2026-08-24)
-VERSION=0x4E50_0100 / INBUF_ADDR=8192
-target=(52,28), score=127, cycle=125845 — dummy Golden과 일치
-LD0 heartbeat / LD2 target_valid 확인
-```
-
-이 기록은 A가 전달한 `integration_manifest.md` 기준이다. 현재 C 체크아웃에는
-`results/`와 UART 원본 로그가 없으므로 C에서 독립 재검증한 결과로 표기하지 않는다.
-
-### C 에게
-
-`rtl/integration/c_module_stub.v`는 A가 만든 자리표시자이며, C 실제 산출물은
-`rtl/control/c_event_control_top.v`다. 기본 AXI/NPU/PWM 포트는 맞지만 stub에 없는
-Event Source, `tensor_start`, 물리 Arm/E-stop, `0x58/0x5C` RO 상태 포트를 추가해야 한다.
-정확한 교체 순서는 `C_TO_A_REPLY_004.md`를 따른다. 자리표시자 측정 WNS +1.121 ns는
-C 실물 수치가 아니며, 실제 통합 후 전체 implementation을 다시 수행한다.
+- v04 데모 후보의 최신 Bitstream/ELF 보드 재시험은 아직 없다.
+- Live의 Event Tensor 생성기는 A 재구성이며 B Dataset Builder와 bit-exact가 미확정이다.
+- PS→PL 실제 Event Source bridge와 `WINDOW_SRC=1` 경로는 미구현이다.
+- IRQ 배선은 있으나 PS interrupt handler는 없고 현재는 polling을 사용한다.
+- 입력 Buffer는 ping-pong 내부 Buffer를 공유해 추론 중 다음 Window 선적재가 불가하다.
+- Servo/FOV/Offset 및 실제 Laser의 물리 안전 수치는 별도 실측이 남아 있다.

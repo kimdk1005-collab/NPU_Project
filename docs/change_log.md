@@ -59,3 +59,13 @@ D3_FREEZE_REQUEST_A_002   A -> C     C_TO_A_REPLY_002에서 좌표식·4축·SAF
 A_TO_C_V01_REQUEST_001    A -> C     C_TO_A_REPLY_005에서 코드 수정·필수 회신 완료
                           A top_system_c timing 재측정과 실물 계측값 대기
 ```
+
+## 2026-08-30 통합 갱신
+
+| 날짜 | 범위 | 버전 | 변경 | 검증 |
+|---|---|---|---|---|
+| 2026-08-30 | A NPU/SoC/PS | `a_npu_v01 / a_soc_v02 / a_sw_v05` | 누락돼 있던 NPU RTL, AXI/Top, TB, PS Driver/자체시험/CPU Baseline과 Vivado/Vitis 재현 스크립트를 공유 저장소 형식으로 반영 | Case 3×16 TB 48/48, Driver 76, CPU 21 PASS |
+| 2026-08-30 | A/C 통합 | `a_soc_c_v03 / ifc_v0.5` | C actual을 보존한 `top_system_c`, `0x58/0x5C` RO, `CTRL[5] HW_START_EN`, VERSION `0x4E50_0101` 반영 | 통합 TB PASS, A+C full 100 MHz WNS +0.618 ns MET 기록 |
+| 2026-08-30 | B 전달물 | `model_v04_demo_masked_radius1_x1 / weight_v04 / golden_v04 / testvec_v04` | B 최종 전달 Weight/Golden/checkpoint와 `color_masked_event_v02_radius1` 반영 | `DEMO-MASKED-PASS / DEMO_ONLY`; 외부 Test 미평가 |
+| 2026-08-30 | Live Runtime | `a_live_v01` | NPUL v1 UART/CRC, PC Camera sender, PS live tracker, 양 언어 교차시험 추가 | Host 90 check PASS; 보드/Camera 미실시 |
+| 2026-08-30 | 저장소 정책 | — | Bitstream/XSA/ELF/로그는 제외하고 소스·재현 명령·체크섬만 보존 | Repository Policy 대상으로 정리 |

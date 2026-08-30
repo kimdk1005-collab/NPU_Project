@@ -1,0 +1,53 @@
+{
+  "config_id": "color_masked_event_v02_radius1",
+  "document_reference": "B_TO_A_V06_E2_RADIUS1_TRAINING_CR_REQUEST_001",
+  "profile_id": "DEMO_BLUE_01",
+  "purpose": "E2 exact-cell pipeline을 유지하면서 Current Color Blob 주변 Event만 남겨 인접 Cell 혼선을 줄인다.",
+  "frozen_before_any_training_result": true,
+  "frozen_before_any_result": true,
+  "frozen_at_utc": "2026-08-29",
+  "hsv_gate": {
+    "source": "ai/v06_raw_private/<session>/session.json color_gate_candidate",
+    "note": "E2와 동일한 촬영 시점 Color Gate를 그대로 사용한다.",
+    "hue_low": 88,
+    "hue_high": 118,
+    "saturation_minimum": 120,
+    "value_minimum": 100,
+    "minimum_area": 250.0,
+    "maximum_area": 12000.0,
+    "morphology_kernel_size": 3,
+    "morphology_open_iterations": 1,
+    "morphology_close_iterations": 1
+  },
+  "mask_pipeline": {
+    "step_1": "Current Color Frame(640x480)에서 E2와 동일한 HSV Gate로 표적 Blob Mask를 만든다.",
+    "step_2": "Mask를 64x64로 축소한다 (cv2.INTER_AREA 후 >0 이면 1).",
+    "step_3": "64x64 Mask를 dilation_radius_px 반경으로 팽창한다.",
+    "step_4": "Positive/Negative Event Tensor에서 Mask 밖 값을 0으로 만든다.",
+    "resize_interpolation": "INTER_AREA",
+    "resize_threshold": 0,
+    "dilation_radius_px": 1,
+    "dilation_kernel": "cv2.MORPH_ELLIPSE 3x3 (반경 1, 64x64 Tensor 좌표계)",
+    "dilation_iterations": 1
+  },
+  "dilation_rationale": {
+    "e2_radius4_validation": "1010/1128 (89.5390%)",
+    "e2_checkpoint_radius1_diagnostic": "1018/1128 (90.2482%)",
+    "e2_radius4_train_eval": "2530/2893 (87.4525%)",
+    "e2_checkpoint_radius1_train_diagnostic": "2668/2893 (92.2226%)",
+    "note": "반경 4가 인접 Cell Event를 과도하게 남겨 exact argmax 경계를 흐린 현상을 Train과 Validation 모두에서 확인했다. 재학습 후 결과를 보고 반경을 재조정하지 않는다."
+  },
+  "constraints": {
+    "ground_truth_used_for_mask": false,
+    "per_frame_human_edit": false,
+    "identical_logic_for_train_validation_runtime": true,
+    "changes_tensor_channel_meaning": false,
+    "changes_cnn_shape": false,
+    "color_center_copied_to_label_or_npu_output_or_servo": false,
+    "external_test_used": false
+  },
+  "no_target_frames": {
+    "behavior": "Color Gate가 표적을 찾지 못하면 Mask와 Event Tensor를 모두 0으로 유지한다.",
+    "note": "E2와 동일하게 no-target score 학습 의미를 유지한다."
+  }
+}

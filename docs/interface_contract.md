@@ -1,9 +1,9 @@
 # Interface Contract — A(NPU RTL / SoC) 확정본 v0.5
 
-> **상태:** C 기본 계약 수용·구현 완료. B 확인 항목과 A Phase 3 확장 회신 대기.
+> **상태:** A/B/C 계약 승인·구현 완료. A/C 통합 RTL과 PS Driver에 `ifc_v0.5` 반영.
 > **기준 문서:** `TEAM_COMMON_AI_INTEGRATION_SPEC.md` **v1.5**
 > **작성 시점:** NPU Core RTL 구현 + Golden 일치 검증 완료 후
-> **갱신:** 2026-08-25 — C Laser 수동 재무장 정책과 `CONTROL_STAT[16]` 반영.
+> **갱신:** 2026-08-30 — `0x58/0x5C`, `CTRL[5] HW_START_EN`, VERSION `0x4E50_0101` 구현 상태 반영.
 >
 > 공통 스펙에서 이미 Freeze된 항목(Weight Layout OIHW, Bias 미사용,
 > Rounding ties-away-from-zero, Requantize M×2^24 / >>24, Clamp, Heatmap Mapping,

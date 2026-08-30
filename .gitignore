@@ -52,12 +52,17 @@ constraints/digilent-xdc-master/*
 # 주의: test_vectors/ 와 golden_outputs/ 는 B 소유이므로 규칙을 넣지 않는다 (SPEC §5.2)
 sim/event_vectors/
 sim/work/
+/sw/build/
 vivado_proj/
+NPU_Pr_vivado/
 vivado_bringup/
 vivado_laser_bringup/
 vivado_dual_head_bringup/
 vivado_ky008_bringup/
 vivado_component_manual_test/
+
+# A 통합 Vivado/Vitis 재현 스크립트가 만드는 공통 작업 디렉터리
+/build/
 
 # OS
 .DS_Store

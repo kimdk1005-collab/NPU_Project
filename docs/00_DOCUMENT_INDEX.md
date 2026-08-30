@@ -1,70 +1,54 @@
 # 문서 인덱스 — 최신 정본 기준
 
-> 갱신: 2026-08-27
-> 기준 상태: B model_v03 최종 전달 + A Phase 4 기록 + C `c_control_v09` SAFE_LIMIT 수정·승인 회신 완료
+> 갱신: 2026-08-30 · 기준: A/B/C 통합 소스 + v04 데모 후보
 
-`docs/`에는 각 규격의 **최신 정본 한 개만** 둔다. 이전 버전은 Git 이력에서
-확인하며 `_v1.x`, `_v0.x`, `(1)` 같은 사본은 저장소에 추가하지 않는다.
+`docs/`에는 같은 목적의 최신 정본 하나만 둔다. `_v1.x`, `(1)` 같은 사본은 만들지 않고
+과거 내용은 Git 이력에서 확인한다.
 
-## 문서 우선순위
+## 우선순위
 
 | 순위 | 정본 | 현재 버전 | 용도 |
 |---:|---|---:|---|
-| 1 | `TEAM_COMMON_AI_INTEGRATION_SPEC.md` | v1.5 | 팀 최상위 공통 규격 |
-| 2 | `TEAM_ROLE_PLAN.md` | v1.6 | A/B/C 역할과 진행 계획 |
-| 3 | `NPU_DEVELOPMENT_PLAN.md` | v1.4 | 전체 개발 계획과 Gate |
-| 4 | `interface_contract.md` | v0.5 | A/B/C RTL·AXI 인터페이스 세부 계약 |
-| 5 | `PROJECT_STATUS.md` | Day 06 | 현재 구현·검증·블로커 |
+| 1 | `TEAM_COMMON_AI_INTEGRATION_SPEC.md` | v1.5-A1 | 팀 최상위 공통 규격 |
+| 2 | `TEAM_ROLE_PLAN.md` | v1.6 | 역할과 진행 계획 |
+| 3 | `NPU_DEVELOPMENT_PLAN.md` | v1.4 | Gate와 개발 계획 |
+| 4 | `interface_contract.md` | v0.5 | RTL·AXI 인터페이스 계약 |
+| 5 | `PROJECT_STATUS.md` | 2026-08-30 | 현재 구현·검증·블로커 |
 
-문서 내용이 충돌하면 상위 문서를 따르고, 공유 인터페이스 변경은 Change Request와
-팀 승인 후 정본 및 `change_log.md`에 반영한다.
+## 현재 통합 문서
 
-## 전달 및 인계 문서
-
-| 파일 | 방향 | 내용 |
-|---|---|---|
-| `A_NPU_HANDOFF.md` | A → 팀 | NPU/SoC 포트, 타이밍, Known Limitation |
-| `../handoff/B_MODEL_HANDOFF.md` | B → 팀 | model_v03/weight_v03/golden_v03/testvec_v03 최종 인계 |
-| `B_TO_A_DELIVERY_SPEC.md` | A → B | B 산출물 전달 형식 |
-| `C_TO_A_DELIVERY_SPEC.md` | A → C | C RTL 전달 형식과 Phase 3 포트 계약 |
-| `C_TO_A_REPLY_003.md` | C → A | Phase 3 통합 설정·상태·START·Laser 재무장 계약 |
-| `C_TO_A_REPLY_004.md` | C → A | A Phase 4 stub를 C 실제 모듈로 교체하는 최종 연결 계약 |
-| `C_TO_A_REPLY_005.md` | C → A | A/C 실물 통합 요청 #001: SAFE_LIMIT 파이프라인, Event Source, CR·핀·안전 회신 |
-| `../handoff/C_EVENT_CONTROL_HANDOFF.md` | C → 팀 | Event/Control RTL 상세 인계 |
-
-`C_TO_A_REPLY_001~005`처럼 번호가 붙은 회신은 서로 다른 의사결정 시점의 기록이며
-구버전 사본이 아니므로 유지한다.
-
-## 승인 및 변경 기록
-
-| 파일 | 상태/용도 |
+| 파일 | 내용 |
 |---|---|
-| `D3_FREEZE_REQUEST_A_001.md` | A → B/C Freeze 요청 #001 |
-| `D3_FREEZE_REQUEST_A_002.md` | A → B/C Freeze 요청 #002 rev.2 |
-| `C_TO_A_APPROVAL_D3_A002_rev2.md` | C → A, 위 rev.2 §2.13 좌표변환식 공식 승인 |
-| `D3_B_to_A_CNN_Convolution_Freeze_Request.md` | B → A Conv 경계 규칙 요청 |
-| `D3_FREEZE_APPROVAL_A_TO_B_001.md` | 위 요청에 대한 A 승인 |
-| `CHANGE_REQUEST_C_001_servo_command_format.md` | Servo Command Format 변경 요청 |
-| `CHANGE_REQUEST_C_002_event_window_and_input_source.md` | Event Window/Input Source 변경 요청 |
-| `change_log.md` | 공유 규격 변경 이력 |
-| `integration_manifest.md` | A/C 산출물 버전·지문과 실제 통합 전 대조표 |
+| `A_NPU_HANDOFF.md` | A NPU/AXI/SoC/PS 계약과 제한 |
+| `../handoff/B_MODEL_HANDOFF.md` | v04 데모 Model/Golden과 범위 |
+| `../handoff/C_EVENT_CONTROL_HANDOFF.md` | C Event/Control/Servo/Laser 계약 |
+| `integration_manifest.md` | 역할별 Version Lock, 측정, 산출물 체크섬 |
+| `A_INTEGRATION_VERIFICATION.md` | 공유 저장소 재현 명령과 실제 결과 |
+| `LIVE_RUNTIME_GUIDE.md` | PC Camera→UART→NPU Live 운용 |
+| `change_log.md` | 공유 규격·통합 이력 |
 
-## 작업 기록
+## 전달·승인 문서
 
-`D1_CHECKLIST_C.md`부터 `D5_CHECKLIST_C.md`, `D5_FINAL_DRIVE_TEST.md`까지는
-당시 수행 내용과 실물 검증 근거를 보존하는 작업 이력이다. 현재 상태 판단에는
-항상 `PROJECT_STATUS.md`와 최신 Handoff를 우선한다.
+- `B_TO_A_DELIVERY_SPEC.md`, `C_TO_A_DELIVERY_SPEC.md`
+- `C_TO_A_REPLY_001.md`~`C_TO_A_REPLY_005.md`
+- `D3_FREEZE_REQUEST_A_001.md`, `D3_FREEZE_REQUEST_A_002.md`
+- `D3_B_to_A_CNN_Convolution_Freeze_Request.md`
+- `D3_FREEZE_APPROVAL_A_TO_B_001.md`
+- `C_TO_A_APPROVAL_D3_A002_rev2.md`
+- `CHANGE_REQUEST_C_001_servo_command_format.md`
+- `CHANGE_REQUEST_C_002_event_window_and_input_source.md`
 
-`KY008_PREARRIVAL_CHECKLIST_C.md`는 파일명은 유지하되, 현재는 KY-008 수령품 핀,
-100 ms 단발 결과와 남은 실제 광원 승인 조건을 기록한 작업 체크리스트다.
+번호가 붙은 요청·회신은 서로 다른 의사결정 기록이므로 중복 정본으로 보지 않는다.
 
-`C_COMPONENT_MANUAL_TEST.md`는 Zybo의 SW0~SW3, 물리 BTN0~BTN3과 두 조합 입력을
-이용해 연결된 4축 Servo와 KY-008을 하나씩 확인하는 현재 수동 시험 절차다.
+## C 작업·안전 기록
+
+`D1_CHECKLIST_C.md`~`D5_CHECKLIST_C.md`, `D5_FINAL_DRIVE_TEST.md`,
+`KY008_PREARRIVAL_CHECKLIST_C.md`, `C_COMPONENT_MANUAL_TEST.md`는 C의 자동시험과 실물
+검증 근거다. A 통합이 이 기록을 덮어쓰지 않는다.
 
 ## 파일 관리 규칙
 
-1. 정본 파일명에는 버전을 넣지 않고 문서 헤더에 버전을 기록한다.
-2. 새 버전 승인 시 기존 정본 내용을 갱신하고 `change_log.md`를 함께 수정한다.
-3. 배포용 버전 사본은 GitHub Release 등 저장소 밖에서 생성한다.
-4. 다운로드 중 생긴 `(1)` 파일은 커밋하지 않는다.
-5. 삭제된 구버전이 필요하면 Git 이력에서 복원한다.
+1. 공유 Interface 변경은 Change Request 승인 후 정본과 `change_log.md`에 반영한다.
+2. 생성 가능한 Bitstream/XSA/ELF/로그/프로젝트는 Git에 올리지 않는다.
+3. 측정하지 않은 성능·보드·안전 결과를 PASS로 표시하지 않는다.
+4. v04 데모 후보는 항상 `DEMO_ONLY`와 필수 Color Mask 조건을 함께 표기한다.

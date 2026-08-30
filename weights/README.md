@@ -1,29 +1,27 @@
-# B 역할 — Weight·Quantization Parameter
+# B 역할 — 현재 Weight·Quantization Parameter
 
-> 소유: B · 전달 규격: `../docs/B_TO_A_DELIVERY_SPEC.md`
-> Version Lock: `model_v03 / weight_v03 / golden_v03 / testvec_v03`
+> 소유: B · Version Lock: `model_v04_demo_masked_radius1_x1 / weight_v04 / golden_v04 / testvec_v04`
+>
+> 판정: `DEMO-MASKED-PASS`, 프로필 `DEMO_BLUE_01`, 범위 **`DEMO_ONLY`**
 
-## 파일과 checksum
+## 파일
 
-| 파일 | 형식·줄 수 | SHA-256 |
+| 파일 | 형식 | SHA-256 |
 |---|---|---|
-| `tiny_cnn_fp32_model_v03.pt` | canonical FP32 checkpoint | `7592abb6ee06a3b41650e8013aefc4f4dcfbb556d1fc3cc66e7e185ab627ff53` |
-| `conv1_weight_int8.mem` | OIHW, 144줄 | `7030b1ac3644dde0f9a13a7ac9eab94579d2895bda89c49c6e4e297b397630d6` |
-| `conv2_weight_int8.mem` | OIHW, 1,152줄 | `498edfa238409527ebcca9dfaac542a97dfb729fa9bcd837225b8b22eb96b32f` |
-| `conv3_weight_int8.mem` | OIHW, 4,608줄 | `d7028aab3d526d79eb657f447f2dd5158905c36e74f56080252d0ddd2b0b8c41` |
-| `conv4_weight_int8.mem` | OIHW, 32줄 | `bf29e64426f9348dae5f7ee5a4c6926b7c11e830a00de946d3c6d38fb5aff740` |
-| `requant_M.mem` | Conv1→4, 32-bit HEX 4줄 | `b7c15e95402511405ad23315f9893fcf199022400af5ec1a950e7c6c4ce39fbe` |
-| `scales.json` | Scale·Multiplier·Clamp 메타 | `7b8c809decd6d36cadf17bd6b28c9c6d682740e8c79f693f3d2460de3e1d33a7` |
+| `tiny_cnn_fp32_model_v04_demo_masked_radius1_x1.pt` | 승인 FP32 checkpoint | `578d3aaa8ce20ff038c45d290e4b6d8cf6c2ab6ddfcfaed28a5f448754436a96` |
+| `conv1_weight_int8.mem` | OIHW, 144줄 | `dc607e93a9a96093cfb0b45717359ea49aa515c1060ba3b487947eab666f5976` |
+| `conv2_weight_int8.mem` | OIHW, 1,152줄 | `08972082cde8cde65126139e77ba161202e0262f5810807a24ffbba852c32bd5` |
+| `conv3_weight_int8.mem` | OIHW, 4,608줄 | `ecd55cc27bc3a65ab702aea7ea869996d8f059792fb90f7f74a419c9bb60b1f8` |
+| `conv4_weight_int8.mem` | OIHW, 32줄 | `80175a34fcecea5989d5b99bfd9ac79b58ff61dd3556473f936a8483c13c056f` |
+| `requant_M.mem` | Conv1→4, Q24 HEX | `3a1917a90cbc73002a6ba1484d5a74f8513cb0fa45f27355b95352c7fb69b600` |
+| `scales.json` | Version/Scale/Clamp/프로필 | `d895ac5b22e1ac13f7e02e9fd7af32de8459d91c4ee678f4d28770a39becb45c` |
 
-## 수치 계약
+`w_bank0.mem`~`w_bank7.mem`은 RTL이 읽는 packed bank이며
+`python3 tools/pack_weights.py`로 재생성한다. 기존 v03 checkpoint는 계보와 B 재현 도구를
+위해 보존하지만 현재 Bitstream의 Weight가 아니다.
 
-- Weight: symmetric per-layer INT8, zero-point 0, clamp `[-127,127]`
-- Layout: OIHW `[O][I][KY][KX]`, KX fastest
-- Bias: 없음
-- Requant: `M = RoundAwayFromZero((in_scale×weight_scale/out_scale)×2^24)`
-- SHIFT: 24
-- Conv1~3 clamp: `[0,127]`; Conv4 clamp: `[-128,127]`
-- `requant_M.mem`: `00009552 / 0000E5C2 / 00006DC6 / 000059C9`
+수치 계약은 symmetric per-layer INT8, zero-point 0, OIHW, bias 없음, Q24
+ties-away-from-zero다. Conv1~3은 `[0,127]`, Conv4는 `[-128,127]`로 Clamp한다.
 
-전체 파일 checksum과 case 연결은
-[`model_v03_manifest.json`](../golden_outputs/model_v03_manifest.json)을 정본으로 사용한다.
+이 모델은 PS의 `color_masked_event_v02_radius1` 전처리가 필수이며 범용 환경 또는 외부
+Test에서 최종 검증됐다고 해석하지 않는다.
